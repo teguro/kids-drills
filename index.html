@@ -28,8 +28,6 @@
   .pin-key { font-family: inherit; font-size: 28px; font-weight: bold; padding: 16px 0; border: none; border-radius: 16px; background: #fdf1dc; color: #333; box-shadow: 0 3px 0 rgba(0,0,0,.12); cursor: pointer; }
   .pin-key:active { transform: translateY(2px); box-shadow: none; background: #f7e3c2; }
   .pin-msg { min-height: 26px; font-size: 17px; font-weight: bold; color: #d33; margin: 10px 0 0; }
-  .lock-btn { margin-top: 28px; font-family: inherit; font-size: 15px; font-weight: bold; padding: 10px 24px; border: none; border-radius: 12px; background: #ddd6c4; color: #666; box-shadow: 0 3px 0 rgba(0,0,0,.12); cursor: pointer; }
-  .lock-btn:active { transform: translateY(2px); box-shadow: none; }
 </style>
 </head>
 <body>
@@ -69,7 +67,6 @@
     <a class="menu-btn m-drills" href="drills.html">ドリルランド<span class="small">かんじ・こくご・さんすう・しゃかい・りか・えいご</span></a>
     <a class="menu-btn m-bird" href="bird.html">バード<span class="small">おうち つうか の かんり</span></a>
     <a class="menu-btn m-help" href="help.html">🆘 こまったとき<span class="small">ママ・お父さんに でんわする</span></a>
-    <button class="lock-btn" id="lock-btn" type="button">🔒 ロックする</button>
   </div>
 
 </div>
@@ -150,11 +147,6 @@ function pinKey(k) {
 $('pin-pad').addEventListener('click', function (ev) {
   var btn = ev.target.closest('[data-k]');
   if (btn) pinKey(btn.getAttribute('data-k'));
-});
-
-$('lock-btn').addEventListener('click', function () {
-  try { localStorage.removeItem('land_unlock_v1'); } catch (e) {}
-  location.replace('index.html');
 });
 
 /* ---------- 初期表示 ---------- */
