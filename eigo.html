@@ -1247,9 +1247,37 @@ function buildLevel2(){
   var picked = pickFresh(2, flat, 20, function(item){ return item.w[0]; });
   return shuffle(picked.map(function(item){ return wordQuestion(item.w, item.pool); }));
 }
+/* --- 並び替え問題：提示する単語リストを実行時にシャッフルする ---
+   正解の語順のまま出すと答えがバレるため、単語とよみかたをペアで並べ替え、
+   結果が正解の語順と一致してしまったら並べ直す。問題文の発音ボタンは
+   q.text を読み上げるので、シャッフル後のリストが読み上げられる。 */
+function shuffleWordsPrompt(item){
+  if (item.text.indexOf("words:") !== 0) return item;
+  var words = item.text.slice("words:".length).replace(/^\s+/, "").split(" / ");
+  if (words.length < 2) return item;
+  var prefix = "", kana = null;
+  var hm = /^(.*?：)(.*)$/.exec(item.hint || "");
+  if (hm){
+    var parts = hm[2].split("／");
+    if (parts.length === words.length){ prefix = hm[1]; kana = parts; }
+  }
+  var pairs = words.map(function(w, i){ return { w:w, k: kana ? kana[i] : null }; });
+  var original = words.join(" / ");
+  var shuffled = pairs;
+  for (var tries = 0; tries < 30; tries++){
+    shuffled = shuffle(pairs.slice());
+    if (shuffled.map(function(p){ return p.w; }).join(" / ") !== original) break;
+  }
+  return {
+    text: "words: " + shuffled.map(function(p){ return p.w; }).join(" / "),
+    hint: kana ? prefix + shuffled.map(function(p){ return p.k; }).join("／") : item.hint,
+    ask: item.ask, choices: item.choices, answer: item.answer, expl: item.expl
+  };
+}
 function buildPhraseLevel(level, bank, label){
   var picked = pickFresh(level, bank, 20, function(item){ return item.text + "|" + item.ask; });
   return shuffle(picked.map(function(item){
+    item = shuffleWordsPrompt(item);
     return makeQ("kind-phrase", label, item.text, "よみかた：" + item.hint, item.ask,
       shuffle(item.choices), item.answer, item.expl, false);
   }));
