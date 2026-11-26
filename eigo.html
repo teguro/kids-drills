@@ -43,6 +43,15 @@
   }
   .howto b{color:var(--orange-d);}
   .lv-title{font-size:19px;font-weight:900;margin:6px 0 10px;text-align:center;}
+  .player-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 0 18px;}
+  .player-btn{
+    border:3px solid var(--choice-line);background:var(--card);color:var(--ink);
+    border-radius:18px;font-size:22px;font-weight:900;padding:14px 8px;min-height:64px;
+    box-shadow:var(--shadow);line-height:1.3;
+  }
+  .player-btn .player-rec{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-top:3px;}
+  .player-btn.selected{border-color:var(--orange);background:#FFE9C9;color:#5A3A00;}
+  @media (prefers-color-scheme: dark){ .player-btn.selected{background:#4A3A1E;color:#FFE9C9;} }
   .lv-card{
     display:block;width:100%;text-align:left;border:none;border-radius:20px;
     padding:16px 18px 14px;margin:0 0 14px;color:#fff;box-shadow:var(--shadow);
@@ -52,6 +61,13 @@
   .lv1{background:linear-gradient(135deg,#FFB03A,#FF8A2A);}
   .lv2{background:linear-gradient(135deg,#3EC6F0,#2FA8E0);}
   .lv3{background:linear-gradient(135deg,#4ED598,#1E9E57);}
+  .lv4{background:linear-gradient(135deg,#FF7A59,#D64545);}
+  .lv5{background:linear-gradient(135deg,#2EC4B6,#0E7C7B);}
+  .lvc{background:linear-gradient(135deg,#FFB03A,#E56E0B);}
+  .challenge-badge{
+    display:inline-block;background:#2B2118;color:#FFD166;font-size:12px;font-weight:900;
+    border-radius:999px;padding:3px 10px;margin-left:8px;vertical-align:middle;letter-spacing:.06em;
+  }
   .lv-name{font-size:24px;font-weight:900;line-height:1.2;}
   .lv-sub{font-size:14px;font-weight:700;opacity:.95;margin-top:3px;line-height:1.5;}
   .lv-best{
@@ -87,15 +103,31 @@
   .q-text{font-size:40px;font-weight:900;line-height:1.3;word-break:keep-all;}
   .q-text.small{font-size:29px;}
   .q-text.jp{font-size:32px;}
+  .q-head{display:flex;align-items:center;justify-content:center;gap:12px;}
+  .speak-btn{
+    flex:none;width:52px;height:52px;min-height:52px;border-radius:50%;
+    border:2px solid var(--choice-line);background:var(--card);color:var(--sky-d);
+    display:inline-flex;align-items:center;justify-content:center;padding:0;
+  }
+  .speak-btn svg{width:28px;height:28px;display:block;}
+  .speak-btn:active{transform:scale(.92);background:var(--bg2);}
   .q-hint{font-size:16px;font-weight:700;color:var(--muted);margin-top:4px;}
   .q-ask{font-size:16px;font-weight:700;color:var(--muted);margin-top:8px;}
   .choices{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px;}
   @media (max-width:380px){ .choices{grid-template-columns:1fr;} .q-text{font-size:34px;} }
   .choice{
+    display:flex;align-items:center;gap:2px;
     border:3px solid var(--choice-line);background:var(--choice-bg);color:var(--ink);
-    border-radius:18px;font-size:24px;font-weight:900;padding:14px 8px;min-height:68px;
-    line-height:1.25;
+    border-radius:18px;padding:8px;
   }
+  .choice-main{
+    flex:1;border:none;background:transparent;color:inherit;
+    font-size:24px;font-weight:900;padding:10px 4px;min-height:52px;
+    line-height:1.25;border-radius:12px;
+  }
+  .choice-main:disabled{color:inherit;-webkit-text-fill-color:currentColor;opacity:1;}
+  .choice .speak-btn{width:48px;height:48px;min-height:48px;}
+  .choice .speak-btn svg{width:25px;height:25px;}
   .choice .c-sub{display:block;font-size:13px;font-weight:700;color:var(--muted);margin-top:2px;}
   .choice:active{transform:scale(.98);}
   .choice.correct{border-color:var(--green);background:#DFF7E8;color:#0E6B38;}
@@ -152,6 +184,12 @@
     font-size:18px;font-weight:900;padding:14px;min-height:56px;
   }
   .foot-note{text-align:center;font-size:13px;color:var(--muted);font-weight:700;margin-top:20px;line-height:1.7;}
+  .land-link{
+    display:block;text-align:center;text-decoration:none;
+    border:2px solid var(--line);border-radius:18px;background:var(--card);color:var(--ink);
+    font-size:18px;font-weight:900;padding:14px;min-height:56px;line-height:1.4;
+  }
+  .land-link:active{transform:translateY(2px);}
   @media (prefers-reduced-motion: reduce){ *{transition:none !important;} }
 </style>
 </head>
@@ -179,7 +217,15 @@
       こたえは <b>4つの ボタン</b>から タップして えらんでね。
       1もんごとに せいかい・ふせいかいと かいせつが すぐ 出るよ。
       えいごの たんごには <b>カタカナの よみかた</b>が ついているよ。
-      20もん ぜんぶ こたえると、スズメの ランクが もらえるよ！
+      スピーカーの ボタンを おすと、<b>えいごの はつおん</b>が きけるよ。
+      20もん ぜんぶ こたえると、鳥の ランクが もらえるよ！
+      たくさん せいかいすると、大きな 鳥（オオワシ）に なれるよ。
+    </div>
+
+    <div class="lv-title">だれが やる？</div>
+    <div class="player-row">
+      <button class="player-btn" id="player-soichiro" data-player="soichiro">そういちろう<span class="player-rec" id="rec-soichiro">まだ きろく なし</span></button>
+      <button class="player-btn" id="player-tsuzumi" data-player="tsuzumi">つづみ<span class="player-rec" id="rec-tsuzumi">まだ きろく なし</span></button>
     </div>
 
     <div class="lv-title">がくねんと レベルを えらんでね</div>
@@ -189,6 +235,13 @@
       <div class="lv-sub">はじめての えいご<br>あいさつ・いろ・すうじ（1〜10）・どうぶつ・アルファベット</div>
       <span class="lv-best none" id="best-0">ベスト： まだ なし</span>
       <button class="start-btn" data-level="0">スタート（20もん）</button>
+    </div>
+
+    <div class="lv-card lvc">
+      <div class="lv-name">1ねんせい チャレンジ<span class="challenge-badge">CHALLENGE</span></div>
+      <div class="lv-sub">小2・小3への 入口（先取り）<br>少し 長い あいさつ・自己紹介の フレーズ、ようび・天気・教室の たんご</div>
+      <span class="lv-best none" id="best-6">ベスト： まだ なし</span>
+      <button class="start-btn" data-level="6">スタート（20もん）</button>
     </div>
 
     <div class="lv-title">4ねんせい</div>
@@ -209,12 +262,27 @@
 
     <div class="lv-card lv3">
       <div class="lv-name">レベル3</div>
-      <div class="lv-sub">あいさつと みじかい フレーズ・ぶん<br>Hello. / Thank you. / How are you? / What is this? / I like 〜. など</div>
+      <div class="lv-sub">考えて こたえる フレーズ・ぶん<br>しつもんへの こたえ方、否定文・命令文、天気と 時刻、場面に 合った 返事</div>
       <span class="lv-best none" id="best-3">ベスト： まだ なし</span>
       <button class="start-btn" data-level="3">スタート（20もん）</button>
     </div>
 
+    <div class="lv-card lv4">
+      <div class="lv-name">レベル4<span class="challenge-badge">CHALLENGE</span></div>
+      <div class="lv-sub">小5への 入口（先取り）<br>過去のこと（was / went / saw）、比べる 言い方（bigger / the biggest）、can の文、場所を 表す 言葉（behind / between / next to）</div>
+      <span class="lv-best none" id="best-4">ベスト： まだ なし</span>
+      <button class="start-btn" data-level="4">スタート（20もん）</button>
+    </div>
+
+    <div class="lv-card lv5">
+      <div class="lv-name">レベル5<span class="challenge-badge">CHALLENGE</span></div>
+      <div class="lv-sub">小6への 入口（先取り）<br>過去形（played / ate など）、これからのこと（will / be going to）、Whose / Which / How often、文の 組み立てと 会話の 返事</div>
+      <span class="lv-best none" id="best-5">ベスト： まだ なし</span>
+      <button class="start-btn" data-level="5">スタート（20もん）</button>
+    </div>
+
     <p class="foot-note">ベストスコアは このページを ひらいている あいだ きろくされるよ。</p>
+    <a class="land-link" href="index.html">ドリルランドにもどる</a>
   </section>
 
   <section id="screen-game" class="hidden">
@@ -226,7 +294,12 @@
     </div>
     <div class="q-card">
       <span class="q-kind kind-word" id="q-kind">たんご</span>
-      <div class="q-text" id="q-text">apple</div>
+      <div class="q-head">
+        <div class="q-text" id="q-text">apple</div>
+        <button class="speak-btn hidden" id="q-speak" type="button" aria-label="はつおんを きく">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16.2 9.2c1.1 1.5 1.1 4.1 0 5.6M18.6 6.8c2.3 3 2.3 7.4 0 10.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
       <div class="q-hint" id="q-hint"></div>
       <div class="q-ask" id="q-ask">いみは どれかな？</div>
       <div class="choices" id="choices"></div>
@@ -248,6 +321,7 @@
     <div class="btn-row">
       <button class="again-btn" id="again-btn">もういちど おなじ レベル</button>
       <button class="home-btn" id="home-btn">レベルを えらびなおす</button>
+      <a class="land-link" href="index.html">ドリルランドにもどる</a>
     </div>
   </section>
 
@@ -266,6 +340,36 @@ function shuffle(arr){
 }
 function sample(arr, n){
   return shuffle(arr).slice(0, n);
+}
+
+/* ================= はつおん（Web Speech API） ================= */
+function speak(text){
+  if (!("speechSynthesis" in window)) return;
+  try {
+    window.speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = "en-US";
+    u.rate = 0.9;
+    window.speechSynthesis.speak(u);
+  } catch (e) { /* 音声が 使えない 環境では 何もしない */ }
+}
+function stopSpeak(){
+  if ("speechSynthesis" in window){
+    try { window.speechSynthesis.cancel(); } catch (e) {}
+  }
+}
+var SPEAK_SVG = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16.2 9.2c1.1 1.5 1.1 4.1 0 5.6M18.6 6.8c2.3 3 2.3 7.4 0 10.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+function makeSpeakBtn(text){
+  var b = document.createElement("button");
+  b.type = "button";
+  b.className = "speak-btn";
+  b.setAttribute("aria-label", "はつおんを きく");
+  b.innerHTML = SPEAK_SVG;
+  b.addEventListener("click", function(ev){
+    ev.stopPropagation();
+    speak(text);
+  });
+  return b;
 }
 
 /* ================= レベル1 たんごバンク ================= */
@@ -297,6 +401,39 @@ var L1_NUMBERS = [
   ["thirteen","サーティーン",13],["fourteen","フォーティーン",14],["fifteen","フィフティーン",15],
   ["sixteen","シックスティーン",16],["seventeen","セブンティーン",17],["eighteen","エイティーン",18],
   ["nineteen","ナインティーン",19],["twenty","トゥエンティ",20]
+];
+var L1_NUMBERS2 = [
+  ["twenty-one","トゥエンティワン",21],["twenty-two","トゥエンティトゥー",22],
+  ["twenty-three","トゥエンティスリー",23],["twenty-four","トゥエンティフォー",24],
+  ["twenty-five","トゥエンティファイブ",25],["twenty-six","トゥエンティシックス",26],
+  ["twenty-seven","トゥエンティセブン",27],["twenty-eight","トゥエンティエイト",28],
+  ["twenty-nine","トゥエンティナイン",29],["thirty","サーティ",30],
+  ["forty","フォーティ",40],["fifty","フィフティ",50],["one hundred","ワン ハンドレッド",100]
+];
+/* レベル1 追加たんご（小1入門では 使わない、レベル1専用） */
+var L1X_SCHOOL = [
+  ["pencil","ペンシル","えんぴつ"],["pen","ペン","ペン"],["book","ブック","ほん"],
+  ["notebook","ノートブック","ノート"],["eraser","イレイサー","けしゴム"],["ruler","ルーラー","じょうぎ"],
+  ["bag","バッグ","かばん"],["desk","デスク","つくえ"],["chair","チェア","いす"],
+  ["teacher","ティーチャー","せんせい"]
+];
+var L1X_FOOD = [
+  ["apple","アップル","りんご"],["banana","バナナ","バナナ"],["bread","ブレッド","パン"],
+  ["cake","ケーキ","ケーキ"],["rice","ライス","ごはん"],["cheese","チーズ","チーズ"],
+  ["strawberry","ストロベリー","いちご"],["grape","グレープ","ぶどう"],["peach","ピーチ","もも"],
+  ["melon","メロン","メロン"]
+];
+var L1X_BODY = [
+  ["eye","アイ","め"],["ear","イア","みみ"],["nose","ノーズ","はな"],
+  ["mouth","マウス","くち"],["hand","ハンド","て"],["head","ヘッド","あたま"],
+  ["hair","ヘア","かみのけ"],["tooth","トゥース","は"],["foot","フット","あし"],
+  ["arm","アーム","うで"]
+];
+var L1X_HOME = [
+  ["door","ドア","ドア"],["window","ウィンドウ","まど"],["clock","クロック","とけい"],
+  ["bed","ベッド","ベッド"],["table","テーブル","テーブル"],["cup","カップ","コップ"],
+  ["spoon","スプーン","スプーン"],["key","キー","かぎ"],["box","ボックス","はこ"],
+  ["picture","ピクチャー","え・しゃしん"]
 ];
 
 /* ================= レベル2 たんごバンク ================= */
@@ -356,6 +493,25 @@ var L2_BANK = [
     ["station","ステーション","えき"],["hospital","ホスピタル","びょういん"],["zoo","ズー","どうぶつえん"],
     ["store","ストア","おみせ"],["beach","ビーチ","すなはま"],["river","リバー","かわ"],
     ["mountain","マウンテン","やま"]
+  ]},
+  {cat:"おしごと", words:[
+    ["teacher","ティーチャー","せんせい"],["doctor","ドクター","おいしゃさん"],
+    ["nurse","ナース","かんごし"],["cook","クック","りょうりにん"],
+    ["driver","ドライバー","うんてんしゅ"],["farmer","ファーマー","のうかの人"],
+    ["police officer","ポリス オフィサー","おまわりさん"],["firefighter","ファイアファイター","しょうぼうし"],
+    ["singer","シンガー","かしゅ"],["painter","ペインター","えかき"]
+  ]},
+  {cat:"しぜんと きせつ", words:[
+    ["spring","スプリング","はる"],["summer","サマー","なつ"],["fall","フォール","あき"],
+    ["winter","ウィンター","ふゆ"],["cloud","クラウド","くも"],["wind","ウィンド","かぜ"],
+    ["sky","スカイ","そら"],["leaf","リーフ","はっぱ"],["snowman","スノーマン","ゆきだるま"],
+    ["rainbow","レインボー","にじ"]
+  ]},
+  {cat:"きもちと ようす", words:[
+    ["happy","ハッピー","うれしい"],["sad","サッド","かなしい"],["angry","アングリー","おこっている"],
+    ["tired","タイアド","つかれた"],["hungry","ハングリー","おなかが すいた"],
+    ["thirsty","サースティ","のどが かわいた"],["sleepy","スリーピー","ねむい"],
+    ["excited","エキサイテッド","ワクワクした"],["big","ビッグ","大きい"],["small","スモール","小さい"]
   ]}
 ];
 
@@ -373,7 +529,8 @@ var INTRO_GREETINGS = [
 /* ================= レベル3 フレーズバンク ================= */
 /* text: えいご（大きく表示） / hint: カタカナよみ / ask: しつもん文
    choices: 4択（文字列、または {t:表示, sub:カタカナよみ}） / answer: 正解の t / expl: かいせつ */
-var L3_BANK = [
+/* 旧レベル3（あいさつ中心）は 難易度引き上げのため 未使用。新レベル3は この下の L3_BANK */
+var L3_BANK_OLD = [
   {text:"Hello.", hint:"ハロー", ask:"いみは どれかな？",
    choices:["こんにちは","さようなら","ありがとう","おやすみなさい"], answer:"こんにちは",
    expl:"「Hello.（ハロー）」は「こんにちは」だよ。友だちに 会ったときの あいさつだね。"},
@@ -573,6 +730,350 @@ var L3_BANK = [
    expl:"「Hurry up.」は「いそいで」だよ。"}
 ];
 
+/* ================= 新バンク共通フォーマット ================= */
+/* 行: [えいご, カタカナよみ, しつもん文, 選択肢(英語は "English#カタカナ" 可), 正解, かいせつ] */
+function P(rows){
+  return rows.map(function(r){
+    return { text:r[0], hint:r[1], ask:r[2],
+      choices:r[3].map(function(c){ var p = String(c).split("#"); return p.length > 1 ? {t:p[0], sub:p[1]} : p[0]; }),
+      answer:r[4], expl:r[5] };
+  });
+}
+
+/* ================= レベル3（改訂・全120問）考えて こたえる問題 ================= */
+var L3_BANK = P([
+["Do you like dogs?","ドゥー ユー ライク ドッグス","「いぬは すきですか？」と きかれて、すきな ときの こたえは？",["Yes, I do.#イエス、アイ ドゥー","Yes, I can.#イエス、アイ キャン","Yes, it is.#イエス、イット イズ","Yes, I am.#イエス、アイ アム"],"Yes, I do.","「Do you 〜?」と きかれたら「Yes, I do. / No, I don't.」で こたえるよ。can や am では こたえないよ。"],
+["Do you like dogs?","ドゥー ユー ライク ドッグス","「いぬは すきですか？」と きかれて、すきじゃ ない ときの こたえは？",["No, I don't.#ノー、アイ ドント","No, I can't.#ノー、アイ キャント","No, it isn't.#ノー、イット イズント","No, I'm not.#ノー、アイム ノット"],"No, I don't.","「Do you 〜?」への 否定の こたえは「No, I don't.（いいえ、すきじゃ ありません）」だよ。"],
+["Do you play soccer?","ドゥー ユー プレイ サッカー","「サッカーを しますか？」と きかれて、する ときの こたえは？",["Yes, I do.#イエス、アイ ドゥー","Yes, I can.#イエス、アイ キャン","Yes, I play.#イエス、アイ プレイ","Yes, it is.#イエス、イット イズ"],"Yes, I do.","「Do you play 〜?」にも「Yes, I do.」で こたえるよ。play を そのまま 返さないのが ルールだよ。"],
+["Do you have a pen?","ドゥー ユー ハブ ア ペン","「ペンを もっていますか？」と きかれて、もって いない ときの こたえは？",["No, I don't.#ノー、アイ ドント","No, I haven't.#ノー、アイ ハブント","No, I do.#ノー、アイ ドゥー","No, thanks.#ノー、サンクス"],"No, I don't.","「Do you have 〜?」も Do で きかれているから「No, I don't.」で こたえるよ。"],
+["Can you swim?","キャン ユー スイム","「およげますか？」と きかれて、およげる ときの こたえは？",["Yes, I can.#イエス、アイ キャン","Yes, I do.#イエス、アイ ドゥー","Yes, I am.#イエス、アイ アム","Yes, I swim.#イエス、アイ スイム"],"Yes, I can.","「Can you 〜?」と きかれたら can で 返すよ。「Yes, I can.（はい、できます）」。"],
+["Can you swim?","キャン ユー スイム","「およげますか？」と きかれて、およげない ときの こたえは？",["No, I can't.#ノー、アイ キャント","No, I don't.#ノー、アイ ドント","No, I'm not.#ノー、アイム ノット","No, it isn't.#ノー、イット イズント"],"No, I can't.","できない ときは「No, I can't.」。can't は can not（できない）の 短い 言い方だよ。"],
+["Can you ride a bike?","キャン ユー ライド ア バイク","「自転車に のれますか？」と きかれて、のれる ときの こたえは？",["Yes, I can.#イエス、アイ キャン","Yes, I do.#イエス、アイ ドゥー","Yes, I ride.#イエス、アイ ライド","Yes, it is.#イエス、イット イズ"],"Yes, I can.","Can で きかれたら Can で 返す。これが セットだよ。"],
+["Are you a student?","アー ユー ア スチューデント","「あなたは 学生ですか？」と きかれて、そうだ ときの こたえは？",["Yes, I am.#イエス、アイ アム","Yes, I do.#イエス、アイ ドゥー","Yes, I can.#イエス、アイ キャン","Yes, it is.#イエス、イット イズ"],"Yes, I am.","「Are you 〜?」には「Yes, I am. / No, I'm not.」で こたえるよ。"],
+["Are you hungry?","アー ユー ハングリー","「おなかが すきましたか？」と きかれて、すいて いない ときの こたえは？",["No, I'm not.#ノー、アイム ノット","No, I don't.#ノー、アイ ドント","No, I can't.#ノー、アイ キャント","No, it isn't.#ノー、イット イズント"],"No, I'm not.","Are you 〜? への 否定は「No, I'm not.」。主語が I に かわることに 注意だよ。"],
+["Is it a cat?","イズ イット ア キャット","ねこを さして「これは ねこですか？」と きかれて、ねこだ ときの こたえは？",["Yes, it is.#イエス、イット イズ","Yes, I am.#イエス、アイ アム","Yes, I do.#イエス、アイ ドゥー","Yes, she is.#イエス、シー イズ"],"Yes, it is.","ものや 動物の ことは it で 受けるよ。「Is it 〜?」→「Yes, it is.」。"],
+["Is it rainy today?","イズ イット レイニー トゥデイ","「今日は 雨ですか？」と きかれて、雨じゃ ない ときの こたえは？",["No, it isn't.#ノー、イット イズント","No, I don't.#ノー、アイ ドント","No, I'm not.#ノー、アイム ノット","No, I can't.#ノー、アイ キャント"],"No, it isn't.","天気の ことも it で 受けるよ。isn't は is not の 短い 言い方だよ。"],
+["Do you like math?","ドゥー ユー ライク マス","「算数は すきですか？」と きかれて、すきな ときの こたえは？",["Yes, I do.#イエス、アイ ドゥー","Yes, I am.#イエス、アイ アム","Yes, it is.#イエス、イット イズ","Yes, I can.#イエス、アイ キャン"],"Yes, I do.","教科の 名前でも 答え方は 同じ。「Do you like 〜?」→「Yes, I do.」。"],
+["Can you play the piano?","キャン ユー プレイ ザ ピアノ","「ピアノが ひけますか？」と きかれて、ひけない ときの こたえは？",["No, I can't.#ノー、アイ キャント","No, I don't.#ノー、アイ ドント","No, I am.#ノー、アイ アム","No, it isn't.#ノー、イット イズント"],"No, I can't.","「Can you play 〜?」→ できない ときは「No, I can't.」だよ。"],
+["Are you OK?","アー ユー オーケー","「だいじょうぶですか？」と きかれて、だいじょうぶな ときの こたえは？",["Yes, I am. Thank you.#イエス、アイ アム。サンキュー","Yes, I do.#イエス、アイ ドゥー","Yes, it is.#イエス、イット イズ","Yes, I can.#イエス、アイ キャン"],"Yes, I am. Thank you.","Are you 〜? には am で 返すよ。心配して もらったら Thank you. も つけると ていねいだね。"],
+["Is this your book?","イズ ディス ユア ブック","「これは あなたの 本ですか？」と きかれて、自分の 本だ ときの こたえは？",["Yes, it is.#イエス、イット イズ","Yes, I do.#イエス、アイ ドゥー","Yes, I am.#イエス、アイ アム","Yes, you are.#イエス、ユー アー"],"Yes, it is.","「Is this 〜?」も it で 受けるよ。your（あなたの）が あっても こたえは it だよ。"],
+["Do you want some water?","ドゥー ユー ウォント サム ウォーター","「お水を のみますか？」と すすめられて、ほしい ときの こたえは？",["Yes, please.#イエス、プリーズ","Yes, I can.#イエス、アイ キャン","Yes, it is.#イエス、イット イズ","Yes, I am.#イエス、アイ アム"],"Yes, please.","すすめられた ときは「Yes, please.（はい、おねがいします）」が 自然な こたえだよ。"],
+["Do you want some water?","ドゥー ユー ウォント サム ウォーター","「お水を のみますか？」と すすめられて、いらない ときの こたえは？",["No, thank you.#ノー、サンキュー","No, I can't.#ノー、アイ キャント","No, it isn't.#ノー、イット イズント","No, I am.#ノー、アイ アム"],"No, thank you.","ことわるときは「No, thank you.（いいえ、けっこうです）」。thank you を つけると やさしい 言い方だよ。"],
+["What do you like?","ホワット ドゥー ユー ライク","「何が すきですか？」と きかれて、りんごが すきな 人の こたえは？",["I like apples.#アイ ライク アップルス","Yes, I do.#イエス、アイ ドゥー","It's an apple.#イッツ アン アップル","I can run.#アイ キャン ラン"],"I like apples.","What で「何が」と きかれたら、Yes では こたえられないよ。すきな ものを 言おう。"],
+["What color do you like?","ホワット カラー ドゥー ユー ライク","「何色が すきですか？」と きかれて、あおが すきな 人の こたえは？",["I like blue.#アイ ライク ブルー","It's blue.#イッツ ブルー","Yes, I do.#イエス、アイ ドゥー","Blue is nice.#ブルー イズ ナイス"],"I like blue.","「何色が すき？」には「I like blue.（あおが すきです）」。It's blue. は「それは あおです」で、質問と ずれるよ。"],
+["What sport do you like?","ホワット スポーツ ドゥー ユー ライク","「何の スポーツが すきですか？」と きかれた ときの こたえは？",["I like baseball.#アイ ライク ベースボール","Yes, I do.#イエス、アイ ドゥー","I can swim.#アイ キャン スイム","It's sunny.#イッツ サニー"],"I like baseball.","What sport 〜? には スポーツの 名前で こたえるよ。"],
+["When is your birthday?","ウェン イズ ユア バースデイ","「誕生日は いつですか？」と きかれて、7月14日の 人の こたえは？",["It's July 14.#イッツ ジュライ フォーティーン","I'm ten years old.#アイム テン イヤーズ オールド","Yes, it is.#イエス、イット イズ","It's Monday.#イッツ マンデイ"],"It's July 14.","When（いつ）には 日付で こたえるよ。年れいや 曜日では こたえないよ。"],
+["Where is the library?","ウェア イズ ザ ライブラリー","「図書館は どこですか？」と きかれた ときの こたえとして 合うのは？",["It's next to the park.#イッツ ネクスト トゥー ザ パーク","It's a book.#イッツ ア ブック","Yes, it is.#イエス、イット イズ","I like books.#アイ ライク ブックス"],"It's next to the park.","Where（どこ）には 場所で こたえるよ。next to 〜 は「〜の となり」という いみだよ。"],
+["Who is that boy?","フー イズ ザット ボーイ","「あの 男の子は だれですか？」と きかれた ときの こたえは？",["He is my brother.#ヒー イズ マイ ブラザー","It's a boy.#イッツ ア ボーイ","Yes, he is.#イエス、ヒー イズ","He is ten.#ヒー イズ テン"],"He is my brother.","Who（だれ）には 人を 紹介する 文で こたえるよ。男の子は he（彼）だね。"],
+["How many pencils do you have?","ハウ メニー ペンシルズ ドゥー ユー ハブ","「えんぴつを 何本 もっていますか？」と きかれて、3本の 人の こたえは？",["I have three pencils.#アイ ハブ スリー ペンシルズ","Yes, I do.#イエス、アイ ドゥー","It's three o'clock.#イッツ スリー オクロック","They are pencils.#ゼイ アー ペンシルズ"],"I have three pencils.","How many（いくつ）には 数で こたえるよ。時刻の three o'clock と まちがえないでね。"],
+["What time do you get up?","ホワット タイム ドゥー ユー ゲット アップ","「何時に 起きますか？」と きかれて、6時に 起きる 人の こたえは？",["I get up at six.#アイ ゲット アップ アット シックス","It's six o'clock.#イッツ シックス オクロック","Yes, I do.#イエス、アイ ドゥー","I'm six.#アイム シックス"],"I get up at six.","「何時に 〜しますか」には「I get up at six.」のように 動作と 時刻を セットで こたえるよ。at は 時刻の 前に つけるよ。"],
+["What do you do on Sundays?","ホワット ドゥー ユー ドゥー オン サンデイズ","「日曜日は 何を しますか？」と きかれた ときの こたえは？",["I play with my friends.#アイ プレイ ウィズ マイ フレンズ","It's Sunday.#イッツ サンデイ","Yes, I do.#イエス、アイ ドゥー","I'm fine.#アイム ファイン"],"I play with my friends.","「日曜日は 何を する？」には すること で こたえるよ。曜日 そのものでは こたえないよ。"],
+["Which do you like, tea or juice?","ウィッチ ドゥー ユー ライク、ティー オア ジュース","「お茶と ジュース、どっちが すきですか？」と きかれて、ジュースが すきな 人の こたえは？",["I like juice.#アイ ライク ジュース","Yes, I do.#イエス、アイ ドゥー","Both, please.#ボース、プリーズ","It's juice.#イッツ ジュース"],"I like juice.","Which（どっち）で 選ばせる 質問には、選んだ ものを 言って こたえるよ。"],
+["How is the weather today?","ハウ イズ ザ ウェザー トゥデイ","「今日の 天気は どうですか？」と きかれて、晴れの ときの こたえは？",["It's sunny.#イッツ サニー","I'm fine.#アイム ファイン","Yes, it is.#イエス、イット イズ","It's Monday.#イッツ マンデイ"],"It's sunny.","天気を きかれたら 天気で こたえるよ。How are you?（元気？）への I'm fine. と まちがえやすいよ。"],
+["How are you?","ハウ アー ユー","「元気ですか？」と きかれて、少し つかれている ときの こたえは？",["I'm a little tired.#アイム ア リトル タイアド","It's tired.#イッツ タイアド","Yes, I am.#イエス、アイ アム","I'm ten.#アイム テン"],"I'm a little tired.","気持ちや 体調は「I'm 〜.」で 言えるよ。a little は「少し」という いみだよ。"],
+["What's the matter?","ホワッツ ザ マター","「どうしたの？」と 心配されて、おなかが 痛い ときの こたえは？",["I have a stomachache.#アイ ハブ ア ストマックエイク","Yes, I do.#イエス、アイ ドゥー","It's sunny.#イッツ サニー","Thank you.#サンキュー"],"I have a stomachache.","What's the matter? は「どうしたの？」。体の 不調は「I have a 〜.」で 言えるよ。stomachache は「おなかの 痛み」だよ。"]
+,
+["I don't like natto.","アイ ドント ライク ナットウ","いみは どれかな？",["なっとうは すきじゃ ありません","なっとうが 大すきです","なっとうを たべました","なっとうを ください"],"なっとうは すきじゃ ありません","don't は do not の 短い 言い方で、「〜じゃ ありません（〜しない）」と 否定するよ。"],
+["He doesn't like milk.","ヒー ダズント ライク ミルク","いみは どれかな？",["彼は 牛乳が すきじゃ ありません","彼は 牛乳が すきです","彼は 牛乳を のみました","彼は 牛乳を 買います"],"彼は 牛乳が すきじゃ ありません","he（彼）の ときは don't では なく doesn't を 使うよ。「彼は 〜じゃ ありません」だね。"],
+["She can't ride a bike.","シー キャント ライド ア バイク","いみは どれかな？",["彼女は 自転車に のれません","彼女は 自転車に のれます","彼女は 自転車が すきです","彼女は 自転車を 買いました"],"彼女は 自転車に のれません","can't は「できません」。she（彼女）でも can / can't の 形は かわらないよ。"],
+["It isn't a dog.","イット イズント ア ドッグ","いみは どれかな？",["それは 犬じゃ ありません","それは 犬です","犬は かわいいです","犬が すきです"],"それは 犬じゃ ありません","isn't は is not の 短い 言い方。「〜じゃ ありません」と 否定するよ。"],
+["I'm not ten.","アイム ノット テン","いみは どれかな？",["わたしは 10さいじゃ ありません","わたしは 10さいです","わたしは 10人 います","いま 10じです"],"わたしは 10さいじゃ ありません","I'm not 〜 は「わたしは 〜じゃ ありません」。not の 位置に 注意だよ。"],
+["We don't play games on Mondays.","ウィー ドント プレイ ゲームズ オン マンデイズ","いみは どれかな？",["わたしたちは 月曜日は ゲームを しません","わたしたちは 月曜日に ゲームを します","月曜日は ゲームの 日です","ゲームは 月曜日に あります"],"わたしたちは 月曜日は ゲームを しません","don't play は「遊ばない・しない」。曜日には on を つけるよ（on Mondays）。"],
+["Don't run in the classroom.","ドント ラン イン ザ クラスルーム","いみは どれかな？",["教室では 走らないで ください","教室で 走りましょう","教室は 広いです","走るのは たのしいです"],"教室では 走らないで ください","Don't 〜. は「〜しないで ください」という 注意の 言い方だよ。"],
+["Don't be late.","ドント ビー レイト","いみは どれかな？",["おくれないで ください","はやく 来て ください","また 会いましょう","おつかれさまです"],"おくれないで ください","Don't be late. は「遅刻しないで」。late は「おそい・おくれた」という いみだよ。"],
+["Don't touch.","ドント タッチ","いみは どれかな？",["さわらないで ください","みて ください","もって ください","さわって ください"],"さわらないで ください","touch は「さわる」。Don't touch. は 美術館などでも 使う 注意だよ。"],
+["Be quiet, please.","ビー クワイエット、プリーズ","いみは どれかな？",["しずかに して ください","大きな 声で 言って ください","すわって ください","たって ください"],"しずかに して ください","Be quiet. は「静かにして」。please を つけると やさしい 言い方に なるよ。"],
+["Be careful.","ビー ケアフル","いみは どれかな？",["気をつけて ください","がんばって ください","いそいで ください","ゆっくり して ください"],"気をつけて ください","Be careful. は「気をつけて」。道を わたるときなどに 言うよ。"],
+["Open the window, please.","オープン ザ ウィンドウ、プリーズ","いみは どれかな？",["窓を あけて ください","窓を しめて ください","窓を みて ください","窓の そとを みて ください"],"窓を あけて ください","open は「あける」。the window は「その 窓」の ことだよ。"],
+["Close the door, please.","クローズ ザ ドア、プリーズ","いみは どれかな？",["ドアを しめて ください","ドアを あけて ください","ドアを ノックして ください","ドアの 前に 立って ください"],"ドアを しめて ください","close は「しめる」。open（あける）の 反対だよ。"],
+["Wash your hands.","ウォッシュ ユア ハンズ","いみは どれかな？",["手を あらって ください","手を あげて ください","手を たたいて ください","手を ふって ください"],"手を あらって ください","wash は「あらう」。your hands は「あなたの 両手」だよ。食事の 前に 言われるね。"],
+["Brush your teeth.","ブラッシュ ユア ティース","いみは どれかな？",["歯を みがいて ください","歯を みせて ください","歯が 痛いです","歯は 大切です"],"歯を みがいて ください","brush は「ブラシで みがく」。teeth は tooth（歯）の 複数形だよ。"],
+["Put your bag on the desk.","プット ユア バッグ オン ザ デスク","いみは どれかな？",["かばんを 机の 上に 置いて ください","かばんを 机の 下に 入れて ください","かばんを もって ください","机を きれいに して ください"],"かばんを 机の 上に 置いて ください","put 〜 on … は「〜を …の 上に 置く」。on は「〜の 上に」だよ。"],
+["Take off your shoes.","テイク オフ ユア シューズ","いみは どれかな？",["くつを ぬいで ください","くつを はいて ください","くつを 買って ください","くつを あらって ください"],"くつを ぬいで ください","take off は「ぬぐ・はずす」。反対は put on（身に つける）だよ。"],
+["Put on your hat.","プット オン ユア ハット","いみは どれかな？",["ぼうしを かぶって ください","ぼうしを ぬいで ください","ぼうしを 買って ください","ぼうしを 洗って ください"],"ぼうしを かぶって ください","put on は「身に つける」。帽子は put on your hat と 言うよ。"],
+["Let's read the book together.","レッツ リード ザ ブック トゥゲザー","いみは どれかな？",["いっしょに 本を 読もう","本を 買いに 行こう","本を 閉じよう","静かに 読もう"],"いっしょに 本を 読もう","Let's 〜. は「〜しよう」。together は「いっしょに」だよ。"],
+["Let's not run.","レッツ ノット ラン","いみは どれかな？",["走るのは やめよう","走ろう","速く 走ろう","走って 行こう"],"走るのは やめよう","Let's not 〜. は「〜するのは やめよう」。not の 位置で いみが かわるよ。"],
+["Shall we play soccer?","シャル ウィー プレイ サッカー","いみは どれかな？",["サッカーを しない？（さそい）","サッカーは すきですか？","サッカーが できますか？","サッカーを 見ますか？"],"サッカーを しない？（さそい）","Shall we 〜? は「〜しない？」と さそう 言い方だよ。Let's play. と 同じように 使うよ。"],
+["Shall I open the window?","シャル アイ オープン ザ ウィンドウ","いみは どれかな？",["窓を あけましょうか？","窓を あけて ください","窓が あいていますか？","窓は 大きいですか？"],"窓を あけましょうか？","Shall I 〜? は「（わたしが）〜しましょうか？」と たずねる 言い方だよ。"],
+["May I come in?","メイ アイ カム イン","教室の 前で 先生に 言う 言葉として 合うのは どれかな？",["入って も いいですか？","入って ください","入りましょう","入ります"],"入って も いいですか？","May I 〜? は「〜しても いいですか？」と 許可を もらう 丁寧な 言い方だよ。"],
+["May I use this pencil?","メイ アイ ユーズ ディス ペンシル","いみは どれかな？",["この えんぴつを 使っても いいですか？","この えんぴつを ください","この えんぴつは あなたのですか？","えんぴつを 貸して ください"],"この えんぴつを 使っても いいですか？","use は「使う」。May I use 〜? で「使っても いいですか？」だよ。"],
+["Can I help you?","キャン アイ ヘルプ ユー","お店の 人が お客さんに 言う 言葉として 合うのは どれかな？",["いらっしゃいませ（何か お探しですか）","手伝って ください","助けて ください","ありがとう ございました"],"いらっしゃいませ（何か お探しですか）","お店では「Can I help you?」が「いらっしゃいませ」の 決まり文句だよ。直訳の「手伝えますか？」とは 場面で いみが ちがうよ。"],
+["Help me, please.","ヘルプ ミー、プリーズ","いみは どれかな？",["手伝って ください","手伝いましょうか","手伝って くれて ありがとう","手伝いは いりません"],"手伝って ください","Help me. は「手伝って（助けて）」。please を つけると 丁寧に なるよ。"],
+["Wait a minute.","ウェイト ア ミニット","いみは どれかな？",["ちょっと 待って ください","1分 待って ください","急いで ください","座って ください"],"ちょっと 待って ください","a minute は 直訳すると「1分」だけど、「ちょっと」という いみで 使う 決まり文句だよ。"],
+["Come here.","カム ヒア","いみは どれかな？",["こっちへ 来て ください","あっちへ 行って ください","ここに 座って ください","ここを 見て ください"],"こっちへ 来て ください","come は「来る」、here は「ここへ」。Come here. は「こっちへ 来て」だよ。"],
+["Go straight.","ゴー ストレート","道を 教える ときの 言葉として 合うのは どれかな？",["まっすぐ 行って ください","止まって ください","右へ 曲がって ください","戻って ください"],"まっすぐ 行って ください","straight は「まっすぐ」。Go straight. は 道案内の 基本だよ。"],
+["Turn right at the corner.","ターン ライト アット ザ コーナー","いみは どれかな？",["角を 右へ 曲がって ください","角を 左へ 曲がって ください","角で 止まって ください","角に 立って ください"],"角を 右へ 曲がって ください","turn right は「右へ 曲がる」。corner は「角・かど」だよ。"]
+,
+["It's cloudy and cold today.","イッツ クラウディ アンド コールド トゥデイ","いみは どれかな？",["今日は 曇りで 寒いです","今日は 晴れて 暑いです","今日は 雨で 暖かいです","明日は 曇りで 寒いです"],"今日は 曇りで 寒いです","cloudy は「曇りの」、cold は「寒い」。and で つないで 両方 言っているよ。"],
+["It will be sunny tomorrow.","イット ウィル ビー サニー トゥモロー","いみは どれかな？",["明日は 晴れるでしょう","今日は 晴れです","明日は 雨でしょう","昨日は 晴れでした"],"明日は 晴れるでしょう","tomorrow は「明日」。will be 〜 で「〜に なるでしょう」と これからの 天気を 言うよ。"],
+["It's going to rain.","イッツ ゴーイング トゥー レイン","空が 真っ黒な ときに 言う 言葉として 合うのは どれかな？",["雨が 降りそう です","雨が 降って いました","雨は 降りません","雨が 好きです"],"雨が 降りそう です","be going to 〜 は「〜しそう・〜する つもり」。雲を 見て「降りそう」と 言う 場面だよ。"],
+["What time is it now?","ホワット タイム イズ イット ナウ","時計は 7時30分を 指して います。正しい こたえは？",["It's seven thirty.#イッツ セブン サーティ","It's seven o'clock.#イッツ セブン オクロック","I'm seven thirty.#アイム セブン サーティ","It's thirty seven.#イッツ サーティ セブン"],"It's seven thirty.","7時30分は「seven thirty」。o'clock は「ちょうど 〜時」の ときだけに 使うよ。"],
+["What time is it now?","ホワット タイム イズ イット ナウ","時計は 12時ちょうどを 指して います。正しい こたえは？",["It's twelve o'clock.#イッツ トゥエルブ オクロック","It's twelve thirty.#イッツ トゥエルブ サーティ","I'm twelve.#アイム トゥエルブ","It's ten two.#イッツ テン トゥー"],"It's twelve o'clock.","ちょうどの 時刻は「〜 o'clock」。12時は twelve o'clock だよ。"],
+["School starts at eight thirty.","スクール スターツ アット エイト サーティ","いみは どれかな？",["学校は 8時30分に 始まります","学校は 8時30分に 終わります","学校へ 8時30分に 着きました","8時30分に 起きます"],"学校は 8時30分に 始まります","starts は「始まる」。時刻の 前には at を つけるよ。"],
+["I go to bed at nine.","アイ ゴー トゥー ベッド アット ナイン","いみは どれかな？",["わたしは 9時に 寝ます","わたしは 9時に 起きます","わたしは 9歳で 寝ます","ベッドは 9つ あります"],"わたしは 9時に 寝ます","go to bed は「寝る」。at nine は「9時に」だよ。"],
+["The train leaves at ten fifteen.","ザ トレイン リーブズ アット テン フィフティーン","いみは どれかな？",["電車は 10時15分に 出発します","電車は 10時15分に 着きます","電車は 10台 あります","10時15分に 電車に 乗りました"],"電車は 10時15分に 出発します","leaves は「出発する」。ten fifteen は 10時15分の ことだよ。"],
+["It's half past three.","イッツ ハーフ パスト スリー","いみは どれかな？",["3時30分です","3時15分です","3時半 前です","4時30分です"],"3時30分です","half past three は「3時を 半分 過ぎた」＝3時30分。英語らしい 時刻の 言い方だよ。"],
+["What day is it today?","ホワット デイ イズ イット トゥデイ","今日が 金曜日の ときの 正しい こたえは？",["It's Friday.#イッツ フライデイ","It's sunny.#イッツ サニー","It's May.#イッツ メイ","Yes, it is.#イエス、イット イズ"],"It's Friday.","What day 〜? は 曜日を きく 質問。天気や 月では こたえないよ。"],
+["Today is Wednesday.","トゥデイ イズ ウェンズデイ","いみは どれかな？",["今日は 水曜日です","今日は 木曜日です","明日は 水曜日です","水曜日は 休みです"],"今日は 水曜日です","Wednesday は「水曜日」。Tuesday（火曜日）と まちがえやすいよ。"],
+["Yesterday was Sunday.","イエスタデイ ワズ サンデイ","いみは どれかな？",["昨日は 日曜日でした","今日は 日曜日です","明日は 日曜日です","日曜日でしたいです"],"昨日は 日曜日でした","yesterday は「昨日」。was は is の 過去の 形で、「〜でした」と 言うよ。"],
+["Tomorrow is Saturday.","トゥモロー イズ サタデイ","いみは どれかな？",["明日は 土曜日です","今日は 土曜日です","昨日は 土曜日でした","土曜日が 好きです"],"明日は 土曜日です","tomorrow は「明日」。is を 使うから これからの ことだね。"],
+["It's windy. Close the window.","イッツ ウィンディ。クローズ ザ ウィンドウ","2つ目の 文が 自然な 理由は どれかな？",["風が 強いから 窓を 閉める","雨だから 窓を 閉める","寒くないから 窓を 閉める","窓が 壊れたから 閉める"],"風が 強いから 窓を 閉める","windy は「風が 強い」。文と 文の つながりを 考えると、風で 窓が バタバタするから 閉める、が 自然だよ。"],
+["It's snowy. Let's play outside.","イッツ スノーイ。レッツ プレイ アウトサイド","雪の 日に 外で 遊ぶ、の 次に 続く 言葉として 合うのは？",["Let's make a snowman.#レッツ メイク ア スノーマン","Let's swim.#レッツ スイム","It's hot.#イッツ ホット","I need an umbrella.#アイ ニード アン アンブレラ"],"Let's make a snowman.","snowy は「雪の」。雪の 日なら「雪だるまを 作ろう」が つながるね。make は「作る」だよ。"],
+["Take an umbrella. It's rainy.","テイク アン アンブレラ。イッツ レイニー","いみは どれかな？",["傘を 持って 行って。雨が 降って います","傘を 置いて 行って。雨です","傘を 買って。晴れて います","傘は いりません。雨です"],"傘を 持って 行って。雨が 降って います","take は ここでは「持って 行く」。rainy（雨）だから 傘が 必要、という つながりだよ。"],
+["It's very hot today.","イッツ ベリー ホット トゥデイ","いみは どれかな？",["今日は とても 暑いです","今日は とても 寒いです","今日は 少し 暑いです","昨日は とても 暑かったです"],"今日は とても 暑いです","very は「とても」。hot は「暑い」だよ。a little（少し）と 反対の 強さだね。"],
+["How is the weather in summer?","ハウ イズ ザ ウェザー イン サマー","「夏の 天気は どうですか？」への こたえとして 合うのは？",["It's hot and sunny.#イッツ ホット アンド サニー","It's snowy.#イッツ スノーイ","I'm hot.#アイム ホット","Summer is hot.#サマー イズ ホット"],"It's hot and sunny.","天気を きかれたら It で 始めて こたえるのが 基本だよ。日本の 夏は「暑くて 晴れ」が 合うね。"],
+["What season do you like?","ホワット シーズン ドゥー ユー ライク","「どの 季節が すきですか？」と きかれて、秋が すきな 人の こたえは？",["I like fall.#アイ ライク フォール","It's fall.#イッツ フォール","Yes, I do.#イエス、アイ ドゥー","Fall is cool.#フォール イズ クール"],"I like fall.","season は「季節」。すきな 季節を きかれたら「I like fall.」と こたえるよ。"],
+["In winter, it is cold.","イン ウィンター、イット イズ コールド","いみは どれかな？",["冬は 寒いです","冬は 暑いです","冬に なりました","冬が すきです"],"冬は 寒いです","in winter は「冬には・冬は」。季節の 前には in を つけるよ。"],
+["Breakfast is at seven.","ブレックファスト イズ アット セブン","いみは どれかな？",["朝ごはんは 7時です","朝ごはんは 7つです","朝ごはんを 7時に 食べました","7歳で 朝ごはんを 食べます"],"朝ごはんは 7時です","breakfast は「朝ごはん」。at seven は「7時に」だよ。"],
+["The shop opens at nine.","ザ ショップ オープンズ アット ナイン","いみは どれかな？",["その 店は 9時に 開きます","その 店は 9時に 閉まります","その 店は 9軒 あります","9時に 店へ 行きました"],"その 店は 9時に 開きます","opens は「開く・開店する」。店の ことは the shop と 言うよ。"],
+["See you at three.","シー ユー アット スリー","いみは どれかな？",["3時に また 会おうね","3人で 会おうね","3時に 行きます","3つ 見えます"],"3時に また 会おうね","See you at 〜 は「〜時に また会おう」。時刻の 前の at を 忘れずに。"],
+["On Sundays, I sleep late.","オン サンデイズ、アイ スリープ レイト","いみは どれかな？",["日曜日は 遅くまで 寝て います","日曜日は 早く 起きます","日曜日は 寝ません","日曜日に 寝ました"],"日曜日は 遅くまで 寝て います","sleep late は「遅くまで 寝る」。on Sundays は「日曜日には（いつも）」という いみだよ。"],
+["I do my homework after school.","アイ ドゥー マイ ホームワーク アフター スクール","いみは どれかな？",["放課後に 宿題を します","学校の 前に 宿題を します","宿題は 学校で 終わりました","宿題が すきです"],"放課後に 宿題を します","after school は「放課後」。before（〜の前）の 反対だよ。homework は「宿題」だね。"],
+["Before dinner, I take a bath.","ビフォア ディナー、アイ テイク ア バス","いみは どれかな？",["夕ごはんの 前に お風呂に 入ります","夕ごはんの 後に お風呂に 入ります","夕ごはんと お風呂が すきです","お風呂で 夕ごはんを 食べます"],"夕ごはんの 前に お風呂に 入ります","before は「〜の 前に」。take a bath は「お風呂に 入る」決まり文句だよ。"],
+["It's time for lunch.","イッツ タイム フォア ランチ","いみは どれかな？",["お昼ごはんの 時間です","お昼ごはんを 食べました","お昼ごはんは 12時です","お昼ごはんが すきです"],"お昼ごはんの 時間です","It's time for 〜 は「〜の 時間です」。for の 後ろに することや ものが 来るよ。"],
+["It's time to go home.","イッツ タイム トゥー ゴー ホーム","いみは どれかな？",["家に 帰る 時間です","家に 帰りました","家へ 行きたいです","家は 遠いです"],"家に 帰る 時間です","It's time to 〜 は「〜する 時間です」。to の 後ろは 動作だよ。"],
+["Hurry up! The bus is coming.","ハリー アップ！ザ バス イズ カミング","いみは どれかな？",["急いで！バスが 来ます","待って！バスが 行きます","バスが 来ました。座って","バスは 遅れて います"],"急いで！バスが 来ます","is coming は「今 来つつある」。だから「急いで」が つながるよ。"],
+["Look at the clock. It's eight fifty.","ルック アット ザ クロック。イッツ エイト フィフティ","時刻は 何時何分かな？",["8時50分","8時15分","5時8分","8時5分"],"8時50分","eight fifty は 8時50分。英語では「時・分」の 順に そのまま 言う 言い方が あるよ。"]
+,
+["Happy birthday!","ハッピー バースデイ","誕生日の お祝いを 言われた ときの 返事は？",["Thank you!#サンキュー","Happy birthday!#ハッピー バースデイ","You're welcome.#ユーアー ウェルカム","I'm sorry.#アイム ソーリー"],"Thank you!","お祝いを 言われたら、まずは「ありがとう」。同じ 言葉を そのまま 返さないよ。"],
+["Here is your book.","ヒア イズ ユア ブック","本を 渡された ときの 返事は？",["Thank you.#サンキュー","Here you are.#ヒア ユー アー","You're welcome.#ユーアー ウェルカム","Excuse me.#エクスキューズ ミー"],"Thank you.","ものを もらったら「Thank you.」。Here you are. は 自分が 渡す ときの 言葉だよ。"],
+["This is for you.","ディス イズ フォア ユー","プレゼントを もらった ときの 返事として 一番 合うのは？",["Thank you! I like it.#サンキュー！アイ ライク イット","No, thank you.#ノー、サンキュー","This is for you.#ディス イズ フォア ユー","You're welcome.#ユーアー ウェルカム"],"Thank you! I like it.","for you は「あなたへの（プレゼント）」。お礼と「気に入った」を 言うと 喜ばれるよ。"],
+["I'm sorry I'm late.","アイム ソーリー アイム レイト","遅刻した 人に 先生が 言う 言葉として 合うのは？",["That's OK. Come in.#ザッツ オーケー。カム イン","Thank you.#サンキュー","Me too.#ミー トゥー","See you.#シー ユー"],"That's OK. Come in.","I'm sorry.（ごめんなさい）に 対しては「That's OK.（だいじょうぶです）」と 許す 言い方が あるよ。"],
+["Watch out!","ウォッチ アウト","自転車が 近づいて 来た ときに 友だちへ 言う 言葉の いみは？",["気をつけて！","見て 見て！","待って いて！","行って らっしゃい！"],"気をつけて！","Watch out! は 危険が 近い ときの「気をつけて！」。look（見て）とは 場面が ちがうよ。"],
+["Cheer up!","チアー アップ","落ち込んで いる 友だちに 言う 言葉の いみは？",["元気を 出して！","急いで！","静かに して！","気をつけて！"],"元気を 出して！","Cheer up! は「元気を 出して」。テストで 失敗した 友だちなどに 言うよ。"],
+["Good job!","グッド ジョブ","上手に できた 友だちに 言う 言葉の いみは？",["よく やったね！","がんばって！","おつかれさま！","すごい 仕事だね！"],"よく やったね！","Good job! は 終わった ことへの「よくやったね」。始める 前の「がんばって」は Good luck! だよ。"],
+["Well done!","ウェル ダン","いみは どれかな？",["よく できました！","よく 焼けました！","いただきます！","ごちそうさま！"],"よく できました！","Well done! も「よくできました」。先生が ほめる ときに よく 使うよ。"],
+["Don't worry.","ドント ウォーリー","いみは どれかな？",["心配しないで","急がないで","走らないで","忘れないで"],"心配しないで","worry は「心配する」。Don't worry. は 不安な 人を 安心させる 言葉だよ。"],
+["Take your time.","テイク ユア タイム","いみは どれかな？",["ゆっくりで いいよ","時間を 守って","急いで ね","時間は 何時？"],"ゆっくりで いいよ","Take your time. は「あせらなくて いいよ」という 優しい 言葉だよ。"],
+["After you.","アフター ユー","ドアの 前で 人に 先を ゆずる ときの 言葉の いみは？",["お先に どうぞ","後に して ください","後で 会おう","あなたの 番です"],"お先に どうぞ","After you. は 直訳と 反対で「お先にどうぞ」。自分が 後（after）に 行く、という ことだよ。"],
+["Bless you!","ブレス ユー","友だちが くしゃみを した ときに 言う 言葉は どれかな？",["Bless you!#ブレス ユー","Thank you!#サンキュー","Excuse me.#エクスキューズ ミー","Good luck!#グッド ラック"],"Bless you!","英語では くしゃみを した 人に「Bless you!（お大事に）」と 言う 習慣が あるよ。"],
+["Excuse me.","エクスキューズ ミー","くしゃみを して しまった 自分が 言う 言葉は どれかな？",["Excuse me.#エクスキューズ ミー","Bless you!#ブレス ユー","Thank you.#サンキュー","Welcome.#ウェルカム"],"Excuse me.","自分が くしゃみや げっぷを したら「Excuse me.（すみません）」。相手の くしゃみには Bless you! だよ。"],
+["Can you speak English?","キャン ユー スピーク イングリッシュ","「英語を 話せますか？」と きかれて、少し 話せる ときの こたえは？",["Yes, a little.#イエス、ア リトル","Yes, I do.#イエス、アイ ドゥー","Yes, it is.#イエス、イット イズ","English is fun.#イングリッシュ イズ ファン"],"Yes, a little.","Can you 〜? への こたえに「a little（少し）」を つけると、程度が 伝わるよ。"],
+["Do you understand?","ドゥー ユー アンダースタンド","「分かりましたか？」と きかれて、分かった ときの こたえは？",["Yes, I do.#イエス、アイ ドゥー","Yes, I can.#イエス、アイ キャン","Yes, I am.#イエス、アイ アム","Yes, please.#イエス、プリーズ"],"Yes, I do.","understand は「分かる」。Do you 〜? だから do で 返すよ。"],
+["I don't understand.","アイ ドント アンダースタンド","いみは どれかな？",["分かりません","分かりました","知って います","聞こえません"],"分かりません","I don't understand. は「分かりません」。分からない ときは 正直に 言おう。もう一度 言って もらう ことも できるよ。"],
+["Say it again, please.","セイ イット アゲイン、プリーズ","いみは どれかな？",["もう一度 言って ください","もう一度 聞いて ください","大きな 声で 言って ください","ゆっくり 言って ください"],"もう一度 言って ください","again は「もう一度」。say は「言う」だよ。聞き取れなかった ときに 使うよ。"],
+["Speak slowly, please.","スピーク スローリー、プリーズ","いみは どれかな？",["ゆっくり 話して ください","大きな 声で 話して ください","英語で 話して ください","もう一度 話して ください"],"ゆっくり 話して ください","slowly は「ゆっくりと」。fast（速く）の 反対だよ。"],
+["What does 'apple' mean?","ホワット ダズ アップル ミーン","いみは どれかな？",["「apple」は どういう いみですか？","「apple」は 好きですか？","「apple」は どこですか？","「apple」を ください"],"「apple」は どういう いみですか？","mean は「〜という いみ」。単語の いみを きく ときの 決まり文句だよ。"],
+["How do you say 'inu' in English?","ハウ ドゥー ユー セイ イヌ イン イングリッシュ","いみは どれかな？",["「いぬ」は 英語で 何と 言いますか？","「いぬ」は 英語で 書けますか？","犬は 英語が 好きですか？","犬と 英語で 話せますか？"],"「いぬ」は 英語で 何と 言いますか？","How do you say 〜 in English? は「〜は 英語で 何と言う？」。答えは Dog. だね。"],
+["I want a new bike.","アイ ウォント ア ニュー バイク","いみは どれかな？",["新しい 自転車が ほしいです","新しい 自転車を 買いました","自転車に 乗りたいです","自転車は 新しいです"],"新しい 自転車が ほしいです","want は「ほしい」。want ＋ もの で「ものが ほしい」だよ。"],
+["I want to swim.","アイ ウォント トゥー スイム","いみは どれかな？",["泳ぎたいです","泳げます","泳ぎました","泳ぐのが 好きです"],"泳ぎたいです","want to 〜 は「〜したい」。to の 後ろには 動作が 来るよ。want a bike（自転車が ほしい）と 使い分けてね。"],
+["I'd like some juice, please.","アイド ライク サム ジュース、プリーズ","お店で 注文する ときの 言葉の いみは？",["ジュースを ください","ジュースが 好きです","ジュースは ありますか？","ジュースを 作ります"],"ジュースを ください","I'd like 〜 は I want 〜 の 丁寧な 言い方で、お店では こちらを 使うよ。"],
+["How much is it?","ハウ マッチ イズ イット","いみは どれかな？",["いくらですか？","いくつですか？","何時ですか？","どのくらい 大きいですか？"],"いくらですか？","How much 〜? は 値段や 量を きく 言い方。数えられる ものの 数は How many だよ。"],
+["It's too big for me.","イッツ トゥー ビッグ フォア ミー","服を 試着した ときの 言葉の いみは？",["わたしには 大きすぎます","わたしには ぴったりです","わたしには 小さすぎます","この 服が 好きです"],"わたしには 大きすぎます","too 〜 は「〜すぎる」。for me は「わたしにとって」だよ。"],
+["This is too difficult.","ディス イズ トゥー ディフィカルト","いみは どれかな？",["これは 難しすぎます","これは 簡単すぎます","これは 難しいです（ふつう）","これは 面白いです"],"これは 難しすぎます","difficult は「難しい」。too が つくと「難しすぎる」と 強く なるよ。easy（簡単）の 反対だね。"],
+["There is a cat under the table.","ゼア イズ ア キャット アンダー ザ テーブル","いみは どれかな？",["テーブルの 下に 猫が います","テーブルの 上に 猫が います","猫は テーブルが 好きです","猫が テーブルを 買いました"],"テーブルの 下に 猫が います","There is 〜 は「〜が います・あります」。under は「〜の 下に」だよ。"],
+["There are many books in the library.","ゼア アー メニー ブックス イン ザ ライブラリー","いみは どれかな？",["図書館には 本が たくさん あります","図書館で 本を 読みます","本は 図書館が 好きです","図書館には 本が 少し あります"],"図書館には 本が たくさん あります","たくさんの ものには There are 〜 を 使うよ。many は「たくさんの」だよ。"],
+["I have a question.","アイ ハブ ア クエスチョン","授業中に 言う 言葉の いみは？",["質問が あります","答えが 分かります","質問に 答えます","宿題が あります"],"質問が あります","question は「質問」。手を 挙げて「I have a question.」と 言おう。"],
+["Just a moment, please.","ジャスト ア モーメント、プリーズ","電話や 窓口で 言われる 言葉の いみは？",["少々 お待ち ください","急いで ください","もう一度 ください","座って ください"],"少々 お待ち ください","moment は「少しの 間」。Wait a minute. と 同じように「少し待って」の 丁寧な 言い方だよ。"]
+]);
+
+/* ================= レベル4 チャレンジ（小5入口・64問） ================= */
+var L4_BANK = P([
+["I was at home yesterday.","アイ ワズ アット ホーム イエスタデイ","いみは どれかな？",["わたしは 昨日 家に いました","わたしは 今日 家に います","わたしは 昨日 家に 行きます","わたしは 家が 好きです"],"わたしは 昨日 家に いました","was は am / is の 過去の 形。yesterday（昨日）の ことには was を 使うよ。"],
+["She was happy yesterday.","シー ワズ ハッピー イエスタデイ","いみは どれかな？",["彼女は 昨日 嬉しかったです","彼女は 今日 嬉しいです","彼女は 昨日 悲しかったです","彼女は 嬉しく なります"],"彼女は 昨日 嬉しかったです","she の 過去も was。「〜でした・〜かった」と 過去を 言うよ。"],
+["They were in the park.","ゼイ ワー イン ザ パーク","いみは どれかな？",["彼らは 公園に いました","彼らは 公園に います","彼らは 公園へ 行きます","公園は 彼らの ものです"],"彼らは 公園に いました","they（彼ら）の 過去は were。was は 一人、were は 複数や you に 使うよ。"],
+["We were busy last week.","ウィー ワー ビジー ラスト ウィーク","いみは どれかな？",["わたしたちは 先週 忙しかったです","わたしたちは 今週 忙しいです","わたしたちは 来週 忙しいです","先週は 休みでした"],"わたしたちは 先週 忙しかったです","last week は「先週」。過去の ことだから were を 使うよ。"],
+["It was rainy yesterday.","イット ワズ レイニー イエスタデイ","いみは どれかな？",["昨日は 雨でした","今日は 雨です","昨日は 晴れでした","雨が 好きでした"],"昨日は 雨でした","天気の 過去も It was 〜。was は was / were の うち it に 合う 形だよ。"],
+["Were you at school yesterday?","ワー ユー アット スクール イエスタデイ","「昨日 学校に いましたか？」と きかれて、いた ときの こたえは？",["Yes, I was.#イエス、アイ ワズ","Yes, I were.#イエス、アイ ワー","Yes, I did.#イエス、アイ ディド","Yes, I am.#イエス、アイ アム"],"Yes, I was.","Were you 〜? には was で 返すよ。I には were は 使えないよ。"],
+["Was he a teacher?","ワズ ヒー ア ティーチャー","「彼は 先生でしたか？」と きかれて、そうだ ときの こたえは？",["Yes, he was.#イエス、ヒー ワズ","Yes, he were.#イエス、ヒー ワー","Yes, he did.#イエス、ヒー ディド","Yes, he is.#イエス、ヒー イズ"],"Yes, he was.","Was he 〜? → Yes, he was. 質問と 同じ was / were で 返すのが ルールだよ。"],
+["I wasn't at home.","アイ ワズント アット ホーム","いみは どれかな？",["わたしは 家に いませんでした","わたしは 家に います","わたしは 家に いました","家には 誰も いません"],"わたしは 家に いませんでした","wasn't は was not の 短い 言い方。「〜じゃ ありませんでした」と 過去を 否定するよ。"],
+["They weren't hungry.","ゼイ ワーント ハングリー","いみは どれかな？",["彼らは おなかが すいて いませんでした","彼らは おなかが すいて いました","彼らは おなかが すきます","彼らは 食べませんでした"],"彼らは おなかが すいて いませんでした","weren't は were not の 短い 言い方だよ。"],
+["My birthday was in June.","マイ バースデイ ワズ イン ジューン","いみは どれかな？",["わたしの 誕生日は 6月でした","わたしの 誕生日は 6月です","6月に 生まれます","誕生日は 6回目です"],"わたしの 誕生日は 6月でした","月の 前には in を つけるよ（in June）。過去の ことだから was だね。"],
+["The movie was fun.","ザ ムービー ワズ ファン","いみは どれかな？",["その 映画は 面白かったです","その 映画は 面白いです","映画を 見に行きます","映画は 楽しそうです"],"その 映画は 面白かったです","fun は「楽しい・面白い」。was と いっしょで「面白かった」と 過去に なるよ。"],
+["You were late yesterday.","ユー ワー レイト イエスタデイ","いみは どれかな？",["あなたは 昨日 遅刻しました","あなたは 昨日 早かったです","あなたは 今日 遅刻します","昨日は 遅くまで 起きて いました"],"あなたは 昨日 遅刻しました","you の 過去は were。you was とは 言わないよ。late は「遅れた」だね。"],
+["I went to the zoo.","アイ ウェント トゥー ザ ズー","いみは どれかな？",["動物園へ 行きました","動物園へ 行きます","動物園に います","動物園が 好きです"],"動物園へ 行きました","went は go（行く）の 過去形。形が 全く 変わる 動詞だよ。"],
+["She went to school by bus.","シー ウェント トゥー スクール バイ バス","いみは どれかな？",["彼女は バスで 学校へ 行きました","彼女は バスで 学校から 帰りました","彼女は バスが 好きです","彼女は 学校へ 行きます"],"彼女は バスで 学校へ 行きました","by bus は「バスで」。乗り物の 前には by を つけるよ。"],
+["We saw a big elephant.","ウィー ソー ア ビッグ エレファント","いみは どれかな？",["大きな 象を 見ました","大きな 象を 見ます","大きな 象が 好きです","大きな 象に 乗りました"],"大きな 象を 見ました","saw は see（見る）の 過去形だよ。"],
+["He saw his friends at the park.","ヒー ソー ヒズ フレンズ アット ザ パーク","いみは どれかな？",["彼は 公園で 友だちに 会いました","彼は 公園で 友だちと 遊びます","彼の 友だちは 公園に います","彼は 友だちを 探して います"],"彼は 公園で 友だちに 会いました","saw は「見た」の ほかに「会った」という いみでも 使うよ。"],
+["I came home at five.","アイ ケイム ホーム アット ファイブ","いみは どれかな？",["5時に 家に 帰りました","5時に 家を 出ました","5時に 家に います","5時に 起きました"],"5時に 家に 帰りました","came は come（来る・帰る）の 過去形だよ。"],
+["They came to my house.","ゼイ ケイム トゥー マイ ハウス","いみは どれかな？",["彼らは わたしの 家に 来ました","彼らは わたしの 家へ 行きます","彼らは 家が 好きです","彼らは 家に いました"],"彼らは わたしの 家に 来ました","came to 〜 で「〜に 来た」。went（行った）と 向きが 反対だね。"],
+["Did you go to the park?","ディド ユー ゴー トゥー ザ パーク","「公園へ 行きましたか？」と きかれて、行った ときの こたえは？",["Yes, I did.#イエス、アイ ディド","Yes, I went.#イエス、アイ ウェント","Yes, I do.#イエス、アイ ドゥー","Yes, I was.#イエス、アイ ワズ"],"Yes, I did.","Did you 〜? には did で 返すよ。「Yes, I went.」と フルで 言っても 通じるけど、短い 答えは did が ルールだよ。"],
+["Did she see the movie?","ディド シー シー ザ ムービー","「彼女は その 映画を 見ましたか？」と きかれて、見なかった ときの こたえは？",["No, she didn't.#ノー、シー ディドント","No, she wasn't.#ノー、シー ワズント","No, she don't.#ノー、シー ドント","No, she can't.#ノー、シー キャント"],"No, she didn't.","didn't は did not の 短い 言い方。Did で きかれたら didn't で 否定するよ。"],
+["Where did you go?","ウェア ディド ユー ゴー","「どこへ 行きましたか？」と きかれて、海へ 行った 人の こたえは？",["I went to the sea.#アイ ウェント トゥー ザ シー","Yes, I did.#イエス、アイ ディド","I go to the sea.#アイ ゴー トゥー ザ シー","It's the sea.#イッツ ザ シー"],"I went to the sea.","Where には 場所で こたえるよ。過去の 質問だから went（行った）を 使うよ。"],
+["What did you see?","ホワット ディド ユー シー","「何を 見ましたか？」と きかれて、鳥を 見た 人の こたえは？",["I saw a bird.#アイ ソー ア バード","Yes, I did.#イエス、アイ ディド","I see a bird.#アイ シー ア バード","It's a bird.#イッツ ア バード"],"I saw a bird.","過去の 質問には saw（見た）で こたえるよ。see の ままでは 今の ことに なっちゃうよ。"],
+["An elephant is bigger than a horse.","アン エレファント イズ ビガー ザン ア ホース","いみは どれかな？",["象は 馬より 大きいです","象は 馬と 同じ 大きさです","象は 一番 大きいです","馬は 象より 大きいです"],"象は 馬より 大きいです","bigger than 〜 で「〜より 大きい」。比べる ときは than（〜より）を セットで 使うよ。"],
+["This box is heavier than that one.","ディス ボックス イズ ヘビアー ザン ザット ワン","いみは どれかな？",["この 箱は あの 箱より 重いです","この 箱は 一番 重いです","あの 箱は この 箱より 重いです","この 箱は 軽いです"],"この 箱は あの 箱より 重いです","heavy の 比較は heavier。y が i に 変わるよ。「〜より」は than だね。"],
+["Today is hotter than yesterday.","トゥデイ イズ ホッター ザン イエスタデイ","いみは どれかな？",["今日は 昨日より 暑いです","今日は 一番 暑いです","昨日は 今日より 暑いです","今日は 昨日と 同じくらい 暑いです"],"今日は 昨日より 暑いです","hot の 比較は hotter。t を 重ねて から er を つけるよ。"],
+["Ken is faster than me.","ケン イズ ファスター ザン ミー","いみは どれかな？",["ケンは わたしより 速いです","ケンは 一番 速いです","わたしは ケンより 速いです","ケンは 速く なります"],"ケンは わたしより 速いです","fast → faster（より速い）。than me で「わたしより」だよ。"],
+["This is the biggest mountain in Japan.","ディス イズ ザ ビゲスト マウンテン イン ジャパン","いみは どれかな？",["これは 日本で 一番 大きい 山です","これは 日本で 大きい 山です","これは 日本より 大きい 山です","日本には 大きい 山が あります"],"これは 日本で 一番 大きい 山です","the biggest で「一番 大きい」。一番を 言う ときは the を 必ず つけるよ。富士山の ことだね。"],
+["She is the tallest in her class.","シー イズ ザ トーレスト イン ハー クラス","いみは どれかな？",["彼女は クラスで 一番 背が 高いです","彼女は クラスで 背が 高いです","彼女は 一番 背が 高く なります","クラスで 一番 背が 高いのは 彼です"],"彼女は クラスで 一番 背が 高いです","the tallest は「一番 背が高い」。範囲は in her class（クラスで）と 言うよ。"],
+["Winter is the coldest season.","ウィンター イズ ザ コールデスト シーズン","いみは どれかな？",["冬は 一番 寒い 季節です","冬は 寒い 季節です","冬は 夏より 寒いです","一番 寒いのは 今日です"],"冬は 一番 寒い 季節です","coldest は cold の「一番」の 形。the を つけるのが ポイントだよ。"],
+["Which is bigger, a cat or a dog?","ウィッチ イズ ビガー、ア キャット オア ア ドッグ","「猫と 犬、どっちが 大きいですか？」への こたえは？",["A dog is bigger.#ア ドッグ イズ ビガー","Yes, it is.#イエス、イット イズ","I like dogs.#アイ ライク ドッグス","Both are big.#ボース アー ビッグ"],"A dog is bigger.","Which 〜 or …? は「どっちが 〜？」。選んで「A dog is bigger.」と 文で こたえるよ。"],
+["My bag is smaller than yours.","マイ バッグ イズ スモーラー ザン ユアーズ","いみは どれかな？",["わたしの かばんは あなたのより 小さいです","わたしの かばんは 一番 小さいです","あなたの かばんは わたしのです","かばんは 小さいです"],"わたしの かばんは あなたのより 小さいです","yours は「あなたのもの」。smaller than yours で「あなたのものより 小さい」だよ。"],
+["This question is easier than that one.","ディス クエスチョン イズ イージアー ザン ザット ワン","いみは どれかな？",["この 問題は あの 問題より 簡単です","この 問題は 一番 簡単です","あの 問題は この 問題より 簡単です","この 問題は 難しすぎます"],"この 問題は あの 問題より 簡単です","easy → easier。y が i に 変わる パターンは heavy と 同じだよ。"]
+,
+["I can speak English well.","アイ キャン スピーク イングリッシュ ウェル","いみは どれかな？",["わたしは 英語を 上手に 話せます","わたしは 英語を 話したいです","わたしは 英語が 好きです","わたしは 英語を 習いました"],"わたしは 英語を 上手に 話せます","well は「上手に・よく」。can speak 〜 well で「〜を 上手に 話せる」だよ。"],
+["She can play soccer very well.","シー キャン プレイ サッカー ベリー ウェル","いみは どれかな？",["彼女は サッカーが とても 上手です","彼女は サッカーを したいです","彼女は サッカーを 見ます","彼女は サッカーが 好きです"],"彼女は サッカーが とても 上手です","very well は「とても 上手に」。can の 文で 実力を 言うよ。"],
+["Can he cook?","キャン ヒー クック","「彼は 料理が できますか？」と きかれて、できる ときの こたえは？",["Yes, he can.#イエス、ヒー キャン","Yes, he does.#イエス、ヒー ダズ","Yes, he is.#イエス、ヒー イズ","Yes, he cooks.#イエス、ヒー クックス"],"Yes, he can.","Can he 〜? には he can で 返すよ。主語が he に 変わることに 注意だよ。"],
+["Birds can fly.","バーズ キャン フライ","いみは どれかな？",["鳥は 飛べます","鳥は 飛びたいです","鳥は 飛びました","鳥は 空が 好きです"],"鳥は 飛べます","can は 人以外にも 使えるよ。「〜できる」という 能力を 表すよ。"],
+["Fish can swim, but they can't fly.","フィッシュ キャン スイム、バット ゼイ キャント フライ","いみは どれかな？",["魚は 泳げるけど、飛べません","魚は 泳げるし、飛べます","魚は 泳げませんが、飛べます","魚は 泳いだり 飛んだり します"],"魚は 泳げるけど、飛べません","but は「でも・けど」。can（できる）と can't（できない）を つないでいるよ。"],
+["Can you help me?","キャン ユー ヘルプ ミー","いみは どれかな？",["手伝って くれますか？","手伝いましょうか？","手伝って くれて ありがとう","助かりました"],"手伝って くれますか？","Can you 〜? は 能力の ほかに「〜して くれますか？」と 頼む ときにも 使うよ。"],
+["You can use my pencil.","ユー キャン ユーズ マイ ペンシル","いみは どれかな？",["わたしの えんぴつを 使って いいよ","わたしの えんぴつを 使えますか？","えんぴつを 貸して ください","わたしの えんぴつは 使えません"],"わたしの えんぴつを 使って いいよ","You can 〜. は「〜して いいよ」と 許可を 言う 言い方にも なるよ。"],
+["We can't play outside. It's rainy.","ウィー キャント プレイ アウトサイド。イッツ レイニー","2つの 文の つながりとして 正しいのは？",["雨だから 外で 遊べない","寒いから 外で 遊べない","宿題が あるから 遊べない","暗いから 外で 遊べない"],"雨だから 外で 遊べない","It's rainy.（雨です）が 理由に なっているよ。文の つながりを 読む 問題だよ。"],
+["He can run fast, but he can't swim.","ヒー キャン ラン ファスト、バット ヒー キャント スイム","いみは どれかな？",["彼は 速く 走れるけど、泳げません","彼は 速く 走れるし、泳げます","彼は 走れませんが、泳げます","彼は 走るのも 泳ぐのも 好きです"],"彼は 速く 走れるけど、泳げません","前半は can、後半は can't。but の 前後で 反対の ことが 並ぶよ。"],
+["Can a penguin fly?","キャン ア ペンギン フライ","「ペンギンは 飛べますか？」への 正しい こたえは？",["No, it can't.#ノー、イット キャント","No, it doesn't.#ノー、イット ダズント","No, it isn't.#ノー、イット イズント","Yes, it can.#イエス、イット キャン"],"No, it can't.","ペンギンは 鳥だけど 飛べないよ。動物の ことは it で 受けるよ。"],
+["The cat is behind the box.","ザ キャット イズ ビハインド ザ ボックス","いみは どれかな？",["猫は 箱の 後ろに います","猫は 箱の 前に います","猫は 箱の 中に います","猫は 箱の 上に います"],"猫は 箱の 後ろに います","behind は「〜の 後ろに」。反対は in front of（〜の 前に）だよ。"],
+["The ball is between the two boxes.","ザ ボール イズ ビトゥイーン ザ トゥー ボクシーズ","いみは どれかな？",["ボールは 2つの 箱の 間に あります","ボールは 箱の 後ろに あります","ボールは 箱の 隣に あります","ボールは 2つの 箱の 中に あります"],"ボールは 2つの 箱の 間に あります","between は「（2つの）間に」。2つ ある ことが ヒントだよ。"],
+["The library is next to the school.","ザ ライブラリー イズ ネクスト トゥー ザ スクール","いみは どれかな？",["図書館は 学校の 隣です","図書館は 学校の 中です","図書館は 学校の 前です","図書館は 学校から 遠いです"],"図書館は 学校の 隣です","next to 〜 は「〜の 隣に」。場所を 説明する 大切な 言い方だよ。"],
+["My house is near the station.","マイ ハウス イズ ニア ザ ステーション","いみは どれかな？",["わたしの 家は 駅の 近くです","わたしの 家は 駅の 中です","わたしの 家は 駅から 遠いです","駅は わたしの 家の 中です"],"わたしの 家は 駅の 近くです","near は「〜の 近くに」。反対は far from（〜から 遠い）だよ。"],
+["The dog is in front of the house.","ザ ドッグ イズ イン フロント オブ ザ ハウス","いみは どれかな？",["犬は 家の 前に います","犬は 家の 後ろに います","犬は 家の 中に います","犬は 家の 上に います"],"犬は 家の 前に います","in front of は「〜の 前に」。behind（後ろ）の 反対だよ。"],
+["Put the book under the desk.","プット ザ ブック アンダー ザ デスク","いみは どれかな？",["本を 机の 下に 置いて ください","本を 机の 上に 置いて ください","本を 机の 後ろに 置いて ください","本を 机の 隣に 置いて ください"],"本を 机の 下に 置いて ください","under は「〜の 下に」。on（上に）の 反対だよ。"],
+["The keys are on the table.","ザ キーズ アー オン ザ テーブル","いみは どれかな？",["鍵は テーブルの 上に あります","鍵は テーブルの 下に あります","鍵は テーブルの 中に あります","鍵は テーブルが 好きです"],"鍵は テーブルの 上に あります","ものが 複数の ときは are を 使うよ。keys は key（鍵）の 複数形だね。"],
+["She is standing between Ken and Yui.","シー イズ スタンディング ビトゥイーン ケン アンド ユイ","いみは どれかな？",["彼女は ケンと ユイの 間に 立って います","彼女は ケンと ユイの 後ろに 立って います","彼女は ケンと ユイの 隣に 立って います","彼女は ケンと ユイと 立って います"],"彼女は ケンと ユイの 間に 立って います","between A and B で「Aと Bの 間に」。2人の 名前が ヒントだよ。"],
+["The park is across from the station.","ザ パーク イズ アクロス フロム ザ ステーション","いみは どれかな？",["公園は 駅の 向かいです","公園は 駅の 隣です","公園は 駅の 中です","公園は 駅の 近くです"],"公園は 駅の 向かいです","across from 〜 は「〜の 向かいに」。道を はさんで 反対側、という いみだよ。"],
+["He is hiding behind the tree.","ヒー イズ ハイディング ビハインド ザ ツリー","いみは どれかな？",["彼は 木の 後ろに 隠れて います","彼は 木の 前に 立って います","彼は 木の 上に います","彼は 木の 下に 座って います"],"彼は 木の 後ろに 隠れて います","hiding は「隠れている」。隠れる 場所は behind（後ろ）が ぴったりだね。"],
+["There is a bridge over the river.","ゼア イズ ア ブリッジ オーバー ザ リバー","いみは どれかな？",["川の 上に 橋が あります","川の 下に 橋が あります","川の 隣に 橋が あります","橋の 下に 川が あります"],"川の 上に 橋が あります","over は「〜の 上に（わたって）」。橋は 川を またいで かかるから over だよ。"],
+["I was sick yesterday, so I stayed home.","アイ ワズ シック イエスタデイ、ソー アイ ステイド ホーム","いみは どれかな？",["昨日は 病気だったので、家に いました","昨日は 元気だったので、家に いました","昨日は 病気で、学校へ 行きました","今日は 病気なので 家に います"],"昨日は 病気だったので、家に いました","sick は「病気の」。so は「だから」。理由と 結果の つながりを 読むよ。stayed は stay（とどまる）の 過去形だよ。"],
+["We played soccer after school yesterday.","ウィー プレイド サッカー アフター スクール イエスタデイ","いみは どれかな？",["わたしたちは 昨日 放課後に サッカーを しました","わたしたちは 今日 放課後に サッカーを します","わたしたちは 昨日 学校で サッカーを 見ました","サッカーは 放課後が 好きです"],"わたしたちは 昨日 放課後に サッカーを しました","played は play の 過去形。yesterday が あるから 過去の 文だね。"],
+["She studied English last night.","シー スタディード イングリッシュ ラスト ナイト","いみは どれかな？",["彼女は 昨夜 英語を 勉強しました","彼女は 今夜 英語を 勉強します","彼女は 英語が 好きです","彼女は 昨夜 英語を 話しました"],"彼女は 昨夜 英語を 勉強しました","last night は「昨夜」。studied は study の 過去形で、y が i に 変わるよ。"],
+["It was cold, so we wore jackets.","イット ワズ コールド、ソー ウィー ウォア ジャケッツ","いみは どれかな？",["寒かったので、ジャケットを 着ました","寒いので、ジャケットを 着ます","暑かったので、ジャケットを 脱ぎました","寒かったので、外へ 行きました"],"寒かったので、ジャケットを 着ました","wore は wear（着る）の 過去形。so（だから）の 後ろが 結果だよ。"],
+["My grandfather is older than my father.","マイ グランドファーザー イズ オールダー ザン マイ ファーザー","いみは どれかな？",["祖父は 父より 年上です","祖父は 一番 年上です","父は 祖父より 年上です","祖父と 父は 同じ 年です"],"祖父は 父より 年上です","older は old の 比較の 形。「〜より」は than だよ。"],
+["This river is longer than that one.","ディス リバー イズ ロンガー ザン ザット ワン","いみは どれかな？",["この 川は あの 川より 長いです","この 川は 一番 長いです","あの 川は この 川より 長いです","この 川は 長く なります"],"この 川は あの 川より 長いです","long → longer。than が あるから「一番」ではなく「〜より」だよ。"],
+["He was a baby ten years ago.","ヒー ワズ ア ベイビー テン イヤーズ アゴー","いみは どれかな？",["彼は 10年前 赤ちゃんでした","彼は 10歳の 赤ちゃんです","彼は 10年後に 赤ちゃんに なります","赤ちゃんは 10歳です"],"彼は 10年前 赤ちゃんでした","ago は「〜前」。ten years ago で「10年前」。過去だから was だね。"],
+["The zoo was fun. We saw pandas.","ザ ズー ワズ ファン。ウィー ソー パンダズ","2つの 文の いみは どれかな？",["動物園は 楽しかったです。パンダを 見ました","動物園は 楽しいです。パンダを 見ます","動物園へ 行きます。パンダが 好きです","動物園は 広かったです。パンダが いました"],"動物園は 楽しかったです。パンダを 見ました","was と saw、両方とも 過去の 形。終わった ことの お話だね。"],
+["Can you see the mountain from here?","キャン ユー シー ザ マウンテン フロム ヒア","「ここから 山が 見えますか？」と きかれて、見える ときの こたえは？",["Yes, I can.#イエス、アイ キャン","Yes, I do.#イエス、アイ ドゥー","Yes, it is.#イエス、イット イズ","Yes, I see.#イエス、アイ シー"],"Yes, I can.","Can you see 〜? も Can の 質問。can で 返そう。from here は「ここから」だよ。"],
+["Where was the cat?","ウェア ワズ ザ キャット","「猫は どこに いましたか？」と きかれて、箱の 中に いた ときの こたえは？",["It was in the box.#イット ワズ イン ザ ボックス","Yes, it was.#イエス、イット ワズ","It is in the box.#イット イズ イン ザ ボックス","It's a cat.#イッツ ア キャット"],"It was in the box.","Where には 場所で こたえるよ。過去の 質問だから was を 使うよ。"],
+["Who was with you?","フー ワズ ウィズ ユー","「誰と いっしょに いましたか？」と きかれて、母と いた 人の こたえは？",["My mother was with me.#マイ マザー ワズ ウィズ ミー","Yes, I was.#イエス、アイ ワズ","I was at home.#アイ ワズ アット ホーム","It was fun.#イット ワズ ファン"],"My mother was with me.","Who（誰）には 人で こたえるよ。with 〜 は「〜と いっしょに」だよ。"]
+]);
+
+/* ================= レベル5 チャレンジ（小6入口・64問） ================= */
+var L5_BANK = P([
+["I played tennis yesterday.","アイ プレイド テニス イエスタデイ","いみは どれかな？",["昨日 テニスを しました","今日 テニスを します","テニスが 好きです","テニスを 見ました"],"昨日 テニスを しました","played は play の 過去形。語尾に ed を つける 規則的な 過去形だよ。"],
+["She watched TV last night.","シー ウォッチト ティービー ラスト ナイト","いみは どれかな？",["彼女は 昨夜 テレビを 見ました","彼女は 今夜 テレビを 見ます","彼女は テレビを 買いました","テレビは 彼女が 好きです"],"彼女は 昨夜 テレビを 見ました","watched は watch の 過去形。ch で 終わる 動詞は ed で 過去に なるよ。"],
+["We ate curry for dinner.","ウィー エイト カリー フォア ディナー","いみは どれかな？",["夕ごはんに カレーを 食べました","夕ごはんに カレーを 作ります","カレーが 好きです","夕ごはんは カレーに します"],"夕ごはんに カレーを 食べました","ate は eat（食べる）の 過去形。形が 変わる 動詞だよ。"],
+["He drank milk this morning.","ヒー ドランク ミルク ディス モーニング","いみは どれかな？",["彼は 今朝 牛乳を 飲みました","彼は 今朝 牛乳を 飲みます","彼は 牛乳が 好きです","今朝は 牛乳が ありません"],"彼は 今朝 牛乳を 飲みました","drank は drink（飲む）の 過去形だよ。"],
+["I wrote a letter to my friend.","アイ ロート ア レター トゥー マイ フレンド","いみは どれかな？",["友だちに 手紙を 書きました","友だちに 手紙を 書きます","友だちから 手紙を もらいました","手紙は 友だちの ものです"],"友だちに 手紙を 書きました","wrote は write（書く）の 過去形。to my friend は「友だちに」だよ。"],
+["They read a book together.","ゼイ レッド ア ブック トゥゲザー","いみは どれかな？",["彼らは いっしょに 本を 読みました","彼らは いっしょに 本を 読みます","彼らは 本を 買いました","本は 彼らの ものです"],"彼らは いっしょに 本を 読みました","read の 過去形も read と 書くけど、読み方は「レッド」に 変わるよ。つづりが 同じでも 過去形だよ。"],
+["She bought a new bag.","シー ボート ア ニュー バッグ","いみは どれかな？",["彼女は 新しい かばんを 買いました","彼女は 新しい かばんを 売りました","彼女は かばんが ほしいです","かばんは 新しいです"],"彼女は 新しい かばんを 買いました","bought は buy（買う）の 過去形だよ。"],
+["We took many pictures.","ウィー トゥック メニー ピクチャーズ","いみは どれかな？",["写真を たくさん 撮りました","写真を たくさん 見ました","写真が たくさん あります","写真を 撮ります"],"写真を たくさん 撮りました","took は take の 過去形。take pictures で「写真を 撮る」だよ。"],
+["He ran to school.","ヒー ラン トゥー スクール","いみは どれかな？",["彼は 学校へ 走って 行きました","彼は 学校へ 走って 行きます","彼は 走るのが 好きです","彼は 学校で 走りました"],"彼は 学校へ 走って 行きました","ran は run（走る）の 過去形だよ。"],
+["I got up at six this morning.","アイ ゴット アップ アット シックス ディス モーニング","いみは どれかな？",["今朝 6時に 起きました","今朝 6時に 寝ました","今朝 6時に 起きます","6歳で 起きました"],"今朝 6時に 起きました","got は get の 過去形。get up で「起きる」だよ。"],
+["She gave me a present.","シー ゲイブ ミー ア プレゼント","いみは どれかな？",["彼女は わたしに プレゼントを くれました","彼女は わたしから プレゼントを もらいました","彼女は プレゼントが ほしいです","プレゼントは 彼女の ものです"],"彼女は わたしに プレゼントを くれました","gave は give（あげる）の 過去形。gave me で「わたしに くれた」だよ。"],
+["We had a great time.","ウィー ハッド ア グレイト タイム","いみは どれかな？",["とても 楽しい 時間を 過ごしました","時間は たくさん あります","良い 天気でした","大きな 時計が あります"],"とても 楽しい 時間を 過ごしました","had a great time は「楽しい 時間を 過ごした」という 決まり文句。had は have の 過去形だよ。"],
+["Did you enjoy the trip?","ディド ユー エンジョイ ザ トリップ","「旅行は 楽しかったですか？」と きかれて、楽しかった ときの こたえは？",["Yes, I did.#イエス、アイ ディド","Yes, I enjoyed.#イエス、アイ エンジョイド","Yes, I was.#イエス、アイ ワズ","Yes, I do.#イエス、アイ ドゥー"],"Yes, I did.","Did you 〜? への 短い 答えは did。enjoy は「楽しむ」だよ。"],
+["What did you do yesterday?","ホワット ディド ユー ドゥー イエスタデイ","「昨日 何を しましたか？」と きかれて、勉強した 人の こたえは？",["I studied hard.#アイ スタディード ハード","Yes, I did.#イエス、アイ ディド","I study hard.#アイ スタディ ハード","It's Sunday.#イッツ サンデイ"],"I studied hard.","What did you do? には した ことで こたえるよ。studied は study の 過去形だよ。"],
+["I didn't play games yesterday.","アイ ディドント プレイ ゲームズ イエスタデイ","いみは どれかな？",["昨日は ゲームを しませんでした","昨日は ゲームを しました","今日は ゲームを しません","ゲームは しません"],"昨日は ゲームを しませんでした","didn't ＋ 動詞の もとの 形 で「〜しなかった」。didn't played とは 言わないよ。"],
+["She didn't come yesterday.","シー ディドント カム イエスタデイ","いみは どれかな？",["彼女は 昨日 来ませんでした","彼女は 昨日 来ました","彼女は 今日 来ません","彼女は 行きませんでした"],"彼女は 昨日 来ませんでした","didn't の 後ろは come（もとの形）。came に しないのが ルールだよ。"],
+["I will help you.","アイ ウィル ヘルプ ユー","いみは どれかな？",["手伝います（これから）","手伝いました","手伝えます","手伝って ください"],"手伝います（これから）","will は「〜します・〜でしょう」と これからの ことを 言うよ。will の 後ろは 動詞の もとの 形だよ。"],
+["It will be cold tomorrow.","イット ウィル ビー コールド トゥモロー","いみは どれかな？",["明日は 寒く なるでしょう","今日は 寒いです","明日は 寒かったです","寒く なりました"],"明日は 寒く なるでしょう","天気予報では will be 〜 を よく 使うよ。tomorrow（明日）が ヒントだね。"],
+["Will you come to the party?","ウィル ユー カム トゥー ザ パーティー","「パーティーに 来ますか？」と きかれて、行く ときの こたえは？",["Yes, I will.#イエス、アイ ウィル","Yes, I do.#イエス、アイ ドゥー","Yes, I can.#イエス、アイ キャン","Yes, I went.#イエス、アイ ウェント"],"Yes, I will.","Will you 〜? には will で 返すよ。"],
+["I won't be late.","アイ ウォント ビー レイト","いみは どれかな？",["遅刻しません","遅刻しました","遅刻したいです","遅れて います"],"遅刻しません","won't は will not の 短い 言い方。「〜しない」という 約束や 決意に 使うよ。"],
+["I'm going to visit my grandmother.","アイム ゴーイング トゥー ビジット マイ グランドマザー","いみは どれかな？",["祖母を 訪ねる つもりです","祖母を 訪ねました","祖母と 住んで います","祖母が 来る つもりです"],"祖母を 訪ねる つもりです","be going to 〜 は「〜する つもり」。計画して いる ことに 使うよ。visit は「訪ねる」だよ。"],
+["We are going to have a test tomorrow.","ウィー アー ゴーイング トゥー ハブ ア テスト トゥモロー","いみは どれかな？",["明日 テストが あります（予定）","昨日 テストが ありました","明日 テストを 受けたいです","テストは 明日 終わります"],"明日 テストが あります（予定）","have a test は「テストが ある・受ける」。be going to で 決まっている 予定を 言うよ。"],
+["What are you going to do this weekend?","ホワット アー ユー ゴーイング トゥー ドゥー ディス ウィークエンド","「今週末 何を する つもりですか？」と きかれて、映画を 見る 予定の 人の こたえは？",["I'm going to watch a movie.#アイム ゴーイング トゥー ウォッチ ア ムービー","Yes, I am.#イエス、アイ アム","I watched a movie.#アイ ウォッチト ア ムービー","It's the weekend.#イッツ ザ ウィークエンド"],"I'm going to watch a movie.","予定を きかれたら be going to 〜 で こたえるよ。weekend は「週末」だよ。"],
+["She is going to be a doctor.","シー イズ ゴーイング トゥー ビー ア ドクター","いみは どれかな？",["彼女は 医者に なる つもりです","彼女は 医者でした","彼女は 医者に 会います","彼女は 医者が 好きです"],"彼女は 医者に なる つもりです","be going to be 〜 は「〜に なる つもり」。将来の 夢を 言う 文だよ。"],
+["Look at the clouds! It's going to rain.","ルック アット ザ クラウズ！イッツ ゴーイング トゥー レイン","雲を 見て 言う 言葉の いみは？",["雨が 降りそう です","雨が 降りました","雨は 降りません","雨が 好きです"],"雨が 降りそう です","目の 前の 様子から「〜しそう」と 言う ときは be going to が ぴったりだよ。"],
+["Whose bag is this?","フーズ バッグ イズ ディス","「これは 誰の かばんですか？」と きかれて、ケンの ものだ ときの こたえは？",["It's Ken's.#イッツ ケンズ","It's Ken.#イッツ ケン","Yes, it is.#イエス、イット イズ","He is Ken.#ヒー イズ ケン"],"It's Ken's.","Whose 〜? は「誰の 〜？」。答えは Ken's のように 名前の 後ろに 's を つけるよ。"],
+["Whose is this umbrella?","フーズ イズ ディス アンブレラ","いみは どれかな？",["この 傘は 誰の ものですか？","この 傘は どこですか？","この 傘は いくらですか？","傘は 誰が 買いましたか？"],"この 傘は 誰の ものですか？","Whose は「誰の」。傘の 持ち主を きく 質問だよ。"],
+["Which season do you like best?","ウィッチ シーズン ドゥー ユー ライク ベスト","「どの 季節が 一番 すきですか？」と きかれて、春が 一番の 人の こたえは？",["I like spring best.#アイ ライク スプリング ベスト","Yes, I do.#イエス、アイ ドゥー","It's spring.#イッツ スプリング","Spring is nice.#スプリング イズ ナイス"],"I like spring best.","best は「一番」。Which 〜 best? には「I like 〜 best.」で こたえるよ。"],
+["Which is your bike, the red one or the blue one?","ウィッチ イズ ユア バイク、ザ レッド ワン オア ザ ブルー ワン","「あなたの 自転車は 赤いのと 青いの、どっちですか？」と きかれて、赤い 自転車の 人の こたえは？",["The red one.#ザ レッド ワン","Yes, it is.#イエス、イット イズ","It's red.#イッツ レッド","I like red.#アイ ライク レッド"],"The red one.","one は「の」という 代わりの 言葉。the red one で「赤いの」だよ。Which の 質問には 選んで こたえるよ。"],
+["How often do you play soccer?","ハウ オーフン ドゥー ユー プレイ サッカー","「どのくらい 頻繁に サッカーを しますか？」と きかれて、週に 2回の 人の こたえは？",["Twice a week.#トゥワイス ア ウィーク","Two o'clock.#トゥー オクロック","Yes, I do.#イエス、アイ ドゥー","For two hours.#フォア トゥー アワーズ"],"Twice a week.","How often は「どのくらいの 頻度」。twice は「2回」、a week は「1週間に」だよ。once は「1回」だね。"],
+["How often do you read books?","ハウ オーフン ドゥー ユー リード ブックス","いみは どれかな？",["どのくらい 頻繁に 本を 読みますか？","何冊 本を 読みますか？","いつ 本を 読みますか？","どこで 本を 読みますか？"],"どのくらい 頻繁に 本を 読みますか？","How often 〜? は 頻度を きく 質問。How many（数）とは ちがうよ。"],
+["How long is the movie?","ハウ ロング イズ ザ ムービー","いみは どれかな？",["その 映画は どのくらい 長いですか？","その 映画は いつですか？","その 映画は 面白いですか？","映画館は 遠いですか？"],"その 映画は どのくらい 長いですか？","How long 〜? は「どのくらい 長い・かかる」。時間にも 長さにも 使えるよ。"]
+,
+["words: I / played / soccer / yesterday","ワーズ：アイ／プレイド／サッカー／イエスタデイ","単語を 正しい 順番に 並べた 文は どれかな？（昨日 サッカーを した）",["I played soccer yesterday.#アイ プレイド サッカー イエスタデイ","I soccer played yesterday.#アイ サッカー プレイド イエスタデイ","Yesterday played I soccer.#イエスタデイ プレイド アイ サッカー","Played I soccer yesterday.#プレイド アイ サッカー イエスタデイ"],"I played soccer yesterday.","英語の 基本の 順番は「誰が・どうした・何を・いつ」。I played soccer yesterday. の 順だよ。"],
+["words: She / watches / TV / every day","ワーズ：シー／ウォッチズ／ティービー／エブリ デイ","単語を 正しい 順番に 並べた 文は どれかな？（彼女は 毎日 テレビを 見る）",["She watches TV every day.#シー ウォッチズ ティービー エブリ デイ","She TV watches every day.#シー ティービー ウォッチズ エブリ デイ","Watches she TV every day.#ウォッチズ シー ティービー エブリ デイ","Every day watches she TV.#エブリ デイ ウォッチズ シー ティービー"],"She watches TV every day.","「彼女は・見る・テレビを・毎日」の 順。she の ときは watches と es が つくよ。"],
+["words: We / went / to / the beach","ワーズ：ウィー／ウェント／トゥー／ザ ビーチ","単語を 正しい 順番に 並べた 文は どれかな？（わたしたちは 海へ 行った）",["We went to the beach.#ウィー ウェント トゥー ザ ビーチ","We to the beach went.#ウィー トゥー ザ ビーチ ウェント","Went we to the beach.#ウェント ウィー トゥー ザ ビーチ","To the beach we went to.#トゥー ザ ビーチ ウィー ウェント トゥー"],"We went to the beach.","went to 〜 で「〜へ 行った」。場所は went の 後ろだよ。"],
+["words: He / is / going / to / read / a book","ワーズ：ヒー／イズ／ゴーイング／トゥー／リード／ア ブック","単語を 正しい 順番に 並べた 文は どれかな？（彼は 本を 読む つもり）",["He is going to read a book.#ヒー イズ ゴーイング トゥー リード ア ブック","He going is to read a book.#ヒー ゴーイング イズ トゥー リード ア ブック","He is read going to a book.#ヒー イズ リード ゴーイング トゥー ア ブック","Is he going to read a book.#イズ ヒー ゴーイング トゥー リード ア ブック"],"He is going to read a book.","be going to の 順番は「is going to ＋ 動詞」。read a book で「本を読む」だよ。"],
+["words: My sister / can / play / the piano","ワーズ：マイ シスター／キャン／プレイ／ザ ピアノ","単語を 正しい 順番に 並べた 文は どれかな？（わたしの 姉は ピアノが 弾ける）",["My sister can play the piano.#マイ シスター キャン プレイ ザ ピアノ","My sister play can the piano.#マイ シスター プレイ キャン ザ ピアノ","Can my sister play the piano.#キャン マイ シスター プレイ ザ ピアノ","My sister can the piano play.#マイ シスター キャン ザ ピアノ プレイ"],"My sister can play the piano.","can の 後ろは 動詞の もとの 形（play）。can play the piano の 順だよ。最後の 選択肢は 質問の 形だね。"],
+["words: I / ate / sushi / last night","ワーズ：アイ／エイト／スシ／ラスト ナイト","単語を 正しい 順番に 並べた 文は どれかな？（昨夜 すしを 食べた）",["I ate sushi last night.#アイ エイト スシ ラスト ナイト","I sushi ate last night.#アイ スシ エイト ラスト ナイト","Ate I sushi last night.#エイト アイ スシ ラスト ナイト","Last night ate sushi I.#ラスト ナイト エイト スシ アイ"],"I ate sushi last night.","「わたしは・食べた・すしを・昨夜」の 順。last night は 最後に 置くよ。"],
+["words: They / are / students","ワーズ：ゼイ／アー／スチューデンツ","単語を 正しい 順番に 並べた 文は どれかな？（彼らは 学生です）",["They are students.#ゼイ アー スチューデンツ","Are they students.#アー ゼイ スチューデンツ","Students they are.#スチューデンツ ゼイ アー","They students are.#ゼイ スチューデンツ アー"],"They are students.","ふつうの 文は「They are 〜」。Are they 〜? は 質問の 形だよ。"],
+["words: This / is / my / new / bike","ワーズ：ディス／イズ／マイ／ニュー／バイク","単語を 正しい 順番に 並べた 文は どれかな？（これは わたしの 新しい 自転車です）",["This is my new bike.#ディス イズ マイ ニュー バイク","This is new my bike.#ディス イズ ニュー マイ バイク","My new bike is this.#マイ ニュー バイク イズ ディス","This my is new bike.#ディス マイ イズ ニュー バイク"],"This is my new bike.","「my new bike（わたしの 新しい 自転車）」の 順番が ポイント。new は bike の すぐ 前だよ。"],
+["words: I / will / call / you / tomorrow","ワーズ：アイ／ウィル／コール／ユー／トゥモロー","単語を 正しい 順番に 並べた 文は どれかな？（明日 電話します）",["I will call you tomorrow.#アイ ウィル コール ユー トゥモロー","I call will you tomorrow.#アイ コール ウィル ユー トゥモロー","Will I call you tomorrow.#ウィル アイ コール ユー トゥモロー","Tomorrow will call I you.#トゥモロー ウィル コール アイ ユー"],"I will call you tomorrow.","will の 後ろは call（もとの形）。call you で「あなたに 電話する」だよ。"],
+["words: The cat / is / under / the table","ワーズ：ザ キャット／イズ／アンダー／ザ テーブル","単語を 正しい 順番に 並べた 文は どれかな？（猫は テーブルの 下に いる）",["The cat is under the table.#ザ キャット イズ アンダー ザ テーブル","The cat under is the table.#ザ キャット アンダー イズ ザ テーブル","Under the table is the cat in.#アンダー ザ テーブル イズ ザ キャット イン","The table is under the cat.#ザ テーブル イズ アンダー ザ キャット"],"The cat is under the table.","is under 〜 で「〜の 下に いる」。最後の 選択肢は 猫と テーブルが 逆に なっているよ。"],
+["words: Did / you / enjoy / the party?","ワーズ：ディド／ユー／エンジョイ／ザ パーティー","単語を 正しい 順番に 並べた 質問は どれかな？（パーティーは 楽しかった？）",["Did you enjoy the party?#ディド ユー エンジョイ ザ パーティー","You did enjoy the party?#ユー ディド エンジョイ ザ パーティー","Enjoy you did the party?#エンジョイ ユー ディド ザ パーティー","Did enjoy you the party?#ディド エンジョイ ユー ザ パーティー"],"Did you enjoy the party?","過去の 質問は Did から 始めるよ。Did you ＋ 動詞の もとの 形（enjoy）だよ。"],
+["words: What / did / you / eat / for lunch?","ワーズ：ホワット／ディド／ユー／イート／フォア ランチ","単語を 正しい 順番に 並べた 質問は どれかな？（お昼に 何を 食べた？）",["What did you eat for lunch?#ホワット ディド ユー イート フォア ランチ","What you did eat for lunch?#ホワット ユー ディド イート フォア ランチ","Did what you eat for lunch?#ディド ホワット ユー イート フォア ランチ","What did eat you for lunch?#ホワット ディド イート ユー フォア ランチ"],"What did you eat for lunch?","What did you 〜? の 順番が 決まりだよ。eat は もとの 形の まま だよ。"],
+["A: How was your weekend? B: ___","アー：ハウ ワズ ユア ウィークエンド？ビー：___","会話の 空欄に 入る 返事は どれかな？（週末は どうだった？）",["It was great. I went camping.#イット ワズ グレイト。アイ ウェント キャンピング","Yes, I do.#イエス、アイ ドゥー","It's Monday.#イッツ マンデイ","I'm twelve.#アイム トゥエルブ"],"It was great. I went camping.","How was 〜? は「〜は どうだった？」。過去の ことだから was で こたえて、した ことを 続けるよ。"],
+["A: What are you going to do tomorrow? B: ___","アー：ホワット アー ユー ゴーイング トゥー ドゥー トゥモロー？ビー：___","会話の 空欄に 入る 返事は どれかな？（明日 何を する つもり？）",["I'm going to play with my friends.#アイム ゴーイング トゥー プレイ ウィズ マイ フレンズ","I played yesterday.#アイ プレイド イエスタデイ","Yes, I am.#イエス、アイ アム","Tomorrow is Sunday.#トゥモロー イズ サンデイ"],"I'm going to play with my friends.","明日の 予定を きかれたら be going to 〜 で こたえるよ。昨日の ことでは こたえないよ。"],
+["A: Whose pen is this? B: ___","アー：フーズ ペン イズ ディス？ビー：___","会話の 空欄に 入る 返事は どれかな？（これは 誰の ペン？）",["It's mine.#イッツ マイン","It's a pen.#イッツ ア ペン","Yes, it is.#イエス、イット イズ","I'm fine.#アイム ファイン"],"It's mine.","mine は「わたしのもの」。Whose（誰の）には 持ち主で こたえるよ。"],
+["A: I won the game! B: ___","アー：アイ ウォン ザ ゲーム！ビー：___","試合に 勝った 友だちへの 言葉は どれかな？（わたし、試合に 勝ったよ！）",["Congratulations!#コングラチュレーションズ","I'm sorry.#アイム ソーリー","Good night.#グッド ナイト","That's too bad.#ザッツ トゥー バッド"],"Congratulations!","Congratulations! は「おめでとう！」。勝った 人に 悲しい 言葉は 合わないね。won は win（勝つ）の 過去形だよ。"],
+["A: I lost my notebook. B: ___","アー：アイ ロスト マイ ノートブック。ビー：___","ノートを なくした 友だちへの 言葉は どれかな？（ノートを なくしちゃった）",["That's too bad. Let's look for it.#ザッツ トゥー バッド。レッツ ルック フォア イット","Congratulations!#コングラチュレーションズ","Good job!#グッド ジョブ","Happy birthday!#ハッピー バースデイ"],"That's too bad. Let's look for it.","That's too bad. は「それは 残念だね」。look for 〜 は「〜を 探す」だよ。lost は lose（なくす）の 過去形だよ。"],
+["A: May I open the window? B: ___","アー：メイ アイ オープン ザ ウィンドウ？ビー：___","「窓を 開けても いい？」への 許可の 返事は どれかな？",["Sure. Go ahead.#シュア。ゴー アヘッド","No, thank you.#ノー、サンキュー","You're welcome.#ユーアー ウェルカム","It's a window.#イッツ ア ウィンドウ"],"Sure. Go ahead.","Go ahead. は「どうぞ（やって ください）」。許可を もらう 質問への 返事だよ。"],
+["A: Thank you for your help. B: ___","アー：サンキュー フォア ユア ヘルプ。ビー：___","「手伝って くれて ありがとう」への 返事は どれかな？",["You're welcome. Anytime.#ユーアー ウェルカム。エニータイム","Thank you.#サンキュー","I'm sorry.#アイム ソーリー","Yes, I did.#イエス、アイ ディド"],"You're welcome. Anytime.","Anytime. は「いつでも（手伝うよ）」。You're welcome. に 続けると 温かい 返事に なるよ。"],
+["A: Let's play basketball after school. B: ___","アー：レッツ プレイ バスケットボール アフター スクール。ビー：___","放課後の 誘いへの 元気な 返事は どれかな？",["Sounds good!#サウンズ グッド","I'm sorry I'm late.#アイム ソーリー アイム レイト","It's five o'clock.#イッツ ファイブ オクロック","I don't understand.#アイ ドント アンダースタンド"],"Sounds good!","Sounds good! は「いいね！」。誘いへの 返事の 決まり文句だよ。"],
+["A: Are you ready? B: ___","アー：アー ユー レディ？ビー：___","「準備は できた？」と きかれて、まだの ときの 返事は どれかな？",["Not yet. Just a minute.#ノット イエット。ジャスト ア ミニット","Yes, I do.#イエス、アイ ドゥー","It's ready.#イッツ レディ","Ready is fun.#レディ イズ ファン"],"Not yet. Just a minute.","Not yet. は「まだです」。Are you 〜? の 質問だけど、状態を 言って こたえる 自然な 会話だよ。"],
+["A: How much is this cap? B: ___","アー：ハウ マッチ イズ ディス キャップ？ビー：___","値段を きかれた 店員さんの 返事は どれかな？（この 帽子は いくら？）",["It's 800 yen.#イッツ エイト ハンドレッド エン","It's a cap.#イッツ ア キャップ","Yes, it is.#イエス、イット イズ","I like caps.#アイ ライク キャップス"],"It's 800 yen.","How much は 値段を きく 言葉。金額で こたえるよ。800 yen は「800円」だよ。"],
+["A: What time does the movie start? B: ___","アー：ホワット タイム ダズ ザ ムービー スタート？ビー：___","「映画は 何時に 始まりますか？」への 返事は どれかな？",["It starts at two.#イット スターツ アット トゥー","It's two hours.#イッツ トゥー アワーズ","Yes, it does.#イエス、イット ダズ","I like movies.#アイ ライク ムービーズ"],"It starts at two.","What time 〜? には 時刻で こたえるよ。starts at two は「2時に 始まる」だよ。"],
+["I cleaned my room yesterday.","アイ クリーンド マイ ルーム イエスタデイ","いみは どれかな？",["昨日 部屋を 掃除しました","今日 部屋を 掃除します","部屋は きれいです","部屋を 掃除したいです"],"昨日 部屋を 掃除しました","cleaned は clean の 過去形。ed タイプの 規則的な 変化だよ。"],
+["He finished his homework early.","ヒー フィニッシュト ヒズ ホームワーク アーリー","いみは どれかな？",["彼は 宿題を 早く 終えました","彼は 宿題を 始めました","彼は 宿題が 好きです","彼は 宿題を 忘れました"],"彼は 宿題を 早く 終えました","finished は「終えた」。early は「早く」だよ。"],
+["We visited Kyoto last spring.","ウィー ビジティド キョウト ラスト スプリング","いみは どれかな？",["昨年の 春 京都を 訪れました","今年の 春 京都へ 行きます","京都が 好きです","京都は 春が きれいです"],"昨年の 春 京都を 訪れました","visited は visit（訪れる）の 過去形。last spring は「昨年の春」だよ。"],
+["She practiced the piano every day.","シー プラクティスト ザ ピアノ エブリ デイ","いみは どれかな？",["彼女は 毎日 ピアノを 練習しました","彼女は 毎日 ピアノを 練習します","彼女は ピアノが 上手です","ピアノは 毎日 聞きます"],"彼女は 毎日 ピアノを 練習しました","practiced は practice（練習する）の 過去形。過去の 習慣を 言う 文だよ。"],
+["How many students are there in your class?","ハウ メニー スチューデンツ アー ゼア イン ユア クラス","いみは どれかな？",["あなたの クラスには 生徒が 何人 いますか？","あなたの クラスは 何時からですか？","生徒は 何を しますか？","クラスは どこですか？"],"あなたの クラスには 生徒が 何人 いますか？","How many 〜 are there …? は「…には 〜が いくつ ありますか？」。数えられる ものには many だよ。"],
+["How much water do you drink every day?","ハウ マッチ ウォーター ドゥー ユー ドリンク エブリ デイ","いみは どれかな？",["毎日 どのくらいの 量の 水を 飲みますか？","毎日 何回 水を 飲みますか？","水は 好きですか？","水は いくらですか？"],"毎日 どのくらいの 量の 水を 飲みますか？","水のような 数えられない ものの 量は How much で きくよ。"],
+["I will be back soon.","アイ ウィル ビー バック スーン","いみは どれかな？",["すぐ 戻ります","すぐ 戻りました","戻りたいです","戻って きました"],"すぐ 戻ります","be back は「戻る」。soon は「すぐに」。will と セットで これからの ことだよ。"],
+["Don't forget your umbrella. It will rain.","ドント フォーゲット ユア アンブレラ。イット ウィル レイン","2つの 文の つながりとして 正しいのは？",["雨が 降るから 傘を 忘れるな、という 注意","雨だから 傘は いらない、という 注意","傘を 忘れたから 雨が 降る","雨の 日は 傘を 買う"],"雨が 降るから 傘を 忘れるな、という 注意","forget は「忘れる」。It will rain.（雨が 降るでしょう）が 理由に なっているよ。"],
+["She is taller than last year.","シー イズ トーラー ザン ラスト イヤー","いみは どれかな？",["彼女は 去年より 背が 高いです","彼女は 一番 背が 高いです","彼女は 去年 背が 高かったです","彼女は 背が 高く なります"],"彼女は 去年より 背が 高いです","taller than 〜 で「〜より 背が高い」。last year は「去年」だよ。"]
+]);
+
+/* ================= 1ねんせい チャレンジ（小2・小3入口・64問） ================= */
+var IC_BANK = P([
+["My name is Sota.","マイ ネーム イズ ソウタ","いみは どれかな？",["わたしの 名前は そうた です","わたしは そうたと 遊びます","そうたは 友だちです","わたしの 名前を 教えて"],"わたしの 名前は そうた です","My name is 〜. は「わたしの 名前は 〜です」。自己紹介の 基本だよ。"],
+["I'm Sota.","アイム ソウタ","いみは どれかな？",["わたしは そうた です","わたしは そうたが 好きです","そうたは ここです","わたしは そうたと 行きます"],"わたしは そうた です","I'm 〜. だけでも 名前を 言えるよ。My name is 〜. と 同じように 使えるよ。"],
+["I'm seven years old.","アイム セブン イヤーズ オールド","いみは どれかな？",["わたしは 7歳です","わたしは 7年生です","わたしは 7人 います","いま 7時です"],"わたしは 7歳です","年の 言い方は「I'm 〜 years old.」。seven は 7 だね。"],
+["I'm from Japan.","アイム フロム ジャパン","いみは どれかな？",["わたしは 日本 出身です","わたしは 日本へ 行きます","わたしは 日本が 好きです","日本は ここです"],"わたしは 日本 出身です","from は「〜から」。出身を 言う ときに 使うよ。"],
+["I live in Shizuoka.","アイ リブ イン シズオカ","いみは どれかな？",["わたしは 静岡に 住んで います","わたしは 静岡へ 行きます","わたしは 静岡が 好きです","静岡は 遠いです"],"わたしは 静岡に 住んで います","live in 〜 は「〜に 住んでいる」。in の 後ろに 場所が 来るよ。"],
+["I like cats.","アイ ライク キャッツ","いみは どれかな？",["わたしは 猫が 好きです","わたしは 猫を 飼って います","猫は かわいいです","猫は ここに います"],"わたしは 猫が 好きです","I like 〜. は「〜が 好きです」。自己紹介で よく 言うよ。"],
+["I like playing soccer.","アイ ライク プレイイング サッカー","いみは どれかな？",["わたしは サッカーを するのが 好きです","わたしは サッカー選手です","サッカーは 今日 です","わたしは サッカーを 見ます"],"わたしは サッカーを するのが 好きです","like playing 〜 で「〜するのが 好き」。playing は「遊ぶ・する」だよ。"],
+["This is my mother.","ディス イズ マイ マザー","いみは どれかな？",["こちらは わたしの 母です","わたしの 母は ここです","母は わたしが 好きです","こちらは わたしの 父です"],"こちらは わたしの 母です","This is 〜. は 人を 紹介する 言い方。mother は「母」だよ。"],
+["This is my friend, Yui.","ディス イズ マイ フレンド、ユイ","いみは どれかな？",["こちらは わたしの 友だちの ユイです","ユイは わたしの 友だちに なります","わたしは ユイと 遊びます","ユイは 友だちが 好きです"],"こちらは わたしの 友だちの ユイです","友だちを 紹介する ときの 決まり文句だよ。friend は「友だち」だね。"],
+["Nice to meet you.","ナイス トゥー ミート ユー","初めて 会った 人に 言う 言葉の いみは？",["はじめまして","また 会おうね","元気ですか","ありがとう"],"はじめまして","Nice to meet you. は 初めての あいさつ。言われたら 同じ 言葉に too を つけて 返すよ。"],
+["Nice to meet you, too.","ナイス トゥー ミート ユー、トゥー","いみは どれかな？",["こちらこそ はじめまして","また はじめまして","はじめまして、ありがとう","会えて 嬉しいです（昨日も）"],"こちらこそ はじめまして","too は「〜も」。相手に 言われた 言葉を 返す ときに つけるよ。"],
+["How are you doing?","ハウ アー ユー ドゥーイング","いみは どれかな？",["元気ですか？（調子は どう？）","何を して いますか？","どこへ 行きますか？","何歳ですか？"],"元気ですか？（調子は どう？）","How are you doing? も 元気を きく 言い方。How are you? と 同じように 使うよ。"],
+["I'm great!","アイム グレイト","「元気ですか？」と きかれて、とっても 元気な ときの こたえは？",["I'm great!#アイム グレイト","I'm sleepy.#アイム スリーピー","It's great.#イッツ グレイト","Yes, I am.#イエス、アイ アム"],"I'm great!","great は「すごく良い」。I'm fine. より 元気いっぱいの こたえだよ。"],
+["I'm a little hungry.","アイム ア リトル ハングリー","いみは どれかな？",["少し おなかが すきました","とても おなかが すきました","おなかは すいて いません","ごはんを 食べました"],"少し おなかが すきました","a little は「少し」。気持ちや 状態の 前に つけて 程度を 言うよ。"],
+["See you later.","シー ユー レイター","いみは どれかな？",["また 後でね","また 明日ね","行って きます","お帰りなさい"],"また 後でね","later は「後で」。See you later. は その日の うちに また 会う ときの あいさつだよ。"],
+["See you tomorrow.","シー ユー トゥモロー","いみは どれかな？",["また 明日ね","また 後でね","明日 行きます","明日は 休みです"],"また 明日ね","tomorrow は「明日」。学校の 帰りに 言う あいさつだね。"],
+["Have a nice day!","ハブ ア ナイス デイ","いみは どれかな？",["良い 一日を！","良い 天気ですね","今日は 良い 日です","一日中 遊ぼう"],"良い 一日を！","別れるときの 優しい 言葉だよ。nice は「良い・素敵な」だね。"],
+["Welcome!","ウェルカム","家に 友だちが 来た ときに 言う 言葉の いみは？",["いらっしゃい！","行って らっしゃい！","ただいま！","お帰り！"],"いらっしゃい！","Welcome! は 迎える ときの 言葉。家や お店の 入口で 言うよ。"],
+["I'm home!","アイム ホーム","家に 帰った ときに 言う 言葉の いみは？",["ただいま！","いらっしゃい！","行って きます！","おやすみ！"],"ただいま！","家に 着いたら「I'm home!」。答える 人は「Welcome home!（お帰り）」と 言うよ。"],
+["Welcome home!","ウェルカム ホーム","いみは どれかな？",["お帰りなさい！","いらっしゃい！","ただいま！","行って らっしゃい！"],"お帰りなさい！","帰って きた 人を 迎える 言葉だよ。I'm home! と セットで 覚えよう。"],
+["Let's go!","レッツ ゴー","いみは どれかな？",["行こう！","来て！","見て！","待って！"],"行こう！","Let's go! は「行こう！」。出発の 合図だよ。"],
+["I'm ready.","アイム レディ","いみは どれかな？",["準備が できました","準備を します","まだです","行きたいです"],"準備が できました","ready は「準備が できた」。Are you ready?（準備できた？）への こたえだよ。"],
+["Monday","マンデイ","いみは どれかな？",["月曜日","火曜日","水曜日","日曜日"],"月曜日","曜日を 覚えよう。Monday は 週の 始まり、月曜日だよ。"],
+["Wednesday","ウェンズデイ","いみは どれかな？",["水曜日","木曜日","火曜日","金曜日"],"水曜日","Wednesday は つづりが 難しいけど「水曜日」。読み方は「ウェンズデイ」だよ。"],
+["Friday","フライデイ","いみは どれかな？",["金曜日","木曜日","土曜日","月曜日"],"金曜日","Friday は「金曜日」。週末の 前の 日だね。"],
+["Saturday","サタデイ","いみは どれかな？",["土曜日","日曜日","金曜日","木曜日"],"土曜日","Saturday は「土曜日」。Sunday（日曜日）と セットで 覚えよう。"],
+["What day is it today?","ホワット デイ イズ イット トゥデイ","今日が 火曜日の ときの こたえは？",["It's Tuesday.#イッツ チューズデイ","It's sunny.#イッツ サニー","Yes, it is.#イエス、イット イズ","Today is fun.#トゥデイ イズ ファン"],"It's Tuesday.","曜日を きかれたら「It's 〜曜日.」で こたえるよ。Tuesday は 火曜日だね。"],
+["It's rainy today.","イッツ レイニー トゥデイ","いみは どれかな？",["今日は 雨です","今日は 晴れです","今日は 曇りです","明日は 雨です"],"今日は 雨です","rainy は「雨の」。天気は It's 〜. で 言うよ。"],
+["It's snowy.","イッツ スノーイ","いみは どれかな？",["雪です","雨です","晴れです","風が 強いです"],"雪です","snowy は「雪の」。snow（雪）に y が ついた 形だよ。"],
+["It's windy.","イッツ ウィンディ","いみは どれかな？",["風が 強いです","雨が 降って います","暑いです","寒いです"],"風が 強いです","windy は「風が 強い」。wind は「風」だよ。"],
+["How's the weather?","ハウズ ザ ウェザー","「天気は どうですか？」と きかれて、曇りの ときの こたえは？",["It's cloudy.#イッツ クラウディ","I'm cloudy.#アイム クラウディ","Yes, it is.#イエス、イット イズ","It's Monday.#イッツ マンデイ"],"It's cloudy.","天気の こたえは It's 〜.。cloudy は「曇りの」だよ。自分の 気持ちの I'm と まちがえないでね。"],
+["I like sunny days.","アイ ライク サニー デイズ","いみは どれかな？",["晴れの日が 好きです","今日は 晴れです","晴れの 日に 遊びます","日曜日が 好きです"],"晴れの日が 好きです","sunny days は「晴れの日」。days は day（日）の 複数形だよ。"]
+,
+["pencil case","ペンシル ケース","いみは どれかな？",["筆箱","えんぴつ","消しゴム","ノート"],"筆箱","pencil case は「筆箱」。pencil（えんぴつ）を 入れる case（箱）だね。"],
+["school bag","スクール バッグ","いみは どれかな？",["学校の かばん（ランドセル）","買い物袋","リュックの 紐","かばん屋さん"],"学校の かばん（ランドセル）","school bag は 学校へ 持って 行く かばんだよ。"],
+["blackboard","ブラックボード","いみは どれかな？",["黒板","教科書","机","窓"],"黒板","blackboard は「黒板」。black（黒い）＋ board（板）だよ。"],
+["textbook","テキストブック","いみは どれかな？",["教科書","ノート","絵本","辞書"],"教科書","textbook は「教科書」。授業で 使う 本だよ。"],
+["homework","ホームワーク","いみは どれかな？",["宿題","家事","仕事","勉強道具"],"宿題","homework は「宿題」。home（家）で する work（勉強・仕事）だね。"],
+["classroom","クラスルーム","いみは どれかな？",["教室","職員室","体育館","図書室"],"教室","classroom は「教室」。class（授業・学級）＋ room（部屋）だよ。"],
+["playground","プレイグラウンド","いみは どれかな？",["運動場・校庭","公園の ブランコ","体育館","プール"],"運動場・校庭","playground は 遊んだり 運動したり する 場所。学校では 校庭の ことだよ。"],
+["lunch","ランチ","いみは どれかな？",["昼ごはん","朝ごはん","夕ごはん","おやつ"],"昼ごはん","lunch は「昼ごはん」。学校の 給食も lunch と 言うよ。"],
+["breakfast","ブレックファスト","いみは どれかな？",["朝ごはん","昼ごはん","夕ごはん","夜食"],"朝ごはん","breakfast は「朝ごはん」。朝の 食事の 名前だよ。"],
+["dinner","ディナー","いみは どれかな？",["夕ごはん","昼ごはん","朝ごはん","おやつ"],"夕ごはん","dinner は「夕ごはん」。breakfast・lunch・dinner で 3食 セットだよ。"],
+["Stand up, please.","スタンド アップ、プリーズ","先生が 言う 言葉の いみは？",["立って ください","座って ください","静かに して ください","聞いて ください"],"立って ください","stand up は「立つ」。please が つくと 丁寧に なるよ。"],
+["Sit down, please.","シット ダウン、プリーズ","いみは どれかな？",["座って ください","立って ください","来て ください","見て ください"],"座って ください","sit down は「座る」。stand up の 反対だよ。"],
+["Open your textbook.","オープン ユア テキストブック","いみは どれかな？",["教科書を 開いて ください","教科書を 閉じて ください","教科書を 読んで ください","教科書を 貸して ください"],"教科書を 開いて ください","open は「開く」。close（閉じる）の 反対だよ。"],
+["Close your book.","クローズ ユア ブック","いみは どれかな？",["本を 閉じて ください","本を 開いて ください","本を 読んで ください","本を 置いて ください"],"本を 閉じて ください","close は「閉じる」。授業の 終わりに 言うよ。"],
+["Listen to me.","リッスン トゥー ミー","いみは どれかな？",["わたしの 話を 聞いて ください","わたしを 見て ください","わたしと 話して ください","静かに して ください"],"わたしの 話を 聞いて ください","listen は「聞く」。to me は「わたし（の話）を」だよ。"],
+["Look at the blackboard.","ルック アット ザ ブラックボード","いみは どれかな？",["黒板を 見て ください","黒板を 消して ください","黒板に 書いて ください","黒板の 前に 来て ください"],"黒板を 見て ください","look at 〜 は「〜を 見て」。at の 後ろに 見る ものが 来るよ。"],
+["Read aloud.","リード アラウド","いみは どれかな？",["声に 出して 読んで ください","静かに 読んで ください","速く 読んで ください","もう一度 読んで ください"],"声に 出して 読んで ください","aloud は「声に 出して」。read aloud は 音読の ことだよ。"],
+["Write your name.","ライト ユア ネーム","いみは どれかな？",["名前を 書いて ください","名前を 言って ください","名前を 読んで ください","名前を 消して ください"],"名前を 書いて ください","write は「書く」。テストの 始まりに 言うよ。"],
+["Raise your hand.","レイズ ユア ハンド","いみは どれかな？",["手を 挙げて ください","手を 洗って ください","手を たたいて ください","手を 振って ください"],"手を 挙げて ください","raise は「挙げる・上げる」。発表したい ときの 合図だよ。"],
+["Hands down.","ハンズ ダウン","いみは どれかな？",["手を 下ろして ください","手を 挙げて ください","手を 洗って ください","拍手して ください"],"手を 下ろして ください","down は「下へ」。raise your hand の 反対の 指示だよ。"],
+["Line up.","ライン アップ","いみは どれかな？",["並んで ください","座って ください","走って ください","静かに して ください"],"並んで ください","line は「列」。line up で「列に 並ぶ」だよ。遠足や 給食で 使うよ。"],
+["Be quiet, please.","ビー クワイエット、プリーズ","いみは どれかな？",["静かに して ください","急いで ください","並んで ください","聞いて ください"],"静かに して ください","quiet は「静かな」。図書室などで 言うよ。"],
+["Good morning, everyone.","グッド モーニング、エブリワン","いみは どれかな？",["みなさん、おはよう","みんな、元気？","みなさん、さようなら","みんな、聞いて"],"みなさん、おはよう","everyone は「みなさん」。朝の 会の あいさつだよ。"],
+["How are you, everyone?","ハウ アー ユー、エブリワン","「みなさん 元気ですか？」と きかれた ときの こたえは？",["We're fine!#ウィアー ファイン","I'm a student.#アイム ア スチューデント","Yes, it is.#イエス、イット イズ","Good morning.#グッド モーニング"],"We're fine!","みんなで 答える ときは We（わたしたち）。We're fine! は「わたしたちは 元気です」だよ。"],
+["Let's sing a song.","レッツ シング ア ソング","いみは どれかな？",["歌を 歌おう","歌を 聞こう","踊ろう","遊ぼう"],"歌を 歌おう","song は「歌」。sing a song で「歌を 歌う」だよ。"],
+["Let's play outside.","レッツ プレイ アウトサイド","いみは どれかな？",["外で 遊ぼう","中で 遊ぼう","外へ 行こう","遊ぶのを やめよう"],"外で 遊ぼう","outside は「外で」。inside（中で）の 反対だよ。"],
+["Time for lunch!","タイム フォア ランチ","いみは どれかな？",["昼ごはんの 時間だよ！","昼ごはんは 終わりだよ！","昼ごはんを 作ろう！","昼ごはんは 何時？"],"昼ごはんの 時間だよ！","Time for 〜! は「〜の 時間だよ」。給食の 時間の 合図だね。"],
+["Yummy!","ヤミー","給食を 食べて 言う 言葉の いみは？",["おいしい！","おなかいっぱい！","いただきます！","ごちそうさま！"],"おいしい！","Yummy! は 子どもが 使う「おいしい！」。食べ物の 感想だよ。"],
+["I like English.","アイ ライク イングリッシュ","いみは どれかな？",["わたしは 英語が 好きです","わたしは 英語を 話します","英語は 今日 です","英語は 難しいです"],"わたしは 英語が 好きです","教科の 名前も like の 後ろに 置けるよ。English は「英語」だね。"],
+["I can jump high.","アイ キャン ジャンプ ハイ","いみは どれかな？",["高く ジャンプできます","速く 走れます","泳げます","歌えます"],"高く ジャンプできます","can は「〜できる」。jump は「跳ぶ」、high は「高く」だよ。"],
+["I can ride a bike.","アイ キャン ライド ア バイク","いみは どれかな？",["自転車に 乗れます","自転車が ほしいです","自転車を 買いました","自転車で 行きます"],"自転車に 乗れます","ride は「（乗り物に）乗る」。bike は 自転車の ことだよ。"],
+["See you after school.","シー ユー アフター スクール","いみは どれかな？",["放課後 また 会おうね","学校で 会おうね","明日 また 会おうね","学校へ 行こうね"],"放課後 また 会おうね","after school は「放課後」。約束の あいさつだよ。"]
+]);
+
 /* ================= もんだい生成 ================= */
 var LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
@@ -642,7 +1143,7 @@ function numberQuestion(entry, pool){
 }
 
 /* --- レベルごとの 20問 組み立て（前回と かぶりにくくする） --- */
-var lastPick = {1:[], 2:[], 3:[]};
+var lastPick = {1:[], 2:[], 3:[], 4:[], 5:[], 6:[]};
 function pickFresh(level, items, count, keyFn){
   var avoid = lastPick[level];
   var idxs = items.map(function(_, i){ return i; });
@@ -678,15 +1179,15 @@ function buildLevel1(){
   var qs = [];
   var combos = [];
   LETTERS.forEach(function(L){ combos.push([L, true]); combos.push([L, false]); });
-  sample(combos, 8).forEach(function(c){ qs.push(alphaQuestion(c[0], c[1])); });
-  var wordPool = L1_COLORS.concat(L1_ANIMALS, L1_THINGS);
-  var words = pickFresh(1, wordPool, 8, function(w){ return w[0]; });
-  words.forEach(function(w){
-    var cat = L1_COLORS.indexOf(w) !== -1 ? L1_COLORS : (L1_ANIMALS.indexOf(w) !== -1 ? L1_ANIMALS : L1_THINGS);
-    qs.push(wordQuestion(w, cat));
-  });
-  var nums = sample(L1_NUMBERS, 4);
-  nums.forEach(function(n){ qs.push(numberQuestion(n, L1_NUMBERS)); });
+  sample(combos, 6).forEach(function(c){ qs.push(alphaQuestion(c[0], c[1])); });
+  var pools = [L1_COLORS, L1_ANIMALS, L1_THINGS, L1X_SCHOOL, L1X_FOOD, L1X_BODY, L1X_HOME];
+  var flat = [];
+  pools.forEach(function(pool){ pool.forEach(function(w){ flat.push({w:w, pool:pool}); }); });
+  var picked = pickFresh(1, flat, 10, function(item){ return item.w[0]; });
+  picked.forEach(function(item){ qs.push(wordQuestion(item.w, item.pool)); });
+  var allNums = L1_NUMBERS.concat(L1_NUMBERS2);
+  var nums = sample(allNums, 4);
+  nums.forEach(function(n){ qs.push(numberQuestion(n, allNums)); });
   return shuffle(qs);
 }
 function buildLevel2(){
@@ -697,10 +1198,10 @@ function buildLevel2(){
   var picked = pickFresh(2, flat, 20, function(item){ return item.w[0]; });
   return shuffle(picked.map(function(item){ return wordQuestion(item.w, item.pool); }));
 }
-function buildLevel3(){
-  var picked = pickFresh(3, L3_BANK, 20, function(item){ return item.text + "|" + item.ask; });
+function buildPhraseLevel(level, bank, label){
+  var picked = pickFresh(level, bank, 20, function(item){ return item.text + "|" + item.ask; });
   return shuffle(picked.map(function(item){
-    return makeQ("kind-phrase", "フレーズ", item.text, "よみかた：" + item.hint, item.ask,
+    return makeQ("kind-phrase", label, item.text, "よみかた：" + item.hint, item.ask,
       shuffle(item.choices), item.answer, item.expl, false);
   }));
 }
@@ -708,13 +1209,16 @@ function buildQuestions(level){
   if (level === 0) return buildIntro();
   if (level === 1) return buildLevel1();
   if (level === 2) return buildLevel2();
-  return buildLevel3();
+  if (level === 3) return buildPhraseLevel(3, L3_BANK, "フレーズ");
+  if (level === 4) return buildPhraseLevel(4, L4_BANK, "チャレンジ");
+  if (level === 5) return buildPhraseLevel(5, L5_BANK, "チャレンジ");
+  return buildPhraseLevel(6, IC_BANK, "チャレンジ");
 }
 
 /* ================= ゲーム状態 ================= */
 var state = { level: 1, questions: [], idx: 0, score: 0, startTime: 0, log: [], locked: false };
-var best = {0:null, 1:null, 2:null, 3:null};
-var LEVEL_LABEL = {0:"1ねんせい（にゅうもん）", 1:"4ねんせい レベル1", 2:"4ねんせい レベル2", 3:"4ねんせい レベル3"};
+var best = {0:null, 1:null, 2:null, 3:null, 4:null, 5:null, 6:null};
+var LEVEL_LABEL = {0:"1ねんせい（にゅうもん）", 6:"1ねんせい チャレンジ", 1:"4ねんせい レベル1", 2:"4ねんせい レベル2", 3:"4ねんせい レベル3", 4:"4ねんせい レベル4 チャレンジ", 5:"4ねんせい レベル5 チャレンジ"};
 
 function showScreen(name){
   document.getElementById("screen-start").classList.toggle("hidden", name !== "start");
@@ -735,6 +1239,7 @@ function startGame(level){
 function renderQuestion(){
   var q = state.questions[state.idx];
   state.locked = false;
+  stopSpeak();
   document.getElementById("progress-bar").style.width = (state.idx / 20 * 100) + "%";
   document.getElementById("qcount").textContent = (state.idx + 1) + " / 20";
   document.getElementById("score-chip").textContent = "⭐ " + state.score;
@@ -744,6 +1249,10 @@ function renderQuestion(){
   var textEl = document.getElementById("q-text");
   textEl.textContent = q.text;
   textEl.className = "q-text" + (q.jp ? " jp" : (q.small ? " small" : ""));
+  var qSpeak = document.getElementById("q-speak");
+  var qIsEnglish = /[A-Za-z]/.test(q.text);
+  qSpeak.classList.toggle("hidden", !qIsEnglish);
+  qSpeak.onclick = qIsEnglish ? function(){ speak(q.text); } : null;
   var hintEl = document.getElementById("q-hint");
   hintEl.textContent = q.hint || "";
   hintEl.style.display = q.hint ? "" : "none";
@@ -752,9 +1261,12 @@ function renderQuestion(){
   var box = document.getElementById("choices");
   box.innerHTML = "";
   q.choices.forEach(function(c){
+    var wrap = document.createElement("div");
+    wrap.className = "choice";
+    wrap.setAttribute("data-val", c.t);
     var btn = document.createElement("button");
-    btn.className = "choice";
-    btn.setAttribute("data-val", c.t);
+    btn.type = "button";
+    btn.className = "choice-main";
     var main = document.createElement("span");
     main.textContent = c.t;
     btn.appendChild(main);
@@ -764,24 +1276,27 @@ function renderQuestion(){
       sub.textContent = c.sub;
       btn.appendChild(sub);
     }
-    btn.addEventListener("click", function(){ answer(btn, c.t); });
-    box.appendChild(btn);
+    btn.addEventListener("click", function(){ answer(wrap, c.t); });
+    wrap.appendChild(btn);
+    if (/[A-Za-z]/.test(c.t)) wrap.appendChild(makeSpeakBtn(c.t));
+    box.appendChild(wrap);
   });
 }
 
-function answer(btn, val){
+function answer(wrap, val){
   if (state.locked) return;
   state.locked = true;
   var q = state.questions[state.idx];
   var correct = String(val) === String(q.answer);
   if (correct) state.score++;
   document.getElementById("score-chip").textContent = "⭐ " + state.score;
-  var btns = document.querySelectorAll(".choice");
-  btns.forEach(function(b){
-    b.disabled = true;
-    if (String(b.getAttribute("data-val")) === String(q.answer)) b.classList.add("correct");
-    else if (b === btn) b.classList.add("wrong");
-    else b.classList.add("dim");
+  var wraps = document.querySelectorAll(".choice");
+  wraps.forEach(function(w){
+    var mainBtn = w.querySelector(".choice-main");
+    if (mainBtn) mainBtn.disabled = true;
+    if (String(w.getAttribute("data-val")) === String(q.answer)) w.classList.add("correct");
+    else if (w === wrap) w.classList.add("wrong");
+    else w.classList.add("dim");
   });
   state.log.push({q:q, picked:val, correct:correct});
   var isLast = state.idx === state.questions.length - 1;
@@ -817,12 +1332,18 @@ var BIRD_SVG = {
   master: "<ellipse cx='58' cy='70' rx='34' ry='28' fill='#B08968'/><circle cx='84' cy='48' r='20' fill='#C49A6C'/><circle cx='90' cy='44' r='3.4' fill='#2B2118'/><path d='M102 48 L114 52 L102 57 Z' fill='#FF8A2A'/><path d='M30 62 Q14 52 10 38 Q26 40 34 52 Z' fill='#8A6A4A'/><ellipse cx='52' cy='76' rx='16' ry='11' fill='#E8D3B0'/><path d='M44 92 L42 104 M66 94 L66 106' stroke='#E56E0B' stroke-width='3.4' stroke-linecap='round'/><path d='M70 22 L76 10 L84 19 L92 8 L97 22 Z' fill='#FFC93C' stroke='#D9A400' stroke-width='2'/><circle cx='84' cy='24' r='3' fill='#FF6B9D'/>"
 };
 
+var RANK_ORDER = ["たまご","スズメ","シジュウカラ","モズ","ツミ","ハイタカ","オオタカ","クマタカ","イヌワシ","オオワシ"];
 function rankOf(score){
-  if (score === 20) return {name:"えいごマスター", key:"master", msg:"かんぺき！ Perfect! すごすぎる！"};
-  if (score >= 16) return {name:"おとなスズメ", key:"adult", msg:"Great! あと すこしで マスターだよ！"};
-  if (score >= 12) return {name:"わかスズメ", key:"young", msg:"Good! よく がんばったね！ あと すこし！"};
-  if (score >= 8) return {name:"ひなスズメ", key:"chick", msg:"いいちょうし！ れんしゅうして もっと 大きくなろう。"};
-  return {name:"たまご", key:"egg", msg:"ここから スタート！ もういちど チャレンジしてみよう。"};
+  if (score >= 19) return {name:"オオワシ", key:"master", size:"約95cm", px:124, msg:"かんぺき！ Perfect! 一番 大きな 鳥、オオワシだよ！"};
+  if (score >= 17) return {name:"イヌワシ", key:"master", size:"約85cm", px:116, msg:"Great! あと すこしで オオワシだよ！"};
+  if (score >= 15) return {name:"クマタカ", key:"adult", size:"約75cm", px:108, msg:"Great! 山の 王者 クマタカだよ！"};
+  if (score >= 13) return {name:"オオタカ", key:"adult", size:"約55cm", px:100, msg:"Good! オオタカまで 大きく なったよ！"};
+  if (score >= 11) return {name:"ハイタカ", key:"young", size:"約35cm", px:92, msg:"Good! ハイタカだよ。あと すこしで もっと 大きく なるよ！"};
+  if (score >= 9) return {name:"ツミ", key:"young", size:"約28cm", px:86, msg:"いいちょうし！ 小さな 猛禽 ツミだよ。"};
+  if (score >= 7) return {name:"モズ", key:"young", size:"約20cm", px:80, msg:"モズだよ！ 小さくても 猛禽の 仲間だよ。"};
+  if (score >= 5) return {name:"シジュウカラ", key:"chick", size:"約14.5cm", px:74, msg:"シジュウカラだよ！ 言葉を 話す 賢い 鳥だよ。"};
+  if (score >= 2) return {name:"スズメ", key:"chick", size:"約14cm", px:70, msg:"スズメだよ！ ここから 大きく 育とう。"};
+  return {name:"たまご", key:"egg", size:"—", px:64, msg:"ここから スタート！ もういちど チャレンジしてみよう。"};
 }
 
 function fmtTime(ms){
@@ -834,7 +1355,10 @@ function fmtTime(ms){
 function showResult(){
   var elapsed = Date.now() - state.startTime;
   var rank = rankOf(state.score);
-  document.getElementById("rank-bird").innerHTML = BIRD_SVG[rank.key];
+  var birdEl = document.getElementById("rank-bird");
+  birdEl.innerHTML = BIRD_SVG[rank.key];
+  birdEl.style.width = rank.px + "px";
+  birdEl.style.height = rank.px + "px";
   document.getElementById("rank-name").textContent = rank.name;
   var stars = "";
   for (var i = 0; i < 20; i++) stars += (i < state.score ? "★" : "☆");
@@ -842,7 +1366,9 @@ function showResult(){
   document.getElementById("rank-score").textContent = "20もん中 " + state.score + "もん せいかい！";
   document.getElementById("rank-meta").innerHTML =
     LEVEL_LABEL[state.level] + "<br>" +
+    (rank.size !== "—" ? "大きさの めやす： " + rank.size + "<br>" : "") +
     "かかった じかん： " + fmtTime(elapsed) + "<br>" + rank.msg;
+  saveRecord(rank.name);
   var prevBest = best[state.level];
   var isNew = (prevBest === null || state.score > prevBest);
   if (isNew) best[state.level] = state.score;
@@ -872,17 +1398,79 @@ function showResult(){
 }
 
 function updateBestLabels(){
-  [0,1,2,3].forEach(function(lv){
+  [0,6,1,2,3,4,5].forEach(function(lv){
     var el = document.getElementById("best-" + lv);
     if (best[lv] === null){ el.textContent = "ベスト： まだ なし"; el.classList.add("none"); }
     else { el.textContent = "ベスト： 20もん中 " + best[lv] + "もん せいかい"; el.classList.remove("none"); }
   });
 }
 
+/* ================= プレイヤーと きろく（localStorage・この端末のみ） ================= */
+var PLAYER_KEY = "kidsdrills_last_player";
+var RECORDS_KEY = "kidsdrills_records_v1";
+var SUBJECT_KEY = "eigo";
+var currentPlayer = null;
+function lsGet(k){ try { return window.localStorage.getItem(k); } catch (e) { return null; } }
+function lsSet(k, v){ try { window.localStorage.setItem(k, v); } catch (e) {} }
+function loadRecords(){
+  try {
+    var raw = lsGet(RECORDS_KEY);
+    var obj = raw ? JSON.parse(raw) : {};
+    return (obj && typeof obj === "object") ? obj : {};
+  } catch (e) { return {}; }
+}
+function todayStr(){
+  var d = new Date();
+  var m = String(d.getMonth() + 1); if (m.length < 2) m = "0" + m;
+  var day = String(d.getDate()); if (day.length < 2) day = "0" + day;
+  return d.getFullYear() + "-" + m + "-" + day;
+}
+function saveRecord(rankName){
+  if (!currentPlayer) return;
+  var records = loadRecords();
+  if (!records[currentPlayer] || typeof records[currentPlayer] !== "object") records[currentPlayer] = {};
+  var cur = records[currentPlayer][SUBJECT_KEY];
+  if (!cur || typeof cur !== "object") cur = {plays:0, questions:0, correct:0, bestRank:null, lastPlayed:null};
+  cur.plays += 1;
+  cur.questions += state.questions.length;
+  cur.correct += state.score;
+  if (cur.bestRank === null || RANK_ORDER.indexOf(rankName) > RANK_ORDER.indexOf(cur.bestRank)) cur.bestRank = rankName;
+  cur.lastPlayed = todayStr();
+  records[currentPlayer][SUBJECT_KEY] = cur;
+  lsSet(RECORDS_KEY, JSON.stringify(records));
+  updatePlayerUI();
+}
+function updatePlayerUI(){
+  var records = loadRecords();
+  ["soichiro", "tsuzumi"].forEach(function(p){
+    var btn = document.getElementById("player-" + p);
+    var rec = document.getElementById("rec-" + p);
+    if (btn) btn.classList.toggle("selected", currentPlayer === p);
+    if (rec){
+      var r = records[p] && records[p][SUBJECT_KEY];
+      rec.textContent = r
+        ? ("えいご： " + r.plays + "回 プレイ ／ ベスト " + (r.bestRank || "たまご"))
+        : "まだ きろく なし";
+    }
+  });
+}
+(function initPlayer(){
+  var saved = lsGet(PLAYER_KEY);
+  if (saved === "soichiro" || saved === "tsuzumi") currentPlayer = saved;
+  document.querySelectorAll(".player-btn").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      currentPlayer = btn.getAttribute("data-player");
+      lsSet(PLAYER_KEY, currentPlayer);
+      updatePlayerUI();
+    });
+  });
+  updatePlayerUI();
+})();
+
 document.querySelectorAll(".start-btn").forEach(function(btn){
   btn.addEventListener("click", function(){ startGame(Number(btn.getAttribute("data-level"))); });
 });
-document.getElementById("quit-btn").addEventListener("click", function(){ showScreen("start"); });
+document.getElementById("quit-btn").addEventListener("click", function(){ stopSpeak(); showScreen("start"); });
 document.getElementById("again-btn").addEventListener("click", function(){ startGame(state.level); });
 document.getElementById("home-btn").addEventListener("click", function(){ showScreen("start"); });
 </script>

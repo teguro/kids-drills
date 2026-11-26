@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>きろく | ドリルランド</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Hiragino Maru Gothic ProN", "Hiragino Sans", sans-serif; background: #fff8e7; color: #333; }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 24px 16px 40px; }
+  h1 { font-size: 30px; text-align: center; margin: 8px 0 20px; }
+  h2 { font-size: 24px; margin: 28px 0 10px; padding: 8px 14px; border-radius: 12px; color: #fff; }
+  .soichiro { background: #2e7de4; }
+  .tsuzumi { background: #e4572e; }
+  table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,.08); font-size: 15px; }
+  th, td { padding: 9px 8px; text-align: center; border-bottom: 1px solid #eee; }
+  th { background: #f5efe0; font-size: 13px; }
+  td.subj { text-align: left; font-weight: bold; }
+  tr.total td { background: #f5efe0; font-weight: bold; }
+  .empty { text-align: center; color: #888; padding: 18px; background: #fff; border-radius: 12px; }
+  a.back { display: block; margin: 30px auto 0; max-width: 320px; text-align: center; padding: 16px; border-radius: 16px; background: #2e9e5b; color: #fff; font-size: 20px; font-weight: bold; text-decoration: none; box-shadow: 0 4px 0 rgba(0,0,0,.15); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>きろく</h1>
+  <div id="content"></div>
+  <a class="back" href="index.html">ドリルランドにもどる</a>
+</div>
+<script>
+  var SUBJECTS = [
+    ["kanji", "かんじ"],
+    ["kokugo", "こくご"],
+    ["sansuu", "さんすう"],
+    ["shakai", "しゃかい"],
+    ["rika", "りか"],
+    ["eigo", "えいご"]
+  ];
+  var PLAYERS = [
+    ["soichiro", "そういちろう", "soichiro"],
+    ["tsuzumi", "つづみ", "tsuzumi"]
+  ];
+  var data = {};
+  try {
+    data = JSON.parse(localStorage.getItem("kidsdrills_records_v1") || "{}");
+  } catch (e) {
+    data = {};
+  }
+  var html = "";
+  PLAYERS.forEach(function (p) {
+    var rec = data[p[0]] || {};
+    html += '<h2 class="' + p[2] + '">' + p[1] + '</h2>';
+    var hasAny = SUBJECTS.some(function (s) { return rec[s[0]] && rec[s[0]].plays > 0; });
+    if (!hasAny) {
+      html += '<div class="empty">まだ きろくが ありません</div>';
+      return;
+    }
+    var tPlays = 0, tQ = 0, tC = 0;
+    html += '<table><tr><th>きょうか</th><th>やった<br>かいすう</th><th>もんだい<br>すう</th><th>せいかい<br>すう</th><th>せいかい<br>りつ</th><th>さいこう<br>ランク</th><th>さいごに<br>やった日</th></tr>';
+    SUBJECTS.forEach(function (s) {
+      var r = rec[s[0]];
+      if (!r || !r.plays) {
+        html += '<tr><td class="subj">' + s[1] + '</td><td>0</td><td>0</td><td>0</td><td>-</td><td>-</td><td>-</td></tr>';
+        return;
+      }
+      tPlays += r.plays; tQ += r.questions; tC += r.correct;
+      var rate = r.questions ? Math.round(r.correct / r.questions * 100) + "%" : "-";
+      html += '<tr><td class="subj">' + s[1] + '</td><td>' + r.plays + '</td><td>' + r.questions + '</td><td>' + r.correct + '</td><td>' + rate + '</td><td>' + (r.bestRank || "-") + '</td><td>' + (r.lastPlayed || "-") + '</td></tr>';
+    });
+    var tRate = tQ ? Math.round(tC / tQ * 100) + "%" : "-";
+    html += '<tr class="total"><td class="subj">ぜんぶ</td><td>' + tPlays + '</td><td>' + tQ + '</td><td>' + tC + '</td><td>' + tRate + '</td><td></td><td></td></tr>';
+    html += '</table>';
+  });
+  document.getElementById("content").innerHTML = html;
+</script>
+</body>
+</html>

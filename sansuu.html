@@ -42,6 +42,24 @@
     box-shadow:var(--shadow);
   }
   .howto b{color:var(--orange-d);}
+  .player-title{font-size:19px;font-weight:900;margin:6px 0 10px;text-align:center;}
+  .player-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 0 4px;}
+  .player-btn{
+    border:3px solid var(--choice-line);background:var(--card);color:var(--ink);
+    border-radius:20px;padding:14px 8px 12px;min-height:76px;box-shadow:var(--shadow);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  }
+  .player-btn .p-name{font-size:24px;font-weight:900;line-height:1.2;}
+  .player-btn .p-state{font-size:13px;font-weight:900;color:var(--muted);}
+  .player-btn.sel-soichiro{background:var(--sky);border-color:var(--sky-d);color:#fff;}
+  .player-btn.sel-tsuzumi{background:var(--pink);border-color:#D64F7E;color:#fff;}
+  .player-btn.sel-soichiro .p-state,.player-btn.sel-tsuzumi .p-state{color:#fff;}
+  .player-btn:active{transform:scale(.98);}
+  .player-record{
+    background:var(--card);border:2px solid var(--line);border-radius:14px;
+    padding:10px 14px;margin:10px 0 18px;font-size:14px;line-height:1.7;font-weight:700;text-align:center;
+  }
+  .player-record.warn{border-color:var(--wrong);color:var(--wrong);}
   .lv-title{font-size:19px;font-weight:900;margin:6px 0 10px;text-align:center;}
   .lv-card{
     display:block;width:100%;text-align:left;border:none;border-radius:20px;
@@ -50,6 +68,12 @@
   }
   .lv1{background:linear-gradient(135deg,#FFB03A,#FF8A2A);}
   .lv4{background:linear-gradient(135deg,#FF7A59,#D63A3F);}
+  .lv1c{background:linear-gradient(135deg,#FF9F1C,#F45D22);}
+  .lv4c{background:linear-gradient(135deg,#E5484D,#93335A);}
+  .lv-tag{
+    display:inline-block;background:#2B2118;color:var(--yellow);
+    font-size:13px;font-weight:900;border-radius:999px;padding:4px 12px;margin-bottom:8px;
+  }
   .lv-name{font-size:24px;font-weight:900;line-height:1.2;}
   .lv-sub{font-size:14px;font-weight:700;opacity:.95;margin-top:3px;line-height:1.5;}
   .lv-best{
@@ -85,6 +109,9 @@
   .kind-dec{background:var(--pink);}
   .kind-frac{background:var(--orange-d);}
   .kind-gaisu{background:var(--sky-d);}
+  .kind-mul{background:var(--green-d);}
+  .kind-avg{background:var(--sky-d);}
+  .kind-vol{background:#93335A;}
   .q-text{font-size:40px;font-weight:900;line-height:1.3;word-break:keep-all;}
   .q-text.small{font-size:28px;}
   .q-ask{font-size:16px;font-weight:700;color:var(--muted);margin-top:8px;}
@@ -150,6 +177,17 @@
     border:2px solid var(--line);border-radius:18px;background:var(--card);color:var(--ink);
     font-size:18px;font-weight:900;padding:14px;min-height:56px;
   }
+  .land-btn{
+    display:block;width:100%;text-align:center;text-decoration:none;
+    border:3px solid var(--green);border-radius:18px;background:#DFF7E8;color:#0E6B38;
+    font-size:19px;font-weight:900;padding:15px;min-height:58px;line-height:1.3;
+    box-shadow:var(--shadow);
+  }
+  .land-btn:active{transform:translateY(2px);}
+  @media (prefers-color-scheme: dark){
+    .land-btn{background:#17402A;color:#8CF0B4;}
+  }
+  .land-wrap{margin-top:18px;}
   .foot-note{text-align:center;font-size:13px;color:var(--muted);font-weight:700;margin-top:20px;line-height:1.7;}
   @media (prefers-reduced-motion: reduce){ *{transition:none !important;} }
 </style>
@@ -174,11 +212,24 @@
     </div>
 
     <div class="howto">
-      あそびかた： がくねんを えらぶと <b>20もん</b> でるよ。
+      あそびかた： まず <b>だれが やるか</b> えらんでね。つぎに がくねんを えらぶと <b>20もん</b> でるよ。
       こたえは <b>4つの ボタン</b>から タップして えらんでね。
       1もんごとに せいかい・ふせいかいと かいせつが すぐ 出るよ。
-      20もん ぜんぶ こたえると、スズメの ランクが もらえるよ！
+      20もん ぜんぶ こたえると、とりの ランクが もらえるよ！ たくさん せいかいするほど、大きな とりに なれるよ。
     </div>
+
+    <div class="player-title">だれが やる？</div>
+    <div class="player-row">
+      <button class="player-btn" data-player="soichiro" aria-pressed="false">
+        <span class="p-name">そういちろう</span>
+        <span class="p-state">タップして えらぶ</span>
+      </button>
+      <button class="player-btn" data-player="tsuzumi" aria-pressed="false">
+        <span class="p-name">つづみ</span>
+        <span class="p-state">タップして えらぶ</span>
+      </button>
+    </div>
+    <div class="player-record" id="player-record">だれが あそぶか えらんでね。あそんだ きろくは、えらんだ 人ごとに たまるよ。</div>
 
     <div class="lv-title">がくねんを えらんでね</div>
 
@@ -196,7 +247,27 @@
       <button class="start-btn" data-level="4">スタート（20もん）</button>
     </div>
 
-    <p class="foot-note">ベストスコアは このページを ひらいている あいだ きろくされるよ。</p>
+    <div class="lv-card lv1c">
+      <span class="lv-tag">⭐ チャレンジ</span>
+      <div class="lv-name">1ねんせい チャレンジ</div>
+      <div class="lv-sub">2ねんせいの 入口： 100までの たしざん・ひきざん、<br>2けたの けいさんと かけ算九九の 入門だよ</div>
+      <span class="lv-best none" id="best-1c">ベスト： まだ なし</span>
+      <button class="start-btn" data-level="1c">スタート（20もん）</button>
+    </div>
+
+    <div class="lv-card lv4c">
+      <span class="lv-tag">⭐ チャレンジ</span>
+      <div class="lv-name">4ねんせい チャレンジ</div>
+      <div class="lv-sub">5ねんせいの 入口： 小数×小数、ことなる 分母の 分数、<br>平均（へいきん）と 体積（たいせき）の もんだいだよ</div>
+      <span class="lv-best none" id="best-4c">ベスト： まだ なし</span>
+      <button class="start-btn" data-level="4c">スタート（20もん）</button>
+    </div>
+
+    <div class="land-wrap">
+      <a class="land-btn" href="index.html">🏠 ドリルランドにもどる</a>
+    </div>
+
+    <p class="foot-note">あそんだ きろくは、えらんだ 人ごとに この たんまつ（iPad）にだけ ほぞんされるよ。</p>
   </section>
 
   <section id="screen-game" class="hidden">
@@ -229,6 +300,7 @@
     <div class="btn-row">
       <button class="again-btn" id="again-btn">もういちど おなじ がくねん</button>
       <button class="home-btn" id="home-btn">がくねんを えらびなおす</button>
+      <a class="land-btn" href="index.html">🏠 ドリルランドにもどる</a>
     </div>
   </section>
 
@@ -521,14 +593,298 @@ function buildGrade4(){
   });
   return qs;
 }
+/* ================= 1ねんせい チャレンジ（2ねんせい 入口） ================= */
+/* 100までの たしざん（2けた ＋ 2けた／1けた） */
+function g1cAdd(){
+  var a = randInt(21, 79);
+  var b;
+  if (Math.random() < 0.4 || 100 - a < 11) b = randInt(2, 9);
+  else b = randInt(11, 100 - a);
+  var ans = a + b;
+  var bT = Math.floor(b / 10) * 10, bO = b % 10;
+  var aT = Math.floor(a / 10) * 10, aO = a % 10;
+  var expl;
+  if (bT > 0){
+    expl = a + " ＋ " + b + " は、" + b + " を " + bT + " と " + bO + " に わけて、まず " +
+      a + " ＋ " + bT + " ＝ " + (a + bT) + "、つぎに " + (a + bT) + " ＋ " + bO + " ＝ " + ans + " だよ。";
+  } else {
+    expl = a + " ＋ " + b + " は、" + a + " を " + aT + " と " + aO + " に わけて、" +
+      aO + " ＋ " + b + " ＝ " + (aO + b) + "、" + aT + " ＋ " + (aO + b) + " ＝ " + ans + " だよ。";
+  }
+  return makeQ("kind-add", "たしざん", a + " ＋ " + b + " ＝ ？", "こたえは どれかな？",
+    numChoices(ans, [-10,-2,-1,1,2,10,-11,11]), String(ans), expl, false);
+}
+/* 100までの ひきざん（2けた − 2けた／1けた） */
+function g1cSub(){
+  var a = randInt(35, 99);
+  var b;
+  if (Math.random() < 0.4) b = randInt(3, 9);
+  else b = randInt(12, a - 15);
+  var ans = a - b;
+  var bT = Math.floor(b / 10) * 10, bO = b % 10;
+  var ones = a % 10;
+  var expl;
+  if (bT > 0){
+    expl = a + " − " + b + " は、" + b + " を " + bT + " と " + bO + " に わけて、まず " +
+      a + " − " + bT + " ＝ " + (a - bT) + "、つぎに " + (a - bT) + " − " + bO + " ＝ " + ans + " だよ。";
+  } else if (ones >= b){
+    expl = a + " − " + b + " は、一のくらいから そのまま ひけるよ。" + a + " − " + b + " ＝ " + ans + " だよ。";
+  } else {
+    expl = a + " − " + b + " は、一のくらい " + ones + " から " + b + " は ひけないから、十のくらいから 10を かりて " +
+      (ones + 10) + " − " + b + " ＝ " + (ones + 10 - b) + "。十のくらいは " + (Math.floor(a / 10) - 1) +
+      " こ のこるから、こたえは " + ans + " だよ。";
+  }
+  return makeQ("kind-sub", "ひきざん", a + " − " + b + " ＝ ？", "こたえは どれかな？",
+    numChoices(ans, [-10,-2,-1,1,2,10,-11,11]), String(ans), expl, false);
+}
+/* かけ算九九の 入門 */
+function g1cMul(){
+  var a = Math.random() < 0.7 ? randInt(2, 5) : randInt(6, 9);
+  var b = randInt(2, 9);
+  var ans = a * b;
+  var list = [];
+  for (var i = 1; i <= b; i++) list.push(a * i);
+  var expl = a + " の だんは " + list.join("、") + " と ふえていくよ。" + b + " つ目が " + ans +
+    " だから、" + a + " × " + b + " ＝ " + ans + " だよ。";
+  return makeQ("kind-mul", "かけ算九九", a + " × " + b + " ＝ ？", "こたえは どれかな？",
+    numChoices(ans, [-a, a, -2, -1, 1, 2, -10, 10]), String(ans), expl, false);
+}
+function buildGrade1C(){
+  var makers = [];
+  var i;
+  for (i = 0; i < 7; i++) makers.push(g1cAdd);
+  for (i = 0; i < 7; i++) makers.push(g1cSub);
+  for (i = 0; i < 6; i++) makers.push(g1cMul);
+  makers = shuffle(makers);
+  var qs = [], seen = {};
+  makers.forEach(function(fn){
+    var q = fn(), tries = 0;
+    while (seen[q.text] && tries < 20){ q = fn(); tries++; }
+    seen[q.text] = true;
+    qs.push(q);
+  });
+  return qs;
+}
+
+/* ================= 4ねんせい チャレンジ（5ねんせい 入口） ================= */
+function gcd(x, y){ while (y){ var t = x % y; x = y; y = t; } return x; }
+function fmtDec2(v){ return v.toFixed(2); }
+function fmtTrim(v){
+  var s = round2(v).toFixed(2);
+  if (s.indexOf(".") >= 0) s = s.replace(/0+$/, "").replace(/\.$/, "");
+  return s;
+}
+/* 小数（第2位まで）の たしざん・ひきざん */
+function g4cDecAddSub(){
+  var a = randInt(105, 999) / 100, b = randInt(105, 999) / 100;
+  if (Math.random() < 0.5){
+    var ans = round2(a + b);
+    var expl = "小数は 小数点の 位置を そろえて、右の くらいから 計算するよ。" + a.toFixed(2) + " ＋ " + b.toFixed(2) +
+      " ＝ " + ans.toFixed(2) + " だよ。小数第2位まで あるときも、やり方は 同じだよ。";
+    return makeQ("kind-dec", "小数", a.toFixed(2) + " ＋ " + b.toFixed(2) + " ＝ ？", "こたえは どれかな？",
+      numChoices(ans, [-1,-0.11,-0.1,-0.01,0.01,0.1,0.11,1], fmtDec2), ans.toFixed(2), expl, false);
+  }
+  if (b > a){ var t = a; a = b; b = t; }
+  if (a === b) a = round2(a + 0.35);
+  var ans2 = round2(a - b);
+  var expl2 = "小数は 小数点の 位置を そろえて、右の くらいから 計算するよ。" + a.toFixed(2) + " − " + b.toFixed(2) +
+    " ＝ " + ans2.toFixed(2) + " だよ。小数第2位まで あるときも、やり方は 同じだよ。";
+  return makeQ("kind-dec", "小数", a.toFixed(2) + " − " + b.toFixed(2) + " ＝ ？", "こたえは どれかな？",
+    numChoices(ans2, [-1,-0.11,-0.1,-0.01,0.01,0.1,0.11,1], fmtDec2), ans2.toFixed(2), expl2, false);
+}
+/* 小数 × 小数の 入門 */
+function g4cDecMulDec(){
+  var a = randInt(12, 99) / 10;
+  var b = Math.random() < 0.35 ? randInt(11, 29) / 10 : randInt(2, 9) / 10;
+  var ans = round2(a * b);
+  var aI = Math.round(a * 10), bI = Math.round(b * 10);
+  var expl = a.toFixed(1) + " × " + b.toFixed(1) + " は、小数点を とって " + aI + " × " + bI + " ＝ " + (aI * bI) +
+    " と 計算してから、小数点以下の けた数の 合計（1けた ＋ 1けた ＝ 2けた）だけ 小数点を 左へ うつして " +
+    fmtTrim(ans) + " だよ。";
+  return makeQ("kind-dec", "小数", a.toFixed(1) + " × " + b.toFixed(1) + " ＝ ？", "こたえは どれかな？",
+    numChoices(ans, [ans * 9, -1, -0.5, -0.1, -0.01, 0.01, 0.1, 0.5, 1], fmtTrim), fmtTrim(ans), expl, false);
+}
+/* 分母が ことなる 分数の たしざん 入門（通分） */
+function g4cFracDiff(){
+  var pairs = [[2,3],[2,4],[3,4],[2,6],[3,6],[4,6],[4,8],[2,8]];
+  var pr = pairs[randInt(0, pairs.length - 1)];
+  var d1 = pr[0], d2 = pr[1];
+  var L = d1 * d2 / gcd(d1, d2);
+  var n1 = randInt(1, d1 - 1), n2 = randInt(1, d2 - 1);
+  var sumN = n1 * (L / d1) + n2 * (L / d2);
+  if (sumN >= L) return g4cFracDiff();
+  var g = gcd(sumN, L);
+  var rn = sumN / g, rd = L / g;
+  var ans = rn + "/" + rd;
+  var expl = "分母が ちがう 分数は、分母を そろえて（通分して）から たすよ。" +
+    n1 + "/" + d1 + " は " + (n1 * (L / d1)) + "/" + L + "、" + n2 + "/" + d2 + " は " + (n2 * (L / d2)) + "/" + L +
+    " になるから、分子を たして " + sumN + "/" + L +
+    (g > 1 ? "。約分すると " + ans + " だよ。" : " ＝ " + ans + " だよ。");
+  var raw = [[sumN + 1, L], [sumN - 1, L], [sumN + 2, L], [sumN + 3, L], [n1 + n2, L], [rn + 1, rd], [rn, rd + 1], [rn + 1, rd + 1]];
+  var cands = [];
+  raw.forEach(function(p){
+    if (p[0] < 1) return;
+    var gg = gcd(p[0], p[1]);
+    var cn = p[0] / gg, cd = p[1] / gg;
+    if (cn * rd !== rn * cd) cands.push(cn + "/" + cd);
+  });
+  return makeQ("kind-frac", "分数", n1 + "/" + d1 + " ＋ " + n2 + "/" + d2 + " ＝ ？", "こたえは どれかな？",
+    strChoices(ans, cands), ans, expl, false);
+}
+/* 分母が ことなる 分数の 大きさくらべ */
+function g4cFracCompareDiff(){
+  var fr = [], guard = 0;
+  while (fr.length < 4 && guard < 300){
+    guard++;
+    var d = randInt(2, 9);
+    var n = randInt(1, d - 1);
+    var dup = false;
+    fr.forEach(function(f){ if (f.n * d === n * f.d) dup = true; });
+    if (!dup) fr.push({n: n, d: d});
+  }
+  var bestF = fr[0];
+  fr.forEach(function(f){ if (f.n * bestF.d > bestF.n * f.d) bestF = f; });
+  var ans = bestF.n + "/" + bestF.d;
+  var expl = "分母が ちがう 分数は、通分して 分母を そろえると、分子の 大きさで くらべられるよ。いちばん 大きいのは " + ans + " だよ。";
+  var choices = fr.map(function(f){ return f.n + "/" + f.d; });
+  return makeQ("kind-frac", "分数", "分数の 大きさくらべ", "いちばん 大きいのは どれかな？",
+    shuffle(choices), ans, expl, true);
+}
+/* 平均 */
+function g4cAvg(){
+  var count = Math.random() < 0.5 ? 3 : 4;
+  var avg = randInt(6, 30);
+  var vals = [], sum = 0, i, v;
+  for (i = 0; i < count - 1; i++){ v = randInt(2, 45); vals.push(v); sum += v; }
+  var last = avg * count - sum;
+  if (last < 1 || last > 60) return g4cAvg();
+  vals.push(last); sum += last;
+  var expl = "平均（へいきん）は、全部の 合計を 個数で わって もとめるよ。合計は " + vals.join(" ＋ ") +
+    " ＝ " + sum + "、" + sum + " ÷ " + count + " ＝ " + avg + " だよ。";
+  return makeQ("kind-avg", "平均", vals.join("、") + " の 平均は？", "平均は どれかな？",
+    numChoices(avg, [-5,-3,-2,-1,1,2,3,5]), String(avg), expl, true);
+}
+/* 直方体の 体積 */
+function g4cVol(){
+  var a = randInt(2, 9), b = randInt(2, 9), c = randInt(2, 6);
+  var ans = a * b * c;
+  var expl = "直方体の 体積（たいせき）は、たて × 横 × 高さ で もとめるよ。" +
+    a + " × " + b + " × " + c + " ＝ " + ans + " だから、体積は " + ans + " cm³ だよ。";
+  return makeQ("kind-vol", "体積", "たて " + a + " cm、横 " + b + " cm、高さ " + c + " cm の 直方体の 体積は？",
+    "体積は どれかな？",
+    numChoices(ans, [-a * b, -12, -6, -2 * c, 2 * c, 6, 12, a * b], function(v){ return v + " cm³"; }),
+    ans + " cm³", expl, true);
+}
+function buildGrade4C(){
+  var makers = [];
+  var i;
+  for (i = 0; i < 4; i++) makers.push(g4cDecAddSub);
+  for (i = 0; i < 4; i++) makers.push(g4cDecMulDec);
+  for (i = 0; i < 4; i++) makers.push(g4cFracDiff);
+  for (i = 0; i < 3; i++) makers.push(g4cFracCompareDiff);
+  for (i = 0; i < 3; i++) makers.push(g4cAvg);
+  for (i = 0; i < 2; i++) makers.push(g4cVol);
+  makers = shuffle(makers);
+  var qs = [], seen = {};
+  makers.forEach(function(fn){
+    var q = fn(), tries = 0;
+    while (seen[q.text] && tries < 20){ q = fn(); tries++; }
+    seen[q.text] = true;
+    qs.push(q);
+  });
+  return qs;
+}
 function buildQuestions(level){
-  return level === 1 ? buildGrade1() : buildGrade4();
+  if (level === "1") return buildGrade1();
+  if (level === "4") return buildGrade4();
+  if (level === "1c") return buildGrade1C();
+  return buildGrade4C();
 }
 
 /* ================= ゲーム状態 ================= */
-var state = { level: 1, questions: [], idx: 0, score: 0, startTime: 0, log: [], locked: false };
-var best = {1:null, 4:null};
-var GRADE_LABEL = {1:"1ねんせい", 4:"4ねんせい"};
+var state = { level: 1, questions: [], idx: 0, score: 0, startTime: 0, log: [], locked: false, recordSaved: false };
+var best = {"1":null, "4":null, "1c":null, "4c":null};
+var GRADE_LABEL = {"1":"1ねんせい", "4":"4ねんせい", "1c":"1ねんせい チャレンジ", "4c":"4ねんせい チャレンジ"};
+
+/* ================= プレイヤーと きろく ================= */
+var PLAYER_LABEL = {"soichiro":"そういちろう", "tsuzumi":"つづみ"};
+var BIRD_ORDER = ["たまご","スズメ","シジュウカラ","モズ","ツミ","ハイタカ","オオタカ","クマタカ","イヌワシ","オオワシ"];
+var currentPlayer = null;
+
+function loadLastPlayer(){
+  try {
+    var p = localStorage.getItem("kidsdrills_last_player");
+    if (p === "soichiro" || p === "tsuzumi") return p;
+  } catch (e) {}
+  return null;
+}
+function loadRecords(){
+  try {
+    var raw = localStorage.getItem("kidsdrills_records_v1");
+    if (raw){
+      var obj = JSON.parse(raw);
+      if (obj && typeof obj === "object") return obj;
+    }
+  } catch (e) {}
+  return {};
+}
+function todayStr(){
+  var d = new Date();
+  var m = ("0" + (d.getMonth() + 1)).slice(-2);
+  var day = ("0" + d.getDate()).slice(-2);
+  return d.getFullYear() + "-" + m + "-" + day;
+}
+function renderPlayerRecord(){
+  var el = document.getElementById("player-record");
+  el.classList.remove("warn");
+  if (!currentPlayer){
+    el.textContent = "だれが あそぶか えらんでね。あそんだ きろくは、えらんだ 人ごとに たまるよ。";
+    return;
+  }
+  var records = loadRecords();
+  var subj = records[currentPlayer] && records[currentPlayer]["sansuu"];
+  if (!subj || !subj.plays){
+    el.textContent = PLAYER_LABEL[currentPlayer] + " の きろく： まだ ないよ。20もん あそぶと ここに たまるよ。";
+    return;
+  }
+  el.textContent = PLAYER_LABEL[currentPlayer] + " の きろく： " + subj.plays + "かい あそんだ ／ " +
+    subj.questions + "もん中 " + subj.correct + "もん せいかい ／ ベスト： " + (subj.bestRank || "―") +
+    " ／ さいごに あそんだ日： " + (subj.lastPlayed || "―");
+}
+function setPlayer(p, save){
+  currentPlayer = p;
+  if (save){
+    try { localStorage.setItem("kidsdrills_last_player", p); } catch (e) {}
+  }
+  document.querySelectorAll(".player-btn").forEach(function(btn){
+    var isSel = btn.getAttribute("data-player") === p;
+    btn.classList.toggle("sel-soichiro", isSel && p === "soichiro");
+    btn.classList.toggle("sel-tsuzumi", isSel && p === "tsuzumi");
+    btn.setAttribute("aria-pressed", isSel ? "true" : "false");
+    btn.querySelector(".p-state").textContent = isSel ? "✓ いまの プレイヤー" : "タップして えらぶ";
+  });
+  renderPlayerRecord();
+}
+/* 20もん おわったら、えらんだ プレイヤーの きろくに 加算する */
+function saveSessionRecord(){
+  if (!currentPlayer || state.recordSaved) return;
+  state.recordSaved = true;
+  var records = loadRecords();
+  if (!records[currentPlayer]) records[currentPlayer] = {};
+  var subj = records[currentPlayer]["sansuu"];
+  if (!subj) subj = {plays:0, questions:0, correct:0, bestRank:null, lastPlayed:null};
+  subj.plays = (subj.plays || 0) + 1;
+  subj.questions = (subj.questions || 0) + state.questions.length;
+  subj.correct = (subj.correct || 0) + state.score;
+  var rank = rankOf(state.score);
+  var curIdx = BIRD_ORDER.indexOf(rank.name);
+  var prevIdx = subj.bestRank ? BIRD_ORDER.indexOf(subj.bestRank) : -1;
+  if (curIdx > prevIdx) subj.bestRank = rank.name;
+  subj.lastPlayed = todayStr();
+  records[currentPlayer]["sansuu"] = subj;
+  try { localStorage.setItem("kidsdrills_records_v1", JSON.stringify(records)); } catch (e) {}
+  renderPlayerRecord();
+}
 
 function showScreen(name){
   document.getElementById("screen-start").classList.toggle("hidden", name !== "start");
@@ -540,7 +896,7 @@ function showScreen(name){
 function startGame(level){
   state.level = level;
   state.questions = buildQuestions(level);
-  state.idx = 0; state.score = 0; state.log = [];
+  state.idx = 0; state.score = 0; state.log = []; state.recordSaved = false;
   state.startTime = Date.now();
   showScreen("game");
   renderQuestion();
@@ -620,12 +976,50 @@ var BIRD_SVG = {
   master: "<ellipse cx='58' cy='70' rx='34' ry='28' fill='#B08968'/><circle cx='84' cy='48' r='20' fill='#C49A6C'/><circle cx='90' cy='44' r='3.4' fill='#2B2118'/><path d='M102 48 L114 52 L102 57 Z' fill='#FF8A2A'/><path d='M30 62 Q14 52 10 38 Q26 40 34 52 Z' fill='#8A6A4A'/><ellipse cx='52' cy='76' rx='16' ry='11' fill='#E8D3B0'/><path d='M44 92 L42 104 M66 94 L66 106' stroke='#E56E0B' stroke-width='3.4' stroke-linecap='round'/><path d='M70 22 L76 10 L84 19 L92 8 L97 22 Z' fill='#FFC93C' stroke='#D9A400' stroke-width='2'/><circle cx='84' cy='24' r='3' fill='#FF6B9D'/>"
 };
 
+/* 鳥の大きさラダー用イラスト（猛禽類と小鳥） */
+function raptorSVG(body, head, belly, tail, s){
+  return "<g transform='translate(60 62) scale(" + s + ") translate(-60 -62)'>" +
+    "<path d='M30 82 L6 100 L32 102 L42 88 Z' fill='" + tail + "'/>" +
+    "<ellipse cx='58' cy='70' rx='32' ry='27' fill='" + body + "'/>" +
+    "<circle cx='82' cy='48' r='19' fill='" + head + "'/>" +
+    "<circle cx='88' cy='44' r='3.2' fill='#2B2118'/>" +
+    "<path d='M99 43 L112 47 L103 52 L109 59 L97 56 Z' fill='#FFC93C'/>" +
+    "<ellipse cx='52' cy='75' rx='15' ry='10' fill='" + belly + "'/>" +
+    "<path d='M46 94 L44 105 M66 95 L66 106' stroke='#D9A400' stroke-width='3.2' stroke-linecap='round' fill='none'/>" +
+    "</g>";
+}
+function songbirdSVG(body, head, belly, s){
+  return "<g transform='translate(60 62) scale(" + s + ") translate(-60 -62)'>" +
+    "<path d='M30 62 Q14 52 10 38 Q26 40 34 52 Z' fill='" + body + "'/>" +
+    "<ellipse cx='58' cy='70' rx='32' ry='26' fill='" + body + "'/>" +
+    "<circle cx='82' cy='49' r='19' fill='" + head + "'/>" +
+    "<circle cx='88' cy='45' r='3.2' fill='#2B2118'/>" +
+    "<path d='M100 49 L112 53 L100 58 Z' fill='#FF8A2A'/>" +
+    "<ellipse cx='52' cy='76' rx='15' ry='10' fill='" + belly + "'/>" +
+    "<path d='M45 93 L43 104 M65 94 L65 105' stroke='#E56E0B' stroke-width='3.2' stroke-linecap='round' fill='none'/>" +
+    "</g>";
+}
+BIRD_SVG.oowashi = raptorSVG("#3E2F23", "#3E2F23", "#FFFFFF", "#FFFFFF", 1.08);
+BIRD_SVG.inuwashi = raptorSVG("#6B4A2A", "#9A7B3F", "#7A5636", "#54381E", 1.04);
+BIRD_SVG.kumataka = raptorSVG("#4A3B30", "#4A3B30", "#D8C9A3", "#38291D", 1.0);
+BIRD_SVG.ootaka = raptorSVG("#5A6B7A", "#5A6B7A", "#E8E4DA", "#46545F", 0.96);
+BIRD_SVG.haitaka = raptorSVG("#6B7C8C", "#6B7C8C", "#EFE6D8", "#55626E", 0.92);
+BIRD_SVG.tsumi = raptorSVG("#7A8699", "#7A8699", "#F0E8DC", "#626D7D", 0.88);
+BIRD_SVG.mozu = songbirdSVG("#A9805A", "#8A6A4A", "#F0E2C4", 0.9);
+BIRD_SVG.shijukara = songbirdSVG("#7A9A4A", "#2B2118", "#FFE066", 0.84);
+BIRD_SVG.suzume = BIRD_SVG.adult;
+
 function rankOf(score){
-  if (score === 20) return {name:"さんすうマスター", key:"master", msg:"かんぺき！ すごすぎる！"};
-  if (score >= 16) return {name:"おとなスズメ", key:"adult", msg:"あと すこしで マスターだよ！"};
-  if (score >= 12) return {name:"わかスズメ", key:"young", msg:"よく がんばったね！ あと すこし！"};
-  if (score >= 8) return {name:"ひなスズメ", key:"chick", msg:"いいちょうし！ れんしゅうして もっと 大きくなろう。"};
-  return {name:"たまご", key:"egg", msg:"ここから スタート！ もういちど チャレンジしてみよう。"};
+  if (score >= 19) return {name:"オオワシ", key:"oowashi", size:"約95cm", msg:"かんぺきに ちかい！ いちばん 大きな オオワシ級だよ！"};
+  if (score >= 17) return {name:"イヌワシ", key:"inuwashi", size:"約85cm", msg:"すごい！ あと すこしで オオワシだよ！"};
+  if (score >= 15) return {name:"クマタカ", key:"kumataka", size:"約75cm", msg:"もりの ハンター、クマタカ級！ よく がんばったね！"};
+  if (score >= 13) return {name:"オオタカ", key:"ootaka", size:"約55cm", msg:"オオタカ級！ いい ちょうしだよ！"};
+  if (score >= 11) return {name:"ハイタカ", key:"haitaka", size:"約35cm", msg:"ハイタカ級！ あと すこしで もっと 大きくなるよ。"};
+  if (score >= 9) return {name:"ツミ", key:"tsumi", size:"約28cm", msg:"ツミ級！ 小さくても すばやい ハンターだよ。"};
+  if (score >= 7) return {name:"モズ", key:"mozu", size:"約20cm", msg:"モズ級！ れんしゅうして もっと 大きくなろう。"};
+  if (score >= 5) return {name:"シジュウカラ", key:"shijukara", size:"約14.5cm", msg:"シジュウカラ級！ いい スタートだよ。"};
+  if (score >= 2) return {name:"スズメ", key:"suzume", size:"約14cm", msg:"スズメ級！ ここから どんどん 大きくなるよ。"};
+  return {name:"たまご", key:"egg", size:"", msg:"ここから スタート！ もういちど チャレンジしてみよう。"};
 }
 
 function fmtTime(ms){
@@ -635,6 +1029,7 @@ function fmtTime(ms){
 }
 
 function showResult(){
+  saveSessionRecord();
   var elapsed = Date.now() - state.startTime;
   var rank = rankOf(state.score);
   document.getElementById("rank-bird").innerHTML = BIRD_SVG[rank.key];
@@ -644,7 +1039,9 @@ function showResult(){
   document.getElementById("rank-stars").textContent = stars;
   document.getElementById("rank-score").textContent = "20もん中 " + state.score + "もん せいかい！";
   document.getElementById("rank-meta").innerHTML =
+    (currentPlayer ? "プレイヤー： " + PLAYER_LABEL[currentPlayer] + "<br>" : "") +
     GRADE_LABEL[state.level] + "<br>" +
+    (rank.size ? "大きさの めやす： " + rank.size + "<br>" : "") +
     "かかった じかん： " + fmtTime(elapsed) + "<br>" + rank.msg;
   var prevBest = best[state.level];
   var isNew = (prevBest === null || state.score > prevBest);
@@ -675,19 +1072,38 @@ function showResult(){
 }
 
 function updateBestLabels(){
-  [1, 4].forEach(function(lv){
+  ["1", "4", "1c", "4c"].forEach(function(lv){
     var el = document.getElementById("best-" + lv);
     if (best[lv] === null){ el.textContent = "ベスト： まだ なし"; el.classList.add("none"); }
     else { el.textContent = "ベスト： 20もん中 " + best[lv] + "もん せいかい"; el.classList.remove("none"); }
   });
 }
 
+document.querySelectorAll(".player-btn").forEach(function(btn){
+  btn.addEventListener("click", function(){ setPlayer(btn.getAttribute("data-player"), true); });
+});
 document.querySelectorAll(".start-btn").forEach(function(btn){
-  btn.addEventListener("click", function(){ startGame(Number(btn.getAttribute("data-level"))); });
+  btn.addEventListener("click", function(){
+    if (!currentPlayer){
+      var el = document.getElementById("player-record");
+      el.textContent = "まず「だれが やる？」で あそぶ 人を えらんでね！";
+      el.classList.add("warn");
+      el.scrollIntoView({block: "center"});
+      return;
+    }
+    startGame(btn.getAttribute("data-level"));
+  });
 });
 document.getElementById("quit-btn").addEventListener("click", function(){ showScreen("start"); });
 document.getElementById("again-btn").addEventListener("click", function(){ startGame(state.level); });
 document.getElementById("home-btn").addEventListener("click", function(){ showScreen("start"); });
+
+/* 前回 えらんだ プレイヤーを 最初から 選択済みにする */
+(function(){
+  var last = loadLastPlayer();
+  if (last) setPlayer(last, false);
+  else renderPlayerRecord();
+})();
 </script>
 </body>
 </html>
