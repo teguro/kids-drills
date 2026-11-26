@@ -146,6 +146,12 @@
       .balance-big small{ font-size:20px; }
       .task-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
       @media (max-width:520px){ .task-grid{ grid-template-columns:1fr; } }
+      .task-cat-head{
+        font-size:17px; font-weight:800; margin:18px 0 10px;
+        padding:6px 14px; background:var(--blue-soft); color:var(--ink);
+        border-radius:999px; display:inline-block;
+      }
+      .task-cat-head:first-child{ margin-top:2px; }
       .task-btn{
         display:flex; justify-content:space-between; align-items:center; gap:10px;
         min-height:64px; padding:12px 16px; text-align:left;
@@ -264,11 +270,12 @@
       @media (max-width:560px){
         .task-edit-row{ grid-template-columns:1fr 64px 64px; }
       }
-      .task-edit-row input{
+      .task-edit-row input, .task-edit-row select{
         padding:9px 10px; font-size:15px; font-weight:700; width:100%;
         border:2px solid var(--card-border); border-radius:10px;
         background:var(--input-bg); color:var(--ink); min-height:44px;
       }
+      .cat-select{ grid-column:1 / -1; }
       .mini-btn{
         min-height:44px; padding:6px 12px; border:none; border-radius:10px;
         background:var(--good); color:#fff; font-weight:800; font-size:14px;
@@ -340,7 +347,7 @@
         <div class="card">
           <h2 class="sec-title"><span class="dot"></span>タスクを えらんで しんせい</h2>
           <p class="muted" style="margin-top:0">できたら タップ！ まだ バードは ふえないよ。おうちの人の OKを まってね。</p>
-          <div class="task-grid" id="task-grid"></div>
+          <div id="task-groups"></div>
         </div>
 
         <div class="card">
@@ -412,7 +419,7 @@
           <h2 class="sec-title"><span class="dot"></span>タスクの編集</h2>
           <div class="col-head"><span>タスク名</span><span>そういちろう</span><span>つづみ</span><span class="sp"></span><span class="sp"></span></div>
           <div id="task-edit-list"></div>
-          <p class="muted">ポイント欄を空にすると、その子のタスク一覧に出なくなります。</p>
+          <p class="muted">ポイント欄を空にすると、その子のタスク一覧に出なくなります。区分は子ども画面の見出しになります。</p>
           <h3 style="margin:16px 0 8px; font-size:16px">タスクを追加</h3>
           <div class="task-edit-row">
             <input type="text" id="new-task-name" placeholder="タスク名" />
@@ -420,6 +427,12 @@
             <input type="number" id="new-task-t" placeholder="つづ" min="0" inputmode="numeric" />
             <button class="mini-btn" id="new-task-add" type="button">追加</button>
             <span></span>
+            <select id="new-task-cat" class="cat-select" aria-label="区分"></select>
+          </div>
+          <h3 style="margin:20px 0 8px; font-size:16px">ボードのリストに戻す</h3>
+          <p class="muted" style="margin-top:0">タスク一覧を、家のマグネットボードのリストに一括で置き換えます。残高・申請・履歴はそのまま残ります。</p>
+          <div class="btn-row">
+            <button class="danger-btn" id="task-reset" type="button">タスクをボードのリストにリセット</button>
           </div>
         </div>
 
@@ -474,21 +487,54 @@
         return 'id' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
       }
 
+      /* タスクの区分（子ども画面の表示順） */
+      var CATEGORIES = ['あさ', 'やすみのひ', 'かえってきてから ねるまで'];
+
+      /* 家のマグネットボードの実物リスト */
+      function boardTasks() {
+        var T = function (name, cat, s, t) {
+          return { id: uid(), name: name, cat: cat, points: { soichiro: s, tsuzumi: t } };
+        };
+        return [
+          /* あさ */
+          T('浅間神社ランニング', 'あさ', 5, 10),
+          T('ふとんを ととのえる', 'あさ', 1, 1),
+          T('あさごはん 20ぷん', 'あさ', 1, 1),
+          T('はみがき', 'あさ', 1, 1),
+          T('きがえ・かおあらう・かみととのえる・クリームつける', 'あさ', 1, 1),
+          T('こころをこめて そうじ（そうじき・クイックルワイパー）', 'あさ', 1, 1),
+          T('走りの教室・フラッグ あさのうんどう', 'あさ', 1, null),
+          T('ラジオたいそう', 'あさ', 1, null),
+          T('わすれものがないか もういちど かくにん', 'あさ', 1, 1),
+          /* やすみのひ */
+          T('つめを きる', 'やすみのひ', 1, 1),
+          T('へやの せいりせいとん', 'やすみのひ', 1, 1),
+          T('うわぐつを あらう', 'やすみのひ', 1, 1),
+          T('ゆかの ふきそうじ', 'やすみのひ', 1, 1),
+          /* かえってきてから ねるまで */
+          T('おたより・きゅうしょくセットを だす', 'かえってきてから ねるまで', 1, 1),
+          T('プールセット・たいそうぎを だす', 'かえってきてから ねるまで', 1, 1),
+          T('しゅくだいを する', 'かえってきてから ねるまで', 1, 1),
+          T('えんぴつを けずる', 'かえってきてから ねるまで', 1, 1),
+          T('じかんわり かくにん', 'かえってきてから ねるまで', 1, 1),
+          T('つぎのひの じゅんび', 'かえってきてから ねるまで', 1, 1),
+          T('よるごはん', 'かえってきてから ねるまで', 1, 1),
+          T('ごはんを つくる', 'かえってきてから ねるまで', 10, null),
+          T('おふろ', 'かえってきてから ねるまで', 1, 1),
+          T('クリームを ぬって ほしつする', 'かえってきてから ねるまで', 1, 1),
+          T('かみのけを かわかす', 'かえってきてから ねるまで', 1, 1),
+          T('はみがき（しあげまで）', 'かえってきてから ねるまで', 1, 1),
+          T('7:30までに 矯正装置を つける', 'かえってきてから ねるまで', 1, null)
+        ];
+      }
+
       function defaultState() {
         return {
           v: 1,
           pin: null,
           rate: 3,
           balances: { soichiro: 0, tsuzumi: 0 },
-          tasks: [
-            { id: uid(), name: 'はみがきを する',           points: { soichiro: 1,    tsuzumi: 1 } },
-            { id: uid(), name: 'てあらい・うがいを する',   points: { soichiro: 1,    tsuzumi: 1 } },
-            { id: uid(), name: 'じぶんの ものを かたづける', points: { soichiro: 1,    tsuzumi: 1 } },
-            { id: uid(), name: 'しゅくだいを する',         points: { soichiro: 1,    tsuzumi: 1 } },
-            { id: uid(), name: 'おてつだいを する',         points: { soichiro: 1,    tsuzumi: 1 } },
-            { id: uid(), name: 'あさ やまを はしる',         points: { soichiro: 5,    tsuzumi: 10 } },
-            { id: uid(), name: 'ゆうしょくを つくる',       points: { soichiro: 10,   tsuzumi: null } }
-          ],
+          tasks: boardTasks(),
           requests: [],
           history: []
         };
@@ -595,23 +641,35 @@
         $('child-balance').textContent = bal;
         $('child-yen').textContent = '1バード＝' + state.rate + '円だから、だいたい ' + (bal * state.rate) + '円分だよ';
 
-        /* tasks */
+        /* tasks（区分ごとに見出し付きで表示） */
         var pend = pendingOf(currentKid);
         var pendTaskIds = {};
         pend.forEach(function (r) { if (r.type === 'task') pendTaskIds[r.taskId] = true; });
+        var visible = state.tasks.filter(function (t) { return t.points[currentKid] != null; });
+        var cats = [];
+        CATEGORIES.forEach(function (c) { if (cats.indexOf(c) < 0) cats.push(c); });
+        visible.forEach(function (t) {
+          var c = t.cat || CATEGORIES[0];
+          if (cats.indexOf(c) < 0) cats.push(c);
+        });
         var html = '';
-        state.tasks.forEach(function (t) {
-          var pts = t.points[currentKid];
-          if (pts == null) return;
-          var isPend = !!pendTaskIds[t.id];
-          html += '<button type="button" class="task-btn' + (isPend ? ' pending' : '') + '" data-task="' + t.id + '"' + (isPend ? ' disabled' : '') + '>'
-            + '<span>' + esc(t.name) + '</span>'
-            + (isPend ? '<span class="pts">しんせいちゅう</span>' : '<span class="pts">+' + pts + '</span>')
-            + '</button>';
+        cats.forEach(function (cat) {
+          var inCat = visible.filter(function (t) { return (t.cat || CATEGORIES[0]) === cat; });
+          if (!inCat.length) return;
+          html += '<h3 class="task-cat-head">' + esc(cat) + '</h3><div class="task-grid">';
+          inCat.forEach(function (t) {
+            var pts = t.points[currentKid];
+            var isPend = !!pendTaskIds[t.id];
+            html += '<button type="button" class="task-btn' + (isPend ? ' pending' : '') + '" data-task="' + t.id + '"' + (isPend ? ' disabled' : '') + '>'
+              + '<span>' + esc(t.name) + '</span>'
+              + (isPend ? '<span class="pts">しんせいちゅう</span>' : '<span class="pts">+' + pts + '</span>')
+              + '</button>';
+          });
+          html += '</div>';
         });
         if (!html) html = '<p class="empty">いま できる タスクは ないよ</p>';
-        $('task-grid').innerHTML = html;
-        Array.prototype.forEach.call($('task-grid').querySelectorAll('[data-task]'), function (b) {
+        $('task-groups').innerHTML = html;
+        Array.prototype.forEach.call($('task-groups').querySelectorAll('[data-task]'), function (b) {
           b.addEventListener('click', function () { applyTask(b.getAttribute('data-task')); });
         });
 
@@ -952,6 +1010,14 @@
         toast('レートを 1バード＝' + v + '円 にしました');
       }
 
+      function catOptions(selected) {
+        var html = '';
+        CATEGORIES.forEach(function (c) {
+          html += '<option value="' + esc(c) + '"' + (c === selected ? ' selected' : '') + '>' + esc(c) + '</option>';
+        });
+        return html;
+      }
+
       function renderTaskEdit() {
         var html = '';
         state.tasks.forEach(function (t) {
@@ -961,9 +1027,11 @@
             + '<input type="number" min="0" inputmode="numeric" id="te-t-' + t.id + '" value="' + (t.points.tsuzumi == null ? '' : t.points.tsuzumi) + '" />'
             + '<button type="button" class="mini-btn" data-tesave="' + t.id + '">保存</button>'
             + '<button type="button" class="mini-btn del" data-tedel="' + t.id + '">削除</button>'
+            + '<select id="te-cat-' + t.id + '" class="cat-select" aria-label="区分">' + catOptions(t.cat || CATEGORIES[0]) + '</select>'
             + '</div>';
         });
         $('task-edit-list').innerHTML = html;
+        $('new-task-cat').innerHTML = catOptions(CATEGORIES[0]);
         Array.prototype.forEach.call($('task-edit-list').querySelectorAll('[data-tesave]'), function (b) {
           b.addEventListener('click', function () { saveTaskEdit(b.getAttribute('data-tesave')); });
         });
@@ -981,10 +1049,11 @@
         var name = $('te-name-' + taskId).value.trim();
         var ps = parsePts($('te-s-' + taskId).value);
         var pt = parsePts($('te-t-' + taskId).value);
+        var cat = $('te-cat-' + taskId).value;
         if (!name) { toast('タスク名を入力してください'); return; }
         if (ps == null && pt == null) { toast('どちらかの子のポイントを入れてください'); return; }
         state.tasks.forEach(function (t) {
-          if (t.id === taskId) { t.name = name; t.points = { soichiro: ps, tsuzumi: pt }; }
+          if (t.id === taskId) { t.name = name; t.cat = cat; t.points = { soichiro: ps, tsuzumi: pt }; }
         });
         save();
         toast('タスクを保存しました');
@@ -999,15 +1068,36 @@
         var name = $('new-task-name').value.trim();
         var ps = parsePts($('new-task-s').value);
         var pt = parsePts($('new-task-t').value);
+        var cat = $('new-task-cat').value;
         if (!name) { toast('タスク名を入力してください'); return; }
         if (ps == null && pt == null) { toast('どちらかの子のポイントを入れてください'); return; }
-        state.tasks.push({ id: uid(), name: name, points: { soichiro: ps, tsuzumi: pt } });
+        state.tasks.push({ id: uid(), name: name, cat: cat, points: { soichiro: ps, tsuzumi: pt } });
         save();
         $('new-task-name').value = '';
         $('new-task-s').value = '';
         $('new-task-t').value = '';
         renderTaskEdit();
         toast('タスクを追加しました');
+      }
+
+      var resetArmed = false;
+      function resetTasksToBoard() {
+        var btn = $('task-reset');
+        if (!resetArmed) {
+          resetArmed = true;
+          btn.textContent = '本当にリセットしますか？（今のタスク一覧はボードのリストに置き換わります）もう一度押すと実行';
+          setTimeout(function () {
+            resetArmed = false;
+            btn.textContent = 'タスクをボードのリストにリセット';
+          }, 6000);
+          return;
+        }
+        resetArmed = false;
+        btn.textContent = 'タスクをボードのリストにリセット';
+        state.tasks = boardTasks();
+        save();
+        renderTaskEdit();
+        toast('タスクをボードのリストにリセットしました');
       }
 
       function changePin() {
@@ -1097,6 +1187,7 @@
       $('bedtime-apply').addEventListener('click', applyBedtime);
       $('rate-save').addEventListener('click', saveRate);
       $('new-task-add').addEventListener('click', addTask);
+      $('task-reset').addEventListener('click', resetTasksToBoard);
       $('pin-change').addEventListener('click', changePin);
       $('export-btn').addEventListener('click', doExport);
       $('copy-btn').addEventListener('click', doCopy);
