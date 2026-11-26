@@ -1,0 +1,693 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>さんすうドリル</title>
+<style>
+  :root{
+    --bg:#FFF6D6; --bg2:#DFF3FF; --card:#FFFFFF; --ink:#2B2118; --muted:#6B5D4F;
+    --orange:#FF8A2A; --orange-d:#E56E0B; --sky:#2FA8E0; --sky-d:#1B7FB8;
+    --green:#2FBF71; --green-d:#1E9E57; --pink:#FF6B9D; --yellow:#FFC93C;
+    --wrong:#E5484D; --line:#F0DFB8; --choice-bg:#FFF9EC; --choice-line:#EAD9AE;
+    --shadow:0 6px 0 rgba(120,80,10,.14);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#1E1A2E; --bg2:#16283A; --card:#2C2742; --ink:#FFF6E3; --muted:#CFC4B0;
+      --line:#4A4266; --choice-bg:#383152; --choice-line:#554A7A;
+      --shadow:0 6px 0 rgba(0,0,0,.35);
+    }
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic UI","Noto Sans JP",sans-serif;
+    background:linear-gradient(180deg,var(--bg2) 0%,var(--bg) 260px,var(--bg) 100%);
+    color:var(--ink); min-height:100dvh;
+  }
+  button{font-family:inherit; cursor:pointer;}
+  button, [role="button"]{min-height:44px;}
+  .wrap{max-width:640px;margin:0 auto;padding:16px 16px 40px;}
+  .hidden{display:none !important;}
+  .hero{text-align:center;padding:14px 6px 4px;}
+  .hero-bird{width:104px;height:104px;margin:0 auto 2px;}
+  h1{font-size:30px;line-height:1.25;margin:6px 0 4px;font-weight:900;letter-spacing:.02em;}
+  .hero p{margin:4px 0;font-size:16px;color:var(--muted);font-weight:700;}
+  .howto{
+    background:var(--card);border:2px solid var(--line);border-radius:18px;
+    padding:12px 16px;margin:14px 0 18px;font-size:15px;line-height:1.7;font-weight:700;
+    box-shadow:var(--shadow);
+  }
+  .howto b{color:var(--orange-d);}
+  .lv-title{font-size:19px;font-weight:900;margin:6px 0 10px;text-align:center;}
+  .lv-card{
+    display:block;width:100%;text-align:left;border:none;border-radius:20px;
+    padding:16px 18px 14px;margin:0 0 14px;color:#fff;box-shadow:var(--shadow);
+    position:relative;
+  }
+  .lv1{background:linear-gradient(135deg,#FFB03A,#FF8A2A);}
+  .lv4{background:linear-gradient(135deg,#FF7A59,#D63A3F);}
+  .lv-name{font-size:24px;font-weight:900;line-height:1.2;}
+  .lv-sub{font-size:14px;font-weight:700;opacity:.95;margin-top:3px;line-height:1.5;}
+  .lv-best{
+    display:inline-block;background:rgba(255,255,255,.92);color:#5A3A00;
+    font-size:13px;font-weight:900;border-radius:999px;padding:4px 12px;margin-top:9px;
+  }
+  .lv-best.none{background:rgba(255,255,255,.28);color:#fff;}
+  .start-btn{
+    display:block;width:100%;border:none;border-radius:14px;background:rgba(255,255,255,.94);color:#5A3A00;
+    font-size:17px;font-weight:900;padding:12px 4px;min-height:48px;margin-top:12px;
+    box-shadow:0 3px 0 rgba(90,58,0,.28);
+  }
+  .start-btn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(90,58,0,.28);}
+  .topbar{display:flex;align-items:center;gap:10px;margin:4px 0 12px;}
+  .quit-btn{
+    border:2px solid var(--line);background:var(--card);color:var(--muted);
+    border-radius:999px;font-size:14px;font-weight:900;padding:8px 16px;min-height:44px;
+  }
+  .progress{flex:1;height:18px;background:var(--card);border:2px solid var(--line);border-radius:999px;overflow:hidden;}
+  .progress > div{height:100%;background:linear-gradient(90deg,var(--yellow),var(--orange));border-radius:999px;transition:width .35s ease;width:0%;}
+  .qcount{font-size:15px;font-weight:900;white-space:nowrap;}
+  .score-chip{font-size:15px;font-weight:900;white-space:nowrap;background:var(--card);border:2px solid var(--line);border-radius:999px;padding:6px 12px;}
+  .q-card{
+    background:var(--card);border:2px solid var(--line);border-radius:24px;
+    padding:22px 18px 20px;box-shadow:var(--shadow);text-align:center;
+  }
+  .q-kind{
+    display:inline-block;font-size:13px;font-weight:900;border-radius:999px;padding:5px 14px;margin-bottom:12px;color:#fff;
+  }
+  .kind-add{background:var(--orange);}
+  .kind-sub{background:var(--sky);}
+  .kind-div{background:var(--green);}
+  .kind-dec{background:var(--pink);}
+  .kind-frac{background:var(--orange-d);}
+  .kind-gaisu{background:var(--sky-d);}
+  .q-text{font-size:40px;font-weight:900;line-height:1.3;word-break:keep-all;}
+  .q-text.small{font-size:28px;}
+  .q-ask{font-size:16px;font-weight:700;color:var(--muted);margin-top:8px;}
+  .frac{display:inline-flex;flex-direction:column;text-align:center;vertical-align:middle;margin:0 .06em;line-height:1.08;font-size:.6em;font-weight:900;}
+  .frac>span:first-child{border-bottom:3px solid currentColor;padding:0 .22em;}
+  .frac>span:last-child{padding:0 .22em;}
+  .choices{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px;}
+  @media (max-width:380px){ .choices{grid-template-columns:1fr;} .q-text{font-size:34px;} }
+  .choice{
+    border:3px solid var(--choice-line);background:var(--choice-bg);color:var(--ink);
+    border-radius:18px;font-size:26px;font-weight:900;padding:16px 8px;min-height:68px;
+    line-height:1.25;
+  }
+  .choice:active{transform:scale(.98);}
+  .choice.correct{border-color:var(--green);background:#DFF7E8;color:#0E6B38;}
+  .choice.wrong{border-color:var(--wrong);background:#FDE3E3;color:#8F1D21;}
+  .choice.dim{opacity:.45;}
+  @media (prefers-color-scheme: dark){
+    .choice.correct{background:#17402A;color:#8CF0B4;}
+    .choice.wrong{background:#4A1E20;color:#FFB3B6;}
+  }
+  .feedback{margin-top:16px;border-radius:18px;padding:14px 16px;font-size:16px;line-height:1.65;font-weight:700;text-align:left;}
+  .feedback.ok{background:#DFF7E8;color:#0E5A30;border:2px solid var(--green);}
+  .feedback.ng{background:#FDECEC;color:#7C1A1E;border:2px solid var(--wrong);}
+  @media (prefers-color-scheme: dark){
+    .feedback.ok{background:#17402A;color:#C9F5DA;}
+    .feedback.ng{background:#4A1E20;color:#FFD9DA;}
+  }
+  .feedback .fb-head{font-size:20px;font-weight:900;}
+  .next-btn{
+    display:block;width:100%;margin-top:14px;border:none;border-radius:18px;
+    background:var(--orange);color:#fff;font-size:21px;font-weight:900;padding:16px;min-height:60px;
+    box-shadow:0 5px 0 var(--orange-d);
+  }
+  .next-btn:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-d);}
+  .result-card{
+    background:var(--card);border:2px solid var(--line);border-radius:24px;
+    padding:24px 18px 20px;box-shadow:var(--shadow);text-align:center;
+  }
+  .rank-bird{width:120px;height:120px;margin:0 auto;}
+  .rank-name{font-size:30px;font-weight:900;margin:6px 0 2px;}
+  .rank-score{font-size:19px;font-weight:900;color:var(--orange-d);}
+  .rank-meta{font-size:15px;font-weight:700;color:var(--muted);margin-top:6px;line-height:1.7;}
+  .newbest{
+    display:inline-block;background:var(--yellow);color:#5A3A00;font-weight:900;
+    border-radius:999px;padding:5px 16px;font-size:14px;margin-top:8px;
+  }
+  .stars{font-size:26px;letter-spacing:4px;margin-top:6px;color:var(--yellow);-webkit-text-stroke:1px #D9A400;}
+  .review-title{font-size:19px;font-weight:900;margin:24px 0 10px;}
+  .review-item{
+    background:var(--card);border:2px solid var(--line);border-radius:16px;
+    padding:12px 14px;margin:0 0 10px;text-align:left;
+  }
+  .review-item .r-q{font-size:18px;font-weight:900;line-height:1.45;}
+  .review-item .r-a{font-size:14px;font-weight:700;color:var(--muted);line-height:1.6;margin-top:3px;}
+  .btn-row{display:grid;gap:12px;margin-top:18px;}
+  .again-btn{
+    border:none;border-radius:18px;background:var(--sky);color:#fff;
+    font-size:20px;font-weight:900;padding:16px;min-height:60px;box-shadow:0 5px 0 var(--sky-d);
+  }
+  .again-btn:active{transform:translateY(3px);box-shadow:0 2px 0 var(--sky-d);}
+  .home-btn{
+    border:2px solid var(--line);border-radius:18px;background:var(--card);color:var(--ink);
+    font-size:18px;font-weight:900;padding:14px;min-height:56px;
+  }
+  .foot-note{text-align:center;font-size:13px;color:var(--muted);font-weight:700;margin-top:20px;line-height:1.7;}
+  @media (prefers-reduced-motion: reduce){ *{transition:none !important;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <section id="screen-start">
+    <div class="hero">
+      <svg class="hero-bird" viewBox="0 0 120 120" aria-hidden="true">
+        <ellipse cx="58" cy="70" rx="34" ry="28" fill="#B08968"/>
+        <circle cx="84" cy="48" r="20" fill="#C49A6C"/>
+        <circle cx="90" cy="44" r="3.4" fill="#2B2118"/>
+        <path d="M102 48 L114 52 L102 57 Z" fill="#FF8A2A"/>
+        <path d="M30 62 Q14 52 10 38 Q26 40 34 52 Z" fill="#8A6A4A"/>
+        <path d="M44 92 L42 104 M66 94 L66 106" stroke="#E56E0B" stroke-width="3.4" stroke-linecap="round"/>
+        <ellipse cx="52" cy="76" rx="16" ry="11" fill="#E8D3B0"/>
+        <path d="M78 30 Q84 22 92 28" stroke="#8A6A4A" stroke-width="3" fill="none" stroke-linecap="round"/>
+      </svg>
+      <h1>さんすうドリル</h1>
+      <p>がくねんを えらんで、<br>20もんに チャレンジ！ がんばろう！</p>
+    </div>
+
+    <div class="howto">
+      あそびかた： がくねんを えらぶと <b>20もん</b> でるよ。
+      こたえは <b>4つの ボタン</b>から タップして えらんでね。
+      1もんごとに せいかい・ふせいかいと かいせつが すぐ 出るよ。
+      20もん ぜんぶ こたえると、スズメの ランクが もらえるよ！
+    </div>
+
+    <div class="lv-title">がくねんを えらんでね</div>
+
+    <div class="lv-card lv1">
+      <div class="lv-name">1ねんせい</div>
+      <div class="lv-sub">たしざん・ひきざん<br>くりあがり・くりさがりの けいさんも 入っているよ（こたえは 20まで）</div>
+      <span class="lv-best none" id="best-1">ベスト： まだ なし</span>
+      <button class="start-btn" data-level="1">スタート（20もん）</button>
+    </div>
+
+    <div class="lv-card lv4">
+      <div class="lv-name">4ねんせい</div>
+      <div class="lv-sub">2けたで わる わりざん・小数と 分数の 入門・がい数<br>四捨五入（ししゃごにゅう）の もんだいも あるよ</div>
+      <span class="lv-best none" id="best-4">ベスト： まだ なし</span>
+      <button class="start-btn" data-level="4">スタート（20もん）</button>
+    </div>
+
+    <p class="foot-note">ベストスコアは このページを ひらいている あいだ きろくされるよ。</p>
+  </section>
+
+  <section id="screen-game" class="hidden">
+    <div class="topbar">
+      <button class="quit-btn" id="quit-btn">← やめる</button>
+      <div class="progress"><div id="progress-bar"></div></div>
+      <div class="qcount" id="qcount">1 / 20</div>
+      <div class="score-chip" id="score-chip">⭐ 0</div>
+    </div>
+    <div class="q-card">
+      <span class="q-kind kind-add" id="q-kind">たしざん</span>
+      <div class="q-text" id="q-text">3 ＋ 4 ＝ ？</div>
+      <div class="q-ask" id="q-ask">こたえは どれかな？</div>
+      <div class="choices" id="choices"></div>
+      <div id="feedback-zone"></div>
+    </div>
+  </section>
+
+  <section id="screen-result" class="hidden">
+    <div class="result-card">
+      <svg class="rank-bird" viewBox="0 0 120 120" aria-hidden="true" id="rank-bird"></svg>
+      <div class="rank-name" id="rank-name">さんすうマスター</div>
+      <div class="stars" id="rank-stars"></div>
+      <div class="rank-score" id="rank-score">20もん せいかい！</div>
+      <div class="rank-meta" id="rank-meta"></div>
+      <div id="newbest-zone"></div>
+    </div>
+    <div class="review-title">ふりかえり（ぜんぶの もんだい）</div>
+    <div id="review-list"></div>
+    <div class="btn-row">
+      <button class="again-btn" id="again-btn">もういちど おなじ がくねん</button>
+      <button class="home-btn" id="home-btn">がくねんを えらびなおす</button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+"use strict";
+/* ================= ユーティリティ ================= */
+function randInt(min, max){ return Math.floor(Math.random() * (max - min + 1)) + min; }
+function shuffle(arr){
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--){
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+function round2(v){ return Math.round(v * 100) / 100; }
+/* 数値の答えから 4つの 選択肢（文字列）を作る */
+function numChoices(ans, offsets, fmt){
+  fmt = fmt || function(v){ return String(v); };
+  var seen = {}; seen[ans] = true;
+  var out = [ans];
+  var offs = shuffle(offsets.slice());
+  for (var i = 0; i < offs.length && out.length < 4; i++){
+    var c = round2(ans + offs[i]);
+    if (c >= 0 && !seen[c]){ seen[c] = true; out.push(c); }
+  }
+  var extra = 3;
+  while (out.length < 4){
+    var c2 = round2(ans + extra);
+    if (c2 >= 0 && !seen[c2]){ seen[c2] = true; out.push(c2); }
+    extra += 2;
+  }
+  return shuffle(out).map(fmt);
+}
+/* 文字列候補から 重ならない 4択を作る */
+function strChoices(answer, cands){
+  var seen = {}; seen[answer] = true;
+  var out = [answer];
+  var list = shuffle(cands.slice());
+  for (var i = 0; i < list.length && out.length < 4; i++){
+    if (!seen[list[i]]){ seen[list[i]] = true; out.push(list[i]); }
+  }
+  return shuffle(out);
+}
+function fmtComma(v){ return v.toLocaleString("ja-JP"); }
+function fmtDec1(v){ return v.toFixed(1); }
+/* "2/5" のような 分数を たて書き表示にする */
+function fracHTML(s){
+  var esc = String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return esc.replace(/(\d+)\/(\d+)/g, '<span class="frac"><span>$1</span><span>$2</span></span>');
+}
+function makeQ(kindClass, kindLabel, text, ask, choices, answer, expl, small){
+  return { kindClass: kindClass, kindLabel: kindLabel, text: text, ask: ask,
+           choices: choices, answer: answer, expl: expl, small: !!small };
+}
+
+/* ================= 1ねんせい ================= */
+/* くりあがりの たしざん：おおきい数を ベースに 10を 作る */
+function g1AddCarry(){
+  var a, b;
+  do { a = randInt(2, 9); b = randInt(2, 9); } while (a + b < 11 || a + b > 19);
+  if (Math.random() < 0.5){ var t = a; a = b; b = t; }
+  var ans = a + b;
+  var big = Math.max(a, b), small = Math.min(a, b);
+  var need = 10 - big, rest = small - need;
+  var expl = a + " ＋ " + b + " は、おおきい " + big + " を ベースに、ちいさい " + small +
+    " を " + need + " と " + rest + " に わけて、" + big + " ＋ " + need + " ＝ 10、のこりの " +
+    rest + " を 10 に たして " + ans + " だよ。";
+  return makeQ("kind-add", "たしざん", a + " ＋ " + b + " ＝ ？", "こたえは どれかな？",
+    numChoices(ans, [-2,-1,1,2,-3,3,10,-10]), String(ans), expl, false);
+}
+/* くりあがりなしの たしざん */
+function g1AddSimple(){
+  var a, b;
+  if (Math.random() < 0.5){
+    do { a = randInt(2, 9); b = randInt(1, 9); } while (a + b > 10);
+  } else {
+    do { a = randInt(11, 19); } while (a % 10 > 8);
+    b = randInt(1, 9 - (a % 10));
+  }
+  var ans = a + b;
+  var expl = a + " ＋ " + b + " は、くりあがりが ないから そのまま たせるよ。" + a + " ＋ " + b + " ＝ " + ans + " だよ。";
+  return makeQ("kind-add", "たしざん", a + " ＋ " + b + " ＝ ？", "こたえは どれかな？",
+    numChoices(ans, [-2,-1,1,2,-3,3,10,-10]), String(ans), expl, false);
+}
+/* くりさがりの ひきざん：減減法（引く数 − 一の位 → 10 − 残り） */
+function g1SubBorrow(){
+  var a = randInt(11, 18);
+  var b = randInt(a - 9, 9);
+  var ans = a - b;
+  var ones = a - 10;
+  var rest = b - ones;
+  var expl = a + " − " + b + " は、" + a + " の 一のくらい " + ones + " を つかって、" +
+    b + " − " + ones + " ＝ " + rest + "、10 − " + rest + " ＝ " + ans + " だよ。";
+  return makeQ("kind-sub", "ひきざん", a + " − " + b + " ＝ ？", "こたえは どれかな？",
+    numChoices(ans, [-2,-1,1,2,-3,3,10,-10]), String(ans), expl, false);
+}
+/* くりさがりなしの ひきざん */
+function g1SubSimple(){
+  var a, b;
+  if (Math.random() < 0.5){
+    a = randInt(4, 9); b = randInt(1, a - 1);
+  } else {
+    a = randInt(12, 19); b = randInt(1, a % 10);
+  }
+  var ans = a - b;
+  var expl = a + " − " + b + " は、一のくらいから そのまま ひけるよ。" + a + " − " + b + " ＝ " + ans + " だよ。";
+  return makeQ("kind-sub", "ひきざん", a + " − " + b + " ＝ ？", "こたえは どれかな？",
+    numChoices(ans, [-2,-1,1,2,-3,3,10,-10]), String(ans), expl, false);
+}
+function buildGrade1(){
+  var makers = [];
+  var i;
+  for (i = 0; i < 6; i++) makers.push(g1AddCarry);
+  for (i = 0; i < 4; i++) makers.push(g1AddSimple);
+  for (i = 0; i < 6; i++) makers.push(g1SubBorrow);
+  for (i = 0; i < 4; i++) makers.push(g1SubSimple);
+  makers = shuffle(makers);
+  var qs = [], seen = {};
+  makers.forEach(function(fn){
+    var q = fn(), tries = 0;
+    while (seen[q.text] && tries < 20){ q = fn(); tries++; }
+    seen[q.text] = true;
+    qs.push(q);
+  });
+  return qs;
+}
+
+/* ================= 4ねんせい ================= */
+/* 2けたで わる わりざん */
+function g4Div(){
+  var divisor = randInt(12, 29);
+  if (Math.random() < 0.4){
+    var q = randInt(3, 15);
+    var r = randInt(1, divisor - 1);
+    var a = divisor * q + r;
+    var ansStr = q + " あまり " + r;
+    var expl = divisor + " × " + q + " ＝ " + (divisor * q) + "、" + a + " − " + (divisor * q) +
+      " ＝ " + r + "。だから " + a + " ÷ " + divisor + " ＝ " + q + " あまり " + r +
+      " だよ。あまりは 割る数 " + divisor + " より 小さくなるよ。";
+    var combos = [[q+1, r],[q, r+1],[q-1, r],[q, r-1],[q+1, r+1],[q+2, r],[q-1, Math.max(0, r-1)]];
+    var cands = [];
+    combos.forEach(function(c){
+      if (c[0] >= 1 && c[1] >= 0 && c[1] < divisor) cands.push(c[0] + " あまり " + c[1]);
+    });
+    return makeQ("kind-div", "わりざん", a + " ÷ " + divisor + " ＝ ？ あまり ？", "商と あまりは どれかな？",
+      strChoices(ansStr, cands), ansStr, expl, true);
+  }
+  var qq = randInt(3, 19);
+  var aa = divisor * qq;
+  var expl2 = divisor + " × " + qq + " ＝ " + aa + " だから、" + aa + " ÷ " + divisor + " ＝ " + qq + " だよ。";
+  return makeQ("kind-div", "わりざん", aa + " ÷ " + divisor + " ＝ ？", "こたえは どれかな？",
+    numChoices(qq, [-3,-2,-1,1,2,3,-10,10]), String(qq), expl2, false);
+}
+/* 小数の たしざん・ひきざん */
+function g4DecAddSub(){
+  var a = randInt(3, 99) / 10, b = randInt(3, 99) / 10;
+  if (Math.random() < 0.5){
+    var ans = round2(a + b);
+    var expl = "小数は 小数点の 位置を そろえて 計算するよ。" + a.toFixed(1) + " ＋ " + b.toFixed(1) +
+      " ＝ " + ans.toFixed(1) + " だよ。整数と 同じように たして、小数点も 同じ 位置に 下ろそう。";
+    return makeQ("kind-dec", "小数", a.toFixed(1) + " ＋ " + b.toFixed(1) + " ＝ ？", "こたえは どれかな？",
+      numChoices(ans, [-1,-0.2,-0.1,0.1,0.2,1,-2,2], fmtDec1), ans.toFixed(1), expl, false);
+  }
+  if (b > a){ var t = a; a = b; b = t; }
+  if (a === b) a = round2(a + 0.5);
+  var ans2 = round2(a - b);
+  var expl2 = "小数は 小数点の 位置を そろえて 計算するよ。" + a.toFixed(1) + " − " + b.toFixed(1) +
+    " ＝ " + ans2.toFixed(1) + " だよ。整数と 同じように ひいて、小数点も 同じ 位置に 下ろそう。";
+  return makeQ("kind-dec", "小数", a.toFixed(1) + " − " + b.toFixed(1) + " ＝ ？", "こたえは どれかな？",
+    numChoices(ans2, [-1,-0.2,-0.1,0.1,0.2,1,-2,2], fmtDec1), ans2.toFixed(1), expl2, false);
+}
+/* 小数 × 整数 */
+function g4DecMul(){
+  var a = randInt(11, 99) / 10;
+  var b = randInt(2, 9);
+  var ans = round2(a * b);
+  var a10 = Math.round(a * 10);
+  var expl = a.toFixed(1) + " × " + b + " は、まず " + a10 + " × " + b + " ＝ " + (a10 * b) +
+    " と 計算して、小数点を 1つ 左へ うつして " + ans.toFixed(1) + " だよ。";
+  return makeQ("kind-dec", "小数", a.toFixed(1) + " × " + b + " ＝ ？", "こたえは どれかな？",
+    numChoices(ans, [-1,-0.2,-0.1,0.1,0.2,1,-10,10], fmtDec1), ans.toFixed(1), expl, false);
+}
+/* 分母が 同じ 分数の たしざん・ひきざん */
+function g4FracAddSub(){
+  var den = randInt(3, 9);
+  if (Math.random() < 0.5){
+    var n1 = randInt(1, den - 2);
+    var n2 = randInt(1, den - 1 - n1);
+    var an = n1 + n2;
+    var ans = an + "/" + den;
+    var expl = "分母が 同じ 分数は、分母は そのままで 分子同士を たすよ。" + n1 + " ＋ " + n2 +
+      " ＝ " + an + " だから、こたえは " + ans + " だよ。";
+    var cands = [(an+1)+"/"+den, (an-1)+"/"+den, (an+2)+"/"+den, an+"/"+(den+1), an+"/"+(den-1), (an-2)+"/"+den];
+    return makeQ("kind-frac", "分数", n1 + "/" + den + " ＋ " + n2 + "/" + den + " ＝ ？", "こたえは どれかな？",
+      strChoices(ans, cands.filter(function(c){ return c.charAt(0) !== "0" && c.indexOf("-") === -1; })), ans, expl, false);
+  }
+  var m1 = randInt(3, den - 1);
+  var m2 = randInt(1, m1 - 1);
+  var an2 = m1 - m2;
+  var ans2 = an2 + "/" + den;
+  var expl2 = "分母が 同じ 分数は、分母は そのままで 分子同士を ひくよ。" + m1 + " − " + m2 +
+    " ＝ " + an2 + " だから、こたえは " + ans2 + " だよ。";
+  var cands2 = [(an2+1)+"/"+den, (an2-1)+"/"+den, (an2+2)+"/"+den, an2+"/"+(den+1), an2+"/"+(den-1), (an2+3)+"/"+den];
+  return makeQ("kind-frac", "分数", m1 + "/" + den + " − " + m2 + "/" + den + " ＝ ？", "こたえは どれかな？",
+    strChoices(ans2, cands2.filter(function(c){ return c.charAt(0) !== "0" && c.indexOf("-") === -1; })), ans2, expl2, false);
+}
+/* 分数の 大きさくらべ */
+function g4FracCompare(){
+  if (Math.random() < 0.5){
+    /* 単位分数：分母が 小さいほど 大きい */
+    var dens = shuffle([3, 4, 5, 6, 8]).slice(0, 4);
+    var choices = dens.map(function(d){ return "1/" + d; });
+    var ansD = Math.min.apply(null, dens);
+    var ans = "1/" + ansD;
+    var expl = "分子が みんな 1の 分数は、分母が 小さいほど 1つ分が 大きいよ。だから いちばん 大きいのは " + ans + " だよ。";
+    return makeQ("kind-frac", "分数", "分数の 大きさくらべ", "いちばん 大きいのは どれかな？",
+      shuffle(choices), ans, expl, true);
+  }
+  /* 分母が 同じ：分子が 大きいほど 大きい */
+  var den = randInt(5, 9);
+  var nums = shuffle([1, 2, 3, 4, 5, 6, 7].filter(function(n){ return n < den; })).slice(0, 4);
+  var choices2 = nums.map(function(n){ return n + "/" + den; });
+  var ansN = Math.max.apply(null, nums);
+  var ans2 = ansN + "/" + den;
+  var expl2 = "分母が 同じ 分数は、分子が 大きいほど 大きいよ。だから いちばん 大きいのは " + ans2 + " だよ。";
+  return makeQ("kind-frac", "分数", "分数の 大きさくらべ", "いちばん 大きいのは どれかな？",
+    shuffle(choices2), ans2, expl2, true);
+}
+/* がい数（四捨五入） */
+function g4Gaisu(){
+  if (Math.random() < 0.5){
+    var places = [
+      {p:100, keep:"百の位", under:"十の位", underP:10},
+      {p:1000, keep:"千の位", under:"百の位", underP:100},
+      {p:10000, keep:"一万の位", under:"千の位", underP:1000}
+    ];
+    var pl = places[randInt(0, 2)];
+    var n, digit;
+    do {
+      n = randInt(12345, 98765);
+      digit = Math.floor(n / pl.underP) % 10;
+    } while (digit === 0);
+    var rounded = Math.round(n / pl.p) * pl.p;
+    var fl = Math.floor(n / pl.p) * pl.p, ce = fl + pl.p;
+    var expl = pl.keep + "までの がい数は、その下の " + pl.under + "を 四捨五入するよ。" +
+      fmtComma(n) + " の " + pl.under + "は " + digit + " だから " +
+      (digit >= 5 ? "切り上げて " : "切り捨てて ") + fmtComma(rounded) + " になるよ。";
+    var cands = [fl, ce, rounded + pl.p, rounded - pl.p, rounded + pl.p * 10, rounded + pl.p * 2, fl - pl.p, n];
+    var choices = strChoices(fmtComma(rounded),
+      cands.filter(function(c){ return c > 0; }).map(fmtComma));
+    return makeQ("kind-gaisu", "がい数", fmtComma(n) + " を " + pl.keep + "までの がい数にすると？",
+      "こたえは どれかな？", choices, fmtComma(rounded), expl, true);
+  }
+  /* 上から ○けたの がい数 */
+  var keepK = randInt(1, 2);
+  var p2 = Math.pow(10, 5 - keepK);
+  var n2, digit2;
+  do {
+    n2 = randInt(23456, 98765);
+    digit2 = Math.floor(n2 / (p2 / 10)) % 10;
+  } while (digit2 === 0);
+  var rounded2 = Math.round(n2 / p2) * p2;
+  var fl2 = Math.floor(n2 / p2) * p2, ce2 = fl2 + p2;
+  var expl2 = "上から " + keepK + "けたの がい数は、" + (keepK + 1) + "けた目を 四捨五入するよ。" +
+    fmtComma(n2) + " の " + (keepK + 1) + "けた目は " + digit2 + " だから " +
+    (digit2 >= 5 ? "切り上げて " : "切り捨てて ") + fmtComma(rounded2) + " になるよ。";
+  var cands2 = [fl2, ce2, rounded2 + p2, rounded2 - p2, rounded2 + p2 * 10, rounded2 + p2 * 2, fl2 - p2, n2];
+  var choices2 = strChoices(fmtComma(rounded2),
+    cands2.filter(function(c){ return c > 0; }).map(fmtComma));
+  return makeQ("kind-gaisu", "がい数", fmtComma(n2) + " を 上から " + keepK + "けたの がい数にすると？",
+    "こたえは どれかな？", choices2, fmtComma(rounded2), expl2, true);
+}
+function buildGrade4(){
+  var makers = [];
+  var i;
+  for (i = 0; i < 5; i++) makers.push(g4Div);
+  makers.push(g4DecAddSub); makers.push(g4DecAddSub); makers.push(g4DecAddSub); makers.push(g4DecMul); makers.push(g4DecAddSub);
+  makers.push(g4FracAddSub); makers.push(g4FracAddSub); makers.push(g4FracCompare); makers.push(g4FracAddSub); makers.push(g4FracCompare);
+  for (i = 0; i < 5; i++) makers.push(g4Gaisu);
+  makers = shuffle(makers);
+  var qs = [], seen = {};
+  makers.forEach(function(fn){
+    var q = fn(), tries = 0;
+    while (seen[q.text] && tries < 20){ q = fn(); tries++; }
+    seen[q.text] = true;
+    qs.push(q);
+  });
+  return qs;
+}
+function buildQuestions(level){
+  return level === 1 ? buildGrade1() : buildGrade4();
+}
+
+/* ================= ゲーム状態 ================= */
+var state = { level: 1, questions: [], idx: 0, score: 0, startTime: 0, log: [], locked: false };
+var best = {1:null, 4:null};
+var GRADE_LABEL = {1:"1ねんせい", 4:"4ねんせい"};
+
+function showScreen(name){
+  document.getElementById("screen-start").classList.toggle("hidden", name !== "start");
+  document.getElementById("screen-game").classList.toggle("hidden", name !== "game");
+  document.getElementById("screen-result").classList.toggle("hidden", name !== "result");
+  window.scrollTo(0, 0);
+}
+
+function startGame(level){
+  state.level = level;
+  state.questions = buildQuestions(level);
+  state.idx = 0; state.score = 0; state.log = [];
+  state.startTime = Date.now();
+  showScreen("game");
+  renderQuestion();
+}
+
+function renderQuestion(){
+  var q = state.questions[state.idx];
+  state.locked = false;
+  document.getElementById("progress-bar").style.width = (state.idx / 20 * 100) + "%";
+  document.getElementById("qcount").textContent = (state.idx + 1) + " / 20";
+  document.getElementById("score-chip").textContent = "⭐ " + state.score;
+  var kindEl = document.getElementById("q-kind");
+  kindEl.textContent = q.kindLabel;
+  kindEl.className = "q-kind " + q.kindClass;
+  var textEl = document.getElementById("q-text");
+  textEl.innerHTML = fracHTML(q.text);
+  textEl.className = "q-text" + (q.small ? " small" : "");
+  document.getElementById("q-ask").textContent = q.ask;
+  document.getElementById("feedback-zone").innerHTML = "";
+  var box = document.getElementById("choices");
+  box.innerHTML = "";
+  q.choices.forEach(function(c){
+    var btn = document.createElement("button");
+    btn.className = "choice";
+    btn.setAttribute("data-val", c);
+    btn.innerHTML = fracHTML(c);
+    btn.addEventListener("click", function(){ answer(btn, c); });
+    box.appendChild(btn);
+  });
+}
+
+function answer(btn, val){
+  if (state.locked) return;
+  state.locked = true;
+  var q = state.questions[state.idx];
+  var correct = String(val) === String(q.answer);
+  if (correct) state.score++;
+  document.getElementById("score-chip").textContent = "⭐ " + state.score;
+  var btns = document.querySelectorAll(".choice");
+  btns.forEach(function(b){
+    b.disabled = true;
+    if (String(b.getAttribute("data-val")) === String(q.answer)) b.classList.add("correct");
+    else if (b === btn) b.classList.add("wrong");
+    else b.classList.add("dim");
+  });
+  state.log.push({q:q, picked:val, correct:correct});
+  var isLast = state.idx === state.questions.length - 1;
+  var fb = document.createElement("div");
+  fb.className = "feedback " + (correct ? "ok" : "ng");
+  var head = document.createElement("div");
+  head.className = "fb-head";
+  head.textContent = correct ? "⭕ せいかい！ よくできたね！" : "❌ ざんねん… こたえは「" + q.answer + "」だよ";
+  var body = document.createElement("div");
+  body.textContent = q.expl;
+  fb.appendChild(head); fb.appendChild(body);
+  var next = document.createElement("button");
+  next.className = "next-btn";
+  next.textContent = isLast ? "けっかを みる →" : "つぎの もんだい →";
+  next.addEventListener("click", function(){
+    state.idx++;
+    document.getElementById("progress-bar").style.width = (state.idx / 20 * 100) + "%";
+    if (state.idx >= 20) showResult();
+    else renderQuestion();
+  });
+  var zone = document.getElementById("feedback-zone");
+  zone.innerHTML = "";
+  zone.appendChild(fb);
+  zone.appendChild(next);
+  next.focus();
+}
+
+var BIRD_SVG = {
+  egg: "<circle cx='60' cy='66' r='34' fill='#F5EFE0' stroke='#D8C9A3' stroke-width='3'/><path d='M34 58 L48 50 L60 60 L74 50 L88 60' stroke='#D8C9A3' stroke-width='3' fill='none'/><ellipse cx='60' cy='104' rx='30' ry='6' fill='#E8D3B0'/>",
+  chick: "<ellipse cx='60' cy='72' rx='26' ry='24' fill='#FFE066'/><circle cx='76' cy='54' r='15' fill='#FFE873'/><circle cx='80' cy='51' r='2.8' fill='#2B2118'/><path d='M90 54 L100 57 L90 61 Z' fill='#FF8A2A'/><path d='M52 34 Q58 24 66 30' stroke='#E5B800' stroke-width='3' fill='none' stroke-linecap='round'/>",
+  young: "<ellipse cx='58' cy='70' rx='30' ry='25' fill='#C9A876'/><circle cx='80' cy='50' r='17' fill='#D9BC8C'/><circle cx='85' cy='46' r='3' fill='#2B2118'/><path d='M96 50 L107 54 L96 58 Z' fill='#FF8A2A'/><path d='M34 62 Q20 54 16 42 Q30 44 37 53 Z' fill='#A5825C'/><ellipse cx='52' cy='75' rx='13' ry='9' fill='#F0E2C4'/><path d='M46 92 L44 102 M64 94 L64 104' stroke='#E56E0B' stroke-width='3' stroke-linecap='round'/>",
+  adult: "<ellipse cx='58' cy='70' rx='34' ry='28' fill='#B08968'/><circle cx='84' cy='48' r='20' fill='#C49A6C'/><circle cx='90' cy='44' r='3.4' fill='#2B2118'/><path d='M102 48 L114 52 L102 57 Z' fill='#FF8A2A'/><path d='M30 62 Q14 52 10 38 Q26 40 34 52 Z' fill='#8A6A4A'/><ellipse cx='52' cy='76' rx='16' ry='11' fill='#E8D3B0'/><path d='M44 92 L42 104 M66 94 L66 106' stroke='#E56E0B' stroke-width='3.4' stroke-linecap='round'/><path d='M78 30 Q84 22 92 28' stroke='#8A6A4A' stroke-width='3' fill='none' stroke-linecap='round'/>",
+  master: "<ellipse cx='58' cy='70' rx='34' ry='28' fill='#B08968'/><circle cx='84' cy='48' r='20' fill='#C49A6C'/><circle cx='90' cy='44' r='3.4' fill='#2B2118'/><path d='M102 48 L114 52 L102 57 Z' fill='#FF8A2A'/><path d='M30 62 Q14 52 10 38 Q26 40 34 52 Z' fill='#8A6A4A'/><ellipse cx='52' cy='76' rx='16' ry='11' fill='#E8D3B0'/><path d='M44 92 L42 104 M66 94 L66 106' stroke='#E56E0B' stroke-width='3.4' stroke-linecap='round'/><path d='M70 22 L76 10 L84 19 L92 8 L97 22 Z' fill='#FFC93C' stroke='#D9A400' stroke-width='2'/><circle cx='84' cy='24' r='3' fill='#FF6B9D'/>"
+};
+
+function rankOf(score){
+  if (score === 20) return {name:"さんすうマスター", key:"master", msg:"かんぺき！ すごすぎる！"};
+  if (score >= 16) return {name:"おとなスズメ", key:"adult", msg:"あと すこしで マスターだよ！"};
+  if (score >= 12) return {name:"わかスズメ", key:"young", msg:"よく がんばったね！ あと すこし！"};
+  if (score >= 8) return {name:"ひなスズメ", key:"chick", msg:"いいちょうし！ れんしゅうして もっと 大きくなろう。"};
+  return {name:"たまご", key:"egg", msg:"ここから スタート！ もういちど チャレンジしてみよう。"};
+}
+
+function fmtTime(ms){
+  var sec = Math.round(ms / 1000);
+  var m = Math.floor(sec / 60), s = sec % 60;
+  return m > 0 ? (m + "ふん " + s + "びょう") : (s + "びょう");
+}
+
+function showResult(){
+  var elapsed = Date.now() - state.startTime;
+  var rank = rankOf(state.score);
+  document.getElementById("rank-bird").innerHTML = BIRD_SVG[rank.key];
+  document.getElementById("rank-name").textContent = rank.name;
+  var stars = "";
+  for (var i = 0; i < 20; i++) stars += (i < state.score ? "★" : "☆");
+  document.getElementById("rank-stars").textContent = stars;
+  document.getElementById("rank-score").textContent = "20もん中 " + state.score + "もん せいかい！";
+  document.getElementById("rank-meta").innerHTML =
+    GRADE_LABEL[state.level] + "<br>" +
+    "かかった じかん： " + fmtTime(elapsed) + "<br>" + rank.msg;
+  var prevBest = best[state.level];
+  var isNew = (prevBest === null || state.score > prevBest);
+  if (isNew) best[state.level] = state.score;
+  document.getElementById("newbest-zone").innerHTML = isNew && prevBest !== null
+    ? "<span class='newbest'>🎉 ベストスコア こうしん！</span>"
+    : (prevBest === null ? "<span class='newbest'>はじめての きろく！</span>" : "");
+  updateBestLabels();
+  var list = document.getElementById("review-list");
+  list.innerHTML = "";
+  state.log.forEach(function(item, i){
+    var q = item.q;
+    var div = document.createElement("div");
+    div.className = "review-item";
+    var rq = document.createElement("div");
+    rq.className = "r-q";
+    rq.innerHTML = (item.correct ? "⭕ " : "❌ ") + (i + 1) + ". " + fracHTML(q.text);
+    var ra = document.createElement("div");
+    ra.className = "r-a";
+    ra.textContent = "こたえ： " + q.answer + (item.correct ? "" : " ／ きみの こたえ： " + item.picked);
+    var ex = document.createElement("div");
+    ex.className = "r-a";
+    ex.textContent = q.expl;
+    div.appendChild(rq); div.appendChild(ra); div.appendChild(ex);
+    list.appendChild(div);
+  });
+  showScreen("result");
+}
+
+function updateBestLabels(){
+  [1, 4].forEach(function(lv){
+    var el = document.getElementById("best-" + lv);
+    if (best[lv] === null){ el.textContent = "ベスト： まだ なし"; el.classList.add("none"); }
+    else { el.textContent = "ベスト： 20もん中 " + best[lv] + "もん せいかい"; el.classList.remove("none"); }
+  });
+}
+
+document.querySelectorAll(".start-btn").forEach(function(btn){
+  btn.addEventListener("click", function(){ startGame(Number(btn.getAttribute("data-level"))); });
+});
+document.getElementById("quit-btn").addEventListener("click", function(){ showScreen("start"); });
+document.getElementById("again-btn").addEventListener("click", function(){ startGame(state.level); });
+document.getElementById("home-btn").addEventListener("click", function(){ showScreen("start"); });
+</script>
+</body>
+</html>

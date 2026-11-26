@@ -1,0 +1,890 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>えいごドリル</title>
+<style>
+  :root{
+    --bg:#FFF6D6; --bg2:#DFF3FF; --card:#FFFFFF; --ink:#2B2118; --muted:#6B5D4F;
+    --orange:#FF8A2A; --orange-d:#E56E0B; --sky:#2FA8E0; --sky-d:#1B7FB8;
+    --green:#2FBF71; --green-d:#1E9E57; --pink:#FF6B9D; --yellow:#FFC93C;
+    --wrong:#E5484D; --line:#F0DFB8; --choice-bg:#FFF9EC; --choice-line:#EAD9AE;
+    --shadow:0 6px 0 rgba(120,80,10,.14);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#1E1A2E; --bg2:#16283A; --card:#2C2742; --ink:#FFF6E3; --muted:#CFC4B0;
+      --line:#4A4266; --choice-bg:#383152; --choice-line:#554A7A;
+      --shadow:0 6px 0 rgba(0,0,0,.35);
+    }
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic UI","Noto Sans JP",sans-serif;
+    background:linear-gradient(180deg,var(--bg2) 0%,var(--bg) 260px,var(--bg) 100%);
+    color:var(--ink); min-height:100dvh;
+  }
+  button{font-family:inherit; cursor:pointer;}
+  button, [role="button"]{min-height:44px;}
+  .wrap{max-width:640px;margin:0 auto;padding:16px 16px 40px;}
+  .hidden{display:none !important;}
+  .hero{text-align:center;padding:14px 6px 4px;}
+  .hero-bird{width:104px;height:104px;margin:0 auto 2px;}
+  h1{font-size:30px;line-height:1.25;margin:6px 0 4px;font-weight:900;letter-spacing:.02em;}
+  .hero p{margin:4px 0;font-size:16px;color:var(--muted);font-weight:700;}
+  .howto{
+    background:var(--card);border:2px solid var(--line);border-radius:18px;
+    padding:12px 16px;margin:14px 0 18px;font-size:15px;line-height:1.7;font-weight:700;
+    box-shadow:var(--shadow);
+  }
+  .howto b{color:var(--orange-d);}
+  .lv-title{font-size:19px;font-weight:900;margin:6px 0 10px;text-align:center;}
+  .lv-card{
+    display:block;width:100%;text-align:left;border:none;border-radius:20px;
+    padding:16px 18px 14px;margin:0 0 14px;color:#fff;box-shadow:var(--shadow);
+    position:relative;
+  }
+  .lv0{background:linear-gradient(135deg,#FF8FBF,#F0528C);}
+  .lv1{background:linear-gradient(135deg,#FFB03A,#FF8A2A);}
+  .lv2{background:linear-gradient(135deg,#3EC6F0,#2FA8E0);}
+  .lv3{background:linear-gradient(135deg,#4ED598,#1E9E57);}
+  .lv-name{font-size:24px;font-weight:900;line-height:1.2;}
+  .lv-sub{font-size:14px;font-weight:700;opacity:.95;margin-top:3px;line-height:1.5;}
+  .lv-best{
+    display:inline-block;background:rgba(255,255,255,.92);color:#5A3A00;
+    font-size:13px;font-weight:900;border-radius:999px;padding:4px 12px;margin-top:9px;
+  }
+  .lv-best.none{background:rgba(255,255,255,.28);color:#fff;}
+  .start-btn{
+    display:block;width:100%;border:none;border-radius:14px;background:rgba(255,255,255,.94);color:#5A3A00;
+    font-size:17px;font-weight:900;padding:12px 4px;min-height:48px;margin-top:12px;
+    box-shadow:0 3px 0 rgba(90,58,0,.28);
+  }
+  .start-btn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(90,58,0,.28);}
+  .topbar{display:flex;align-items:center;gap:10px;margin:4px 0 12px;}
+  .quit-btn{
+    border:2px solid var(--line);background:var(--card);color:var(--muted);
+    border-radius:999px;font-size:14px;font-weight:900;padding:8px 16px;min-height:44px;
+  }
+  .progress{flex:1;height:18px;background:var(--card);border:2px solid var(--line);border-radius:999px;overflow:hidden;}
+  .progress > div{height:100%;background:linear-gradient(90deg,var(--yellow),var(--orange));border-radius:999px;transition:width .35s ease;width:0%;}
+  .qcount{font-size:15px;font-weight:900;white-space:nowrap;}
+  .score-chip{font-size:15px;font-weight:900;white-space:nowrap;background:var(--card);border:2px solid var(--line);border-radius:999px;padding:6px 12px;}
+  .q-card{
+    background:var(--card);border:2px solid var(--line);border-radius:24px;
+    padding:22px 18px 20px;box-shadow:var(--shadow);text-align:center;
+  }
+  .q-kind{
+    display:inline-block;font-size:13px;font-weight:900;border-radius:999px;padding:5px 14px;margin-bottom:12px;color:#fff;
+  }
+  .kind-alpha{background:var(--orange);}
+  .kind-word{background:var(--sky);}
+  .kind-phrase{background:var(--green);}
+  .q-text{font-size:40px;font-weight:900;line-height:1.3;word-break:keep-all;}
+  .q-text.small{font-size:29px;}
+  .q-text.jp{font-size:32px;}
+  .q-hint{font-size:16px;font-weight:700;color:var(--muted);margin-top:4px;}
+  .q-ask{font-size:16px;font-weight:700;color:var(--muted);margin-top:8px;}
+  .choices{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px;}
+  @media (max-width:380px){ .choices{grid-template-columns:1fr;} .q-text{font-size:34px;} }
+  .choice{
+    border:3px solid var(--choice-line);background:var(--choice-bg);color:var(--ink);
+    border-radius:18px;font-size:24px;font-weight:900;padding:14px 8px;min-height:68px;
+    line-height:1.25;
+  }
+  .choice .c-sub{display:block;font-size:13px;font-weight:700;color:var(--muted);margin-top:2px;}
+  .choice:active{transform:scale(.98);}
+  .choice.correct{border-color:var(--green);background:#DFF7E8;color:#0E6B38;}
+  .choice.wrong{border-color:var(--wrong);background:#FDE3E3;color:#8F1D21;}
+  .choice.dim{opacity:.45;}
+  @media (prefers-color-scheme: dark){
+    .choice.correct{background:#17402A;color:#8CF0B4;}
+    .choice.wrong{background:#4A1E20;color:#FFB3B6;}
+  }
+  .feedback{margin-top:16px;border-radius:18px;padding:14px 16px;font-size:16px;line-height:1.65;font-weight:700;text-align:left;}
+  .feedback.ok{background:#DFF7E8;color:#0E5A30;border:2px solid var(--green);}
+  .feedback.ng{background:#FDECEC;color:#7C1A1E;border:2px solid var(--wrong);}
+  @media (prefers-color-scheme: dark){
+    .feedback.ok{background:#17402A;color:#C9F5DA;}
+    .feedback.ng{background:#4A1E20;color:#FFD9DA;}
+  }
+  .feedback .fb-head{font-size:20px;font-weight:900;}
+  .next-btn{
+    display:block;width:100%;margin-top:14px;border:none;border-radius:18px;
+    background:var(--orange);color:#fff;font-size:21px;font-weight:900;padding:16px;min-height:60px;
+    box-shadow:0 5px 0 var(--orange-d);
+  }
+  .next-btn:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-d);}
+  .result-card{
+    background:var(--card);border:2px solid var(--line);border-radius:24px;
+    padding:24px 18px 20px;box-shadow:var(--shadow);text-align:center;
+  }
+  .rank-bird{width:120px;height:120px;margin:0 auto;}
+  .rank-name{font-size:30px;font-weight:900;margin:6px 0 2px;}
+  .rank-score{font-size:19px;font-weight:900;color:var(--orange-d);}
+  .rank-meta{font-size:15px;font-weight:700;color:var(--muted);margin-top:6px;line-height:1.7;}
+  .newbest{
+    display:inline-block;background:var(--yellow);color:#5A3A00;font-weight:900;
+    border-radius:999px;padding:5px 16px;font-size:14px;margin-top:8px;
+  }
+  .stars{font-size:26px;letter-spacing:4px;margin-top:6px;color:var(--yellow);-webkit-text-stroke:1px #D9A400;}
+  .review-title{font-size:19px;font-weight:900;margin:24px 0 10px;}
+  .review-item{
+    background:var(--card);border:2px solid var(--line);border-radius:16px;
+    padding:12px 14px;margin:0 0 10px;text-align:left;
+  }
+  .review-item .r-q{font-size:18px;font-weight:900;line-height:1.45;}
+  .review-item .r-a{font-size:14px;font-weight:700;color:var(--muted);line-height:1.6;margin-top:3px;}
+  .mark-ok{color:var(--green-d);font-weight:900;}
+  .mark-ng{color:var(--wrong);font-weight:900;}
+  .btn-row{display:grid;gap:12px;margin-top:18px;}
+  .again-btn{
+    border:none;border-radius:18px;background:var(--sky);color:#fff;
+    font-size:20px;font-weight:900;padding:16px;min-height:60px;box-shadow:0 5px 0 var(--sky-d);
+  }
+  .again-btn:active{transform:translateY(3px);box-shadow:0 2px 0 var(--sky-d);}
+  .home-btn{
+    border:2px solid var(--line);border-radius:18px;background:var(--card);color:var(--ink);
+    font-size:18px;font-weight:900;padding:14px;min-height:56px;
+  }
+  .foot-note{text-align:center;font-size:13px;color:var(--muted);font-weight:700;margin-top:20px;line-height:1.7;}
+  @media (prefers-reduced-motion: reduce){ *{transition:none !important;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <section id="screen-start">
+    <div class="hero">
+      <svg class="hero-bird" viewBox="0 0 120 120" aria-hidden="true">
+        <ellipse cx="58" cy="70" rx="34" ry="28" fill="#B08968"/>
+        <circle cx="84" cy="48" r="20" fill="#C49A6C"/>
+        <circle cx="90" cy="44" r="3.4" fill="#2B2118"/>
+        <path d="M102 48 L114 52 L102 57 Z" fill="#FF8A2A"/>
+        <path d="M30 62 Q14 52 10 38 Q26 40 34 52 Z" fill="#8A6A4A"/>
+        <path d="M44 92 L42 104 M66 94 L66 106" stroke="#E56E0B" stroke-width="3.4" stroke-linecap="round"/>
+        <ellipse cx="52" cy="76" rx="16" ry="11" fill="#E8D3B0"/>
+        <path d="M78 30 Q84 22 92 28" stroke="#8A6A4A" stroke-width="3" fill="none" stroke-linecap="round"/>
+      </svg>
+      <h1>えいごドリル</h1>
+      <p>がくねんと レベルを えらんで、<br>20もんに チャレンジ！ Let's go!</p>
+    </div>
+
+    <div class="howto">
+      あそびかた： がくねんと レベルを えらぶと <b>20もん</b> でるよ。
+      こたえは <b>4つの ボタン</b>から タップして えらんでね。
+      1もんごとに せいかい・ふせいかいと かいせつが すぐ 出るよ。
+      えいごの たんごには <b>カタカナの よみかた</b>が ついているよ。
+      20もん ぜんぶ こたえると、スズメの ランクが もらえるよ！
+    </div>
+
+    <div class="lv-title">がくねんと レベルを えらんでね</div>
+
+    <div class="lv-card lv0">
+      <div class="lv-name">1ねんせい（にゅうもん）</div>
+      <div class="lv-sub">はじめての えいご<br>あいさつ・いろ・すうじ（1〜10）・どうぶつ・アルファベット</div>
+      <span class="lv-best none" id="best-0">ベスト： まだ なし</span>
+      <button class="start-btn" data-level="0">スタート（20もん）</button>
+    </div>
+
+    <div class="lv-title">4ねんせい</div>
+
+    <div class="lv-card lv1">
+      <div class="lv-name">レベル1</div>
+      <div class="lv-sub">アルファベット（大文字⇔小文字）と 基本の たんご<br>いろ・すうじ（1〜20）・どうぶつ・みのまわりの もの</div>
+      <span class="lv-best none" id="best-1">ベスト： まだ なし</span>
+      <button class="start-btn" data-level="1">スタート（20もん）</button>
+    </div>
+
+    <div class="lv-card lv2">
+      <div class="lv-name">レベル2</div>
+      <div class="lv-sub">たんご いっぱい<br>学校の もの・たべもの・からだ・天気・ようびと 月・スポーツ・かぞく・ばしょ</div>
+      <span class="lv-best none" id="best-2">ベスト： まだ なし</span>
+      <button class="start-btn" data-level="2">スタート（20もん）</button>
+    </div>
+
+    <div class="lv-card lv3">
+      <div class="lv-name">レベル3</div>
+      <div class="lv-sub">あいさつと みじかい フレーズ・ぶん<br>Hello. / Thank you. / How are you? / What is this? / I like 〜. など</div>
+      <span class="lv-best none" id="best-3">ベスト： まだ なし</span>
+      <button class="start-btn" data-level="3">スタート（20もん）</button>
+    </div>
+
+    <p class="foot-note">ベストスコアは このページを ひらいている あいだ きろくされるよ。</p>
+  </section>
+
+  <section id="screen-game" class="hidden">
+    <div class="topbar">
+      <button class="quit-btn" id="quit-btn">← やめる</button>
+      <div class="progress"><div id="progress-bar"></div></div>
+      <div class="qcount" id="qcount">1 / 20</div>
+      <div class="score-chip" id="score-chip">⭐ 0</div>
+    </div>
+    <div class="q-card">
+      <span class="q-kind kind-word" id="q-kind">たんご</span>
+      <div class="q-text" id="q-text">apple</div>
+      <div class="q-hint" id="q-hint"></div>
+      <div class="q-ask" id="q-ask">いみは どれかな？</div>
+      <div class="choices" id="choices"></div>
+      <div id="feedback-zone"></div>
+    </div>
+  </section>
+
+  <section id="screen-result" class="hidden">
+    <div class="result-card">
+      <svg class="rank-bird" viewBox="0 0 120 120" aria-hidden="true" id="rank-bird"></svg>
+      <div class="rank-name" id="rank-name">えいごマスター</div>
+      <div class="stars" id="rank-stars"></div>
+      <div class="rank-score" id="rank-score">20もん せいかい！</div>
+      <div class="rank-meta" id="rank-meta"></div>
+      <div id="newbest-zone"></div>
+    </div>
+    <div class="review-title">ふりかえり（ぜんぶの もんだい）</div>
+    <div id="review-list"></div>
+    <div class="btn-row">
+      <button class="again-btn" id="again-btn">もういちど おなじ レベル</button>
+      <button class="home-btn" id="home-btn">レベルを えらびなおす</button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+"use strict";
+/* ================= ユーティリティ ================= */
+function shuffle(arr){
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--){
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+function sample(arr, n){
+  return shuffle(arr).slice(0, n);
+}
+
+/* ================= レベル1 たんごバンク ================= */
+/* [えいご, カタカナよみ, にほんご] */
+var L1_COLORS = [
+  ["red","レッド","あか"],["blue","ブルー","あお"],["yellow","イエロー","きいろ"],
+  ["green","グリーン","みどり"],["orange","オレンジ","オレンジいろ"],["pink","ピンク","ピンク"],
+  ["black","ブラック","くろ"],["white","ホワイト","しろ"],["brown","ブラウン","ちゃいろ"],
+  ["purple","パープル","むらさき"]
+];
+var L1_ANIMALS = [
+  ["dog","ドッグ","いぬ"],["cat","キャット","ねこ"],["bird","バード","とり"],
+  ["fish","フィッシュ","さかな"],["rabbit","ラビット","うさぎ"],["bear","ベア","くま"],
+  ["lion","ライオン","ライオン"],["elephant","エレファント","ぞう"],["monkey","モンキー","さる"],
+  ["pig","ピッグ","ぶた"],["cow","カウ","うし"],["horse","ホース","うま"],
+  ["panda","パンダ","パンダ"],["mouse","マウス","ねずみ"]
+];
+var L1_THINGS = [
+  ["sun","サン","たいよう"],["moon","ムーン","つき"],["star","スター","ほし"],
+  ["flower","フラワー","はな"],["tree","ツリー","き"],["rain","レイン","あめ"],
+  ["snow","スノー","ゆき"],["sea","シー","うみ"],["house","ハウス","いえ"],
+  ["car","カー","くるま"],["ball","ボール","ボール"],["hat","ハット","ぼうし"],
+  ["egg","エッグ","たまご"],["milk","ミルク","ぎゅうにゅう"]
+];
+var L1_NUMBERS = [
+  ["one","ワン",1],["two","トゥー",2],["three","スリー",3],["four","フォー",4],
+  ["five","ファイブ",5],["six","シックス",6],["seven","セブン",7],["eight","エイト",8],
+  ["nine","ナイン",9],["ten","テン",10],["eleven","イレブン",11],["twelve","トゥエルブ",12],
+  ["thirteen","サーティーン",13],["fourteen","フォーティーン",14],["fifteen","フィフティーン",15],
+  ["sixteen","シックスティーン",16],["seventeen","セブンティーン",17],["eighteen","エイティーン",18],
+  ["nineteen","ナインティーン",19],["twenty","トゥエンティ",20]
+];
+
+/* ================= レベル2 たんごバンク ================= */
+/* カテゴリごとに [えいご, カタカナよみ, にほんご] */
+var L2_BANK = [
+  {cat:"学校の もの", words:[
+    ["pencil","ペンシル","えんぴつ"],["pen","ペン","ペン"],["eraser","イレイサー","けしゴム"],
+    ["ruler","ルーラー","じょうぎ"],["notebook","ノートブック","ノート"],["book","ブック","ほん"],
+    ["bag","バッグ","かばん"],["desk","デスク","つくえ"],["chair","チェア","いす"],
+    ["crayon","クレヨン","クレヨン"],["scissors","シザーズ","はさみ"],["glue","グルー","のり"]
+  ]},
+  {cat:"たべもの", words:[
+    ["apple","アップル","りんご"],["banana","バナナ","バナナ"],["bread","ブレッド","パン"],
+    ["rice","ライス","ごはん"],["cake","ケーキ","ケーキ"],["hamburger","ハンバーガー","ハンバーガー"],
+    ["pizza","ピザ","ピザ"],["cheese","チーズ","チーズ"],["strawberry","ストロベリー","いちご"],
+    ["grape","グレープ","ぶどう"],["melon","メロン","メロン"],["peach","ピーチ","もも"]
+  ]},
+  {cat:"からだ", words:[
+    ["eye","アイ","め"],["ear","イア","みみ"],["nose","ノーズ","はな"],
+    ["mouth","マウス","くち"],["hand","ハンド","て"],["foot","フット","あし"],
+    ["head","ヘッド","あたま"],["hair","ヘア","かみのけ"],["tooth","トゥース","は"],
+    ["arm","アーム","うで"],["finger","フィンガー","ゆび"],["shoulder","ショルダー","かた"]
+  ]},
+  {cat:"天気", words:[
+    ["sunny","サニー","はれ"],["rainy","レイニー","あめ"],["cloudy","クラウディ","くもり"],
+    ["snowy","スノーイ","ゆき"],["windy","ウィンディ","かぜ"],["hot","ホット","あつい"],
+    ["cold","コールド","さむい"],["warm","ウォーム","あたたかい"],["cool","クール","すずしい"]
+  ]},
+  {cat:"ようび", words:[
+    ["Monday","マンデイ","げつようび"],["Tuesday","チューズデイ","かようび"],
+    ["Wednesday","ウェンズデイ","すいようび"],["Thursday","サーズデイ","もくようび"],
+    ["Friday","フライデイ","きんようび"],["Saturday","サタデイ","どようび"],
+    ["Sunday","サンデイ","にちようび"]
+  ]},
+  {cat:"月", words:[
+    ["January","ジャニュアリー","1がつ"],["February","フェブラリー","2がつ"],
+    ["March","マーチ","3がつ"],["April","エイプリル","4がつ"],["May","メイ","5がつ"],
+    ["June","ジューン","6がつ"],["July","ジュライ","7がつ"],["August","オーガスト","8がつ"],
+    ["September","セプテンバー","9がつ"],["October","オクトーバー","10がつ"],
+    ["November","ノベンバー","11がつ"],["December","ディセンバー","12がつ"]
+  ]},
+  {cat:"スポーツ", words:[
+    ["soccer","サッカー","サッカー"],["baseball","ベースボール","やきゅう"],
+    ["basketball","バスケットボール","バスケットボール"],["swimming","スイミング","すいえい"],
+    ["tennis","テニス","テニス"],["volleyball","バレーボール","バレーボール"],
+    ["judo","ジュードー","じゅうどう"],["karate","カラテ","からて"],
+    ["skiing","スキーイング","スキー"],["running","ランニング","かけっこ"]
+  ]},
+  {cat:"かぞく", words:[
+    ["father","ファーザー","おとうさん"],["mother","マザー","おかあさん"],
+    ["brother","ブラザー","おにいさん"],["sister","シスター","おねえさん"],
+    ["baby","ベイビー","あかちゃん"],["grandfather","グランドファーザー","おじいさん"],
+    ["grandmother","グランドマザー","おばあさん"],["family","ファミリー","かぞく"]
+  ]},
+  {cat:"ばしょ", words:[
+    ["school","スクール","がっこう"],["park","パーク","こうえん"],["library","ライブラリー","としょかん"],
+    ["station","ステーション","えき"],["hospital","ホスピタル","びょういん"],["zoo","ズー","どうぶつえん"],
+    ["store","ストア","おみせ"],["beach","ビーチ","すなはま"],["river","リバー","かわ"],
+    ["mountain","マウンテン","やま"]
+  ]}
+];
+
+/* ================= 1ねんせい（にゅうもん）あいさつバンク ================= */
+/* [えいご, カタカナよみ, にほんご] */
+var INTRO_GREETINGS = [
+  ["Hello.","ハロー","こんにちは"],["Good morning.","グッド モーニング","おはよう"],
+  ["Good evening.","グッド イブニング","こんばんは"],["Good night.","グッド ナイト","おやすみなさい"],
+  ["Goodbye.","グッドバイ","さようなら"],["See you.","シー ユー","またね"],
+  ["Thank you.","サンキュー","ありがとう"],["I'm sorry.","アイム ソーリー","ごめんなさい"],
+  ["Please.","プリーズ","おねがい"],["Yes.","イエス","はい"],["No.","ノー","いいえ"],
+  ["Happy birthday!","ハッピー バースデイ","おたんじょうび おめでとう"]
+];
+
+/* ================= レベル3 フレーズバンク ================= */
+/* text: えいご（大きく表示） / hint: カタカナよみ / ask: しつもん文
+   choices: 4択（文字列、または {t:表示, sub:カタカナよみ}） / answer: 正解の t / expl: かいせつ */
+var L3_BANK = [
+  {text:"Hello.", hint:"ハロー", ask:"いみは どれかな？",
+   choices:["こんにちは","さようなら","ありがとう","おやすみなさい"], answer:"こんにちは",
+   expl:"「Hello.（ハロー）」は「こんにちは」だよ。友だちに 会ったときの あいさつだね。"},
+  {text:"Good morning.", hint:"グッド モーニング", ask:"いみは どれかな？",
+   choices:["おはよう","こんばんは","おやすみなさい","さようなら"], answer:"おはよう",
+   expl:"「Good morning.（グッド モーニング）」は 朝の あいさつ「おはよう」だよ。"},
+  {text:"Good afternoon.", hint:"グッド アフタヌーン", ask:"いみは どれかな？",
+   choices:["こんにちは","おはよう","おやすみなさい","ありがとう"], answer:"こんにちは",
+   expl:"「Good afternoon.（グッド アフタヌーン）」は お昼の あいさつ「こんにちは」だよ。"},
+  {text:"Good evening.", hint:"グッド イブニング", ask:"いみは どれかな？",
+   choices:["こんばんは","おはよう","さようなら","ごめんなさい"], answer:"こんばんは",
+   expl:"「Good evening.（グッド イブニング）」は 夕方から 夜の あいさつ「こんばんは」だよ。"},
+  {text:"Good night.", hint:"グッド ナイト", ask:"いみは どれかな？",
+   choices:["おやすみなさい","こんばんは","ありがとう","はじめまして"], answer:"おやすみなさい",
+   expl:"「Good night.（グッド ナイト）」は ねる前の「おやすみなさい」だよ。"},
+  {text:"Goodbye.", hint:"グッドバイ", ask:"いみは どれかな？",
+   choices:["さようなら","こんにちは","おはよう","すみません"], answer:"さようなら",
+   expl:"「Goodbye.（グッドバイ）」は わかれるときの「さようなら」だよ。"},
+  {text:"See you.", hint:"シー ユー", ask:"いみは どれかな？",
+   choices:["またね","ありがとう","ごめんなさい","おねがい"], answer:"またね",
+   expl:"「See you.（シー ユー）」は「またね」という いみだよ。友だちとの わかれ際に 使うね。"},
+  {text:"Thank you.", hint:"サンキュー", ask:"いみは どれかな？",
+   choices:["ありがとう","ごめんなさい","こんにちは","どういたしまして"], answer:"ありがとう",
+   expl:"「Thank you.（サンキュー）」は「ありがとう」だよ。何か してもらったときに 言おうね。"},
+  {text:"Thank you very much.", hint:"サンキュー ベリー マッチ", ask:"いみは どれかな？",
+   choices:["どうも ありがとう","ごめんなさい","おつかれさま","いただきます"], answer:"どうも ありがとう",
+   expl:"「Thank you very much.」は「どうも ありがとう」。very much で「とても」という いみが 強くなるよ。"},
+  {text:"Thank you.", hint:"サンキュー", ask:"「ありがとう」と 言われたら、なんと こたえる？",
+   choices:[{t:"You're welcome.", sub:"ユーアー ウェルカム"},{t:"Goodbye.", sub:"グッドバイ"},{t:"I'm sorry.", sub:"アイム ソーリー"},{t:"Good night.", sub:"グッド ナイト"}],
+   answer:"You're welcome.",
+   expl:"「You're welcome.（ユーアー ウェルカム）」は「どういたしまして」だよ。"},
+  {text:"I'm sorry.", hint:"アイム ソーリー", ask:"いみは どれかな？",
+   choices:["ごめんなさい","ありがとう","さようなら","おはよう"], answer:"ごめんなさい",
+   expl:"「I'm sorry.（アイム ソーリー）」は「ごめんなさい」だよ。あやまるときに 使うね。"},
+  {text:"Excuse me.", hint:"エクスキューズ ミー", ask:"いみは どれかな？",
+   choices:["すみません","ありがとう","こんにちは","またね"], answer:"すみません",
+   expl:"「Excuse me.（エクスキューズ ミー）」は「すみません」。人に 声を かけるときにも 使うよ。"},
+  {text:"Please.", hint:"プリーズ", ask:"いみは どれかな？",
+   choices:["おねがい","ありがとう","ごめんなさい","どうぞ"], answer:"おねがい",
+   expl:"「Please.（プリーズ）」は「おねがい」だよ。何か たのむときに つけると ていねいだね。"},
+  {text:"Here you are.", hint:"ヒア ユー アー", ask:"いみは どれかな？",
+   choices:["はい、どうぞ","ありがとう","すみません","がんばって"], answer:"はい、どうぞ",
+   expl:"「Here you are.（ヒア ユー アー）」は ものを わたすときの「はい、どうぞ」だよ。"},
+  {text:"Nice to meet you.", hint:"ナイス トゥー ミート ユー", ask:"いみは どれかな？",
+   choices:["はじめまして","さようなら","おげんきですか","おなまえは？"], answer:"はじめまして",
+   expl:"「Nice to meet you.」は 初めて 会った人への「はじめまして」だよ。"},
+  {text:"How are you?", hint:"ハウ アー ユー", ask:"いみは どれかな？",
+   choices:["げんきですか？","なんさいですか？","おなまえは？","なんじですか？"], answer:"げんきですか？",
+   expl:"「How are you?（ハウ アー ユー）」は「げんきですか？」と きく あいさつだよ。"},
+  {text:"How are you?", hint:"ハウ アー ユー", ask:"「げんきですか？」と きかれたら、なんと こたえる？",
+   choices:[{t:"I'm fine, thank you.", sub:"アイム ファイン、サンキュー"},{t:"Good morning.", sub:"グッド モーニング"},{t:"It's a pen.", sub:"イッツ ア ペン"},{t:"See you.", sub:"シー ユー"}],
+   answer:"I'm fine, thank you.",
+   expl:"「I'm fine, thank you.」は「げんきです、ありがとう」という こたえだよ。"},
+  {text:"I'm fine.", hint:"アイム ファイン", ask:"いみは どれかな？",
+   choices:["わたしは げんきです","わたしは ねむいです","わたしは おなかが すきました","わたしは 10さいです"], answer:"わたしは げんきです",
+   expl:"「I'm fine.（アイム ファイン）」は「わたしは げんきです」だよ。"},
+  {text:"I'm happy.", hint:"アイム ハッピー", ask:"いみは どれかな？",
+   choices:["うれしいです","かなしいです","ねむいです","つかれました"], answer:"うれしいです",
+   expl:"「I'm happy.（アイム ハッピー）」は「うれしいです」だよ。"},
+  {text:"I'm hungry.", hint:"アイム ハングリー", ask:"いみは どれかな？",
+   choices:["おなかが すきました","のどが かわきました","ねむいです","げんきです"], answer:"おなかが すきました",
+   expl:"「I'm hungry.（アイム ハングリー）」は「おなかが すきました」だよ。"},
+  {text:"I'm sleepy.", hint:"アイム スリーピー", ask:"いみは どれかな？",
+   choices:["ねむいです","うれしいです","おなかが すきました","あついです"], answer:"ねむいです",
+   expl:"「I'm sleepy.（アイム スリーピー）」は「ねむいです」だよ。"},
+  {text:"What is this?", hint:"ホワット イズ ディス", ask:"いみは どれかな？",
+   choices:["これは なんですか？","これは なんいろですか？","きょうは なんようびですか？","これは だれのですか？"], answer:"これは なんですか？",
+   expl:"「What is this?」は 近くの ものを さして「これは なんですか？」と きく 言い方だよ。"},
+  {text:"What is this?", hint:"ホワット イズ ディス", ask:"ほんを さして「これは なんですか？」と きかれたら、なんと こたえる？",
+   choices:[{t:"It's a book.", sub:"イッツ ア ブック"},{t:"Thank you.", sub:"サンキュー"},{t:"I'm fine.", sub:"アイム ファイン"},{t:"Good night.", sub:"グッド ナイト"}],
+   answer:"It's a book.",
+   expl:"「It's a book.（イッツ ア ブック）」は「それは 本です」という こたえだよ。"},
+  {text:"It's a pen.", hint:"イッツ ア ペン", ask:"いみは どれかな？",
+   choices:["これは ペンです","これは 本です","ペンが すきです","ペンは どこですか？"], answer:"これは ペンです",
+   expl:"「It's a pen.」は「これは ペンです」。a pen は「1本の ペン」という いみだよ。"},
+  {text:"What color is this?", hint:"ホワット カラー イズ ディス", ask:"いみは どれかな？",
+   choices:["これは なんいろですか？","これは なんですか？","これは いくつですか？","いろは すきですか？"], answer:"これは なんいろですか？",
+   expl:"「What color is this?」は「これは なんいろですか？」。color は「いろ」だよ。"},
+  {text:"What color is this?", hint:"ホワット カラー イズ ディス", ask:"あかい ものを さして「なんいろですか？」と きかれたら、なんと こたえる？",
+   choices:[{t:"It's red.", sub:"イッツ レッド"},{t:"It's a dog.", sub:"イッツ ア ドッグ"},{t:"I like red.", sub:"アイ ライク レッド"},{t:"It's ten.", sub:"イッツ テン"}],
+   answer:"It's red.",
+   expl:"いろを こたえるときは「It's red.（あかです）」の ように 言うよ。"},
+  {text:"It's blue.", hint:"イッツ ブルー", ask:"いみは どれかな？",
+   choices:["それは あおです","それは あかです","あおが すきです","そらは あおいです"], answer:"それは あおです",
+   expl:"「It's blue.」は「それは あおです」だよ。blue は「あお」だね。"},
+  {text:"I like dogs.", hint:"アイ ライク ドッグス", ask:"いみは どれかな？",
+   choices:["わたしは いぬが すきです","わたしは ねこが すきです","いぬを かっています","いぬは かわいいです"], answer:"わたしは いぬが すきです",
+   expl:"「I like 〜.」は「わたしは 〜が すきです」。dogs は「いぬ（たち）」だよ。"},
+  {text:"I like apples.", hint:"アイ ライク アップルス", ask:"いみは どれかな？",
+   choices:["りんごが すきです","りんごを たべます","りんごは あかいです","りんごを ください"], answer:"りんごが すきです",
+   expl:"「I like apples.」は「りんごが すきです」だよ。"},
+  {text:"I like soccer.", hint:"アイ ライク サッカー", ask:"いみは どれかな？",
+   choices:["サッカーが すきです","サッカーを します","サッカーは たのしいです","サッカーが じょうずです"], answer:"サッカーが すきです",
+   expl:"「I like soccer.」は「サッカーが すきです」。スポーツの 名前も「I like 〜.」で 言えるよ。"},
+  {text:"I don't like fish.", hint:"アイ ドント ライク フィッシュ", ask:"いみは どれかな？",
+   choices:["さかなは すきじゃ ありません","さかなが すきです","さかなを たべました","さかなは おいしいです"], answer:"さかなは すきじゃ ありません",
+   expl:"「I don't like 〜.」は「〜は すきじゃ ありません」。don't で「〜ない」に なるよ。"},
+  {text:"Do you like cats?", hint:"ドゥー ユー ライク キャッツ", ask:"いみは どれかな？",
+   choices:["ねこは すきですか？","ねこが すきです","ねこを かっていますか？","ねこは どこですか？"], answer:"ねこは すきですか？",
+   expl:"「Do you like 〜?」は「〜は すきですか？」と きく 言い方だよ。"},
+  {text:"Do you like soccer?", hint:"ドゥー ユー ライク サッカー", ask:"「サッカーは すきですか？」と きかれて、すきな ときは なんと こたえる？",
+   choices:[{t:"Yes, I do.", sub:"イエス、アイ ドゥー"},{t:"Yes, I can.", sub:"イエス、アイ キャン"},{t:"It's red.", sub:"イッツ レッド"},{t:"Thank you.", sub:"サンキュー"}],
+   answer:"Yes, I do.",
+   expl:"「Do you like 〜?」への こたえは「Yes, I do.（はい、すきです）」だよ。"},
+  {text:"I can swim.", hint:"アイ キャン スイム", ask:"いみは どれかな？",
+   choices:["わたしは およげます","わたしは およぎたいです","およぐのは たのしいです","プールに いきます"], answer:"わたしは およげます",
+   expl:"「I can 〜.」は「わたしは 〜できます」。swim は「およぐ」だよ。"},
+  {text:"I can run fast.", hint:"アイ キャン ラン ファスト", ask:"いみは どれかな？",
+   choices:["はやく はしれます","ゆっくり はしります","はしるのが すきです","まいにち はしります"], answer:"はやく はしれます",
+   expl:"「I can run fast.」は「はやく はしれます」。fast は「はやい」だよ。"},
+  {text:"Can you swim?", hint:"キャン ユー スイム", ask:"「およげますか？」と きかれて、およげる ときは なんと こたえる？",
+   choices:[{t:"Yes, I can.", sub:"イエス、アイ キャン"},{t:"Yes, I do.", sub:"イエス、アイ ドゥー"},{t:"No, thank you.", sub:"ノー、サンキュー"},{t:"It's blue.", sub:"イッツ ブルー"}],
+   answer:"Yes, I can.",
+   expl:"「Can you 〜?」への こたえは「Yes, I can.（はい、できます）」だよ。"},
+  {text:"Let's play.", hint:"レッツ プレイ", ask:"いみは どれかな？",
+   choices:["あそぼう","うたおう","はしろう","やすもう"], answer:"あそぼう",
+   expl:"「Let's 〜.」は「〜しよう」と さそう 言い方だよ。play は「あそぶ」だね。"},
+  {text:"Let's sing.", hint:"レッツ シング", ask:"いみは どれかな？",
+   choices:["うたおう","あそぼう","おどろう","ねよう"], answer:"うたおう",
+   expl:"「Let's sing.」は「うたおう」だよ。sing は「うたう」だね。"},
+  {text:"Stand up.", hint:"スタンド アップ", ask:"いみは どれかな？",
+   choices:["たって ください","すわって ください","あるいて ください","とまって ください"], answer:"たって ください",
+   expl:"「Stand up.」は「たって ください」だよ。学校で よく 使う 言い方だね。"},
+  {text:"Sit down.", hint:"シット ダウン", ask:"いみは どれかな？",
+   choices:["すわって ください","たって ください","みて ください","きいて ください"], answer:"すわって ください",
+   expl:"「Sit down.」は「すわって ください」だよ。Stand up. の はんたいだね。"},
+  {text:"Open your book.", hint:"オープン ユア ブック", ask:"いみは どれかな？",
+   choices:["本を あけて ください","本を しめて ください","本を よんで ください","本を みせて ください"], answer:"本を あけて ください",
+   expl:"「Open your book.」は「本を あけて ください」。open は「あける」だよ。"},
+  {text:"Listen.", hint:"リッスン", ask:"いみは どれかな？",
+   choices:["きいて ください","みて ください","かいて ください","よんで ください"], answer:"きいて ください",
+   expl:"「Listen.」は「きいて ください」だよ。耳を すまして きこうね。"},
+  {text:"Look.", hint:"ルック", ask:"いみは どれかな？",
+   choices:["みて ください","きいて ください","たって ください","すわって ください"], answer:"みて ください",
+   expl:"「Look.」は「みて ください」だよ。"},
+  {text:"How old are you?", hint:"ハウ オールド アー ユー", ask:"いみは どれかな？",
+   choices:["なんさいですか？","おなまえは？","げんきですか？","なんじですか？"], answer:"なんさいですか？",
+   expl:"「How old are you?」は「なんさいですか？」と 年を きく 言い方だよ。"},
+  {text:"How old are you?", hint:"ハウ オールド アー ユー", ask:"「なんさいですか？」と きかれたら、10さいの 人は なんと こたえる？",
+   choices:[{t:"I'm ten years old.", sub:"アイム テン イヤーズ オールド"},{t:"I'm fine.", sub:"アイム ファイン"},{t:"It's ten.", sub:"イッツ テン"},{t:"My name is ten.", sub:"マイ ネーム イズ テン"}],
+   answer:"I'm ten years old.",
+   expl:"年を こたえるときは「I'm ten years old.（10さいです）」と 言うよ。"},
+  {text:"I'm nine years old.", hint:"アイム ナイン イヤーズ オールド", ask:"いみは どれかな？",
+   choices:["9さいです","10さいです","9ねんせいです","9じです"], answer:"9さいです",
+   expl:"「I'm nine years old.」は「9さいです」。nine は 9 だね。"},
+  {text:"What's your name?", hint:"ホワッツ ユア ネーム", ask:"いみは どれかな？",
+   choices:["おなまえは なんですか？","なんさいですか？","どこから きましたか？","げんきですか？"], answer:"おなまえは なんですか？",
+   expl:"「What's your name?」は「おなまえは なんですか？」だよ。"},
+  {text:"What's your name?", hint:"ホワッツ ユア ネーム", ask:"「おなまえは？」と きかれたら、ケンさんは なんと こたえる？",
+   choices:[{t:"My name is Ken.", sub:"マイ ネーム イズ ケン"},{t:"I'm ten years old.", sub:"アイム テン イヤーズ オールド"},{t:"I'm from Japan.", sub:"アイム フロム ジャパン"},{t:"Nice to meet you.", sub:"ナイス トゥー ミート ユー"}],
+   answer:"My name is Ken.",
+   expl:"名前を こたえるときは「My name is 〜.（わたしの 名前は 〜です）」と 言うよ。"},
+  {text:"My name is Ken.", hint:"マイ ネーム イズ ケン", ask:"いみは どれかな？",
+   choices:["わたしの 名前は ケンです","わたしは ケンと あそびます","ケンさんは ともだちです","ケンさんは 10さいです"], answer:"わたしの 名前は ケンです",
+   expl:"「My name is Ken.」は「わたしの 名前は ケンです」だよ。"},
+  {text:"Where are you from?", hint:"ウェア アー ユー フロム", ask:"いみは どれかな？",
+   choices:["どこの しゅっしんですか？","どこへ いきますか？","なまえは なんですか？","なんさいですか？"], answer:"どこの しゅっしんですか？",
+   expl:"「Where are you from?」は「どこの しゅっしんですか？」だよ。"},
+  {text:"I'm from Japan.", hint:"アイム フロム ジャパン", ask:"いみは どれかな？",
+   choices:["にっぽん しゅっしんです","にっぽんに すんでいます","にっぽんが すきです","にっぽんへ いきます"], answer:"にっぽん しゅっしんです",
+   expl:"「I'm from Japan.」は「にっぽん しゅっしんです」。from は「〜から」だよ。"},
+  {text:"What day is it today?", hint:"ホワット デイ イズ イット トゥデイ", ask:"いみは どれかな？",
+   choices:["きょうは なんようびですか？","きょうは なんにちですか？","いま なんじですか？","きょうは 天気ですか？"], answer:"きょうは なんようびですか？",
+   expl:"「What day is it today?」は「きょうは なんようびですか？」。day は「日・ようび」だよ。"},
+  {text:"It's Monday.", hint:"イッツ マンデイ", ask:"いみは どれかな？",
+   choices:["げつようびです","かようびです","きょうは はれです","1がつです"], answer:"げつようびです",
+   expl:"「It's Monday.」は「（きょうは）げつようびです」だよ。"},
+  {text:"What time is it?", hint:"ホワット タイム イズ イット", ask:"いみは どれかな？",
+   choices:["いま なんじですか？","なんさいですか？","なんようびですか？","いくつですか？"], answer:"いま なんじですか？",
+   expl:"「What time is it?」は「いま なんじですか？」。time は「じかん・じこく」だよ。"},
+  {text:"It's three o'clock.", hint:"イッツ スリー オクロック", ask:"いみは どれかな？",
+   choices:["3じです","3さいです","3つです","3にんです"], answer:"3じです",
+   expl:"「It's three o'clock.」は「3じです」。o'clock は「〜じ」という いみだよ。"},
+  {text:"How many?", hint:"ハウ メニー", ask:"いみは どれかな？",
+   choices:["いくつですか？","いくらですか？","なんじですか？","だれですか？"], answer:"いくつですか？",
+   expl:"「How many?」は かずを きく「いくつですか？」だよ。"},
+  {text:"This is my friend.", hint:"ディス イズ マイ フレンド", ask:"いみは どれかな？",
+   choices:["こちらは わたしの ともだちです","ともだちと あそびます","ともだちは 元気です","わたしには ともだちが います"], answer:"こちらは わたしの ともだちです",
+   expl:"「This is my friend.」は ともだちを しょうかいする「こちらは わたしの ともだちです」だよ。"},
+  {text:"Happy birthday!", hint:"ハッピー バースデイ", ask:"いみは どれかな？",
+   choices:["おたんじょうび おめでとう！","あけまして おめでとう！","おつかれさま！","いってらっしゃい！"], answer:"おたんじょうび おめでとう！",
+   expl:"「Happy birthday!」は「おたんじょうび おめでとう！」だよ。"},
+  {text:"Good luck!", hint:"グッド ラック", ask:"いみは どれかな？",
+   choices:["がんばって！","おつかれさま！","ありがとう！","おだいじに！"], answer:"がんばって！",
+   expl:"「Good luck!」は 試合や テストの 前に 言う「がんばって！」だよ。"},
+  {text:"Me too.", hint:"ミー トゥー", ask:"いみは どれかな？",
+   choices:["わたしも","わたしは","あなたも？","もういちど"], answer:"わたしも",
+   expl:"「Me too.」は「わたしも（おなじ）」という いみだよ。"},
+  {text:"Of course.", hint:"オブ コース", ask:"いみは どれかな？",
+   choices:["もちろん","たぶん","ざんねん","そうかな"], answer:"もちろん",
+   expl:"「Of course.」は「もちろん」だよ。"},
+  {text:"Be quiet.", hint:"ビー クワイエット", ask:"いみは どれかな？",
+   choices:["しずかに して ください","はやく して ください","すわって ください","みて ください"], answer:"しずかに して ください",
+   expl:"「Be quiet.」は「しずかに して ください」。quiet は「しずかな」だよ。"},
+  {text:"Hurry up.", hint:"ハリー アップ", ask:"いみは どれかな？",
+   choices:["いそいで","ゆっくり","とまって","まって"], answer:"いそいで",
+   expl:"「Hurry up.」は「いそいで」だよ。"}
+];
+
+/* ================= もんだい生成 ================= */
+var LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
+function normChoice(c){
+  return (typeof c === "string") ? {t:c, sub:null} : c;
+}
+function makeQ(kindClass, kindLabel, text, hint, ask, choices, answer, expl, isJp){
+  return {
+    kindClass: kindClass, kindLabel: kindLabel, text: text, hint: hint || null,
+    ask: ask, choices: choices.map(normChoice), answer: answer, expl: expl,
+    small: text.length > 11, jp: !!isJp
+  };
+}
+
+/* --- アルファベット --- */
+function alphaQuestion(L, toLower){
+  var lower = L.toLowerCase();
+  var pool, correct, ask, expl;
+  if (toLower){
+    pool = LETTERS.map(function(x){ return x.toLowerCase(); }).filter(function(x){ return x !== lower; });
+    correct = lower;
+    ask = "「" + L + "」の 小文字（こもじ）は どれ？";
+    expl = "「" + L + "」の 小文字は「" + lower + "」だよ。大文字と 小文字を セットで おぼえよう。";
+    return makeQ("kind-alpha", "アルファベット", L, null, ask, shuffle([correct].concat(sample(pool, 3))), correct, expl, false);
+  }
+  pool = LETTERS.filter(function(x){ return x !== L; });
+  correct = L;
+  ask = "「" + lower + "」の 大文字（おおもじ）は どれ？";
+  expl = "「" + lower + "」の 大文字は「" + L + "」だよ。大文字と 小文字を セットで おぼえよう。";
+  return makeQ("kind-alpha", "アルファベット", lower, null, ask, shuffle([correct].concat(sample(pool, 3))), correct, expl, false);
+}
+
+/* --- たんご（[en, kana, ja] と カテゴリ内プールから） --- */
+function pickDistractors(pool, entry, keyIdx){
+  var seen = {}; seen[entry[keyIdx]] = true;
+  var out = [];
+  var cands = shuffle(pool.filter(function(w){ return w !== entry; }));
+  for (var i = 0; i < cands.length && out.length < 3; i++){
+    if (!seen[cands[i][keyIdx]]){ seen[cands[i][keyIdx]] = true; out.push(cands[i]); }
+  }
+  return out;
+}
+function wordQuestion(entry, pool){
+  var en = entry[0], kana = entry[1], ja = entry[2];
+  var ds = pickDistractors(pool, entry, 2);
+  if (Math.random() < 0.55){
+    var choices = shuffle([{t:ja, sub:null}].concat(ds.map(function(w){ return {t:w[2], sub:null}; })));
+    return makeQ("kind-word", "たんご", en, "よみかた：" + kana, "この たんごの いみは どれかな？",
+      choices, ja, "「" + en + "（" + kana + "）」は「" + ja + "」という いみだよ。", false);
+  }
+  var ds2 = pickDistractors(pool, entry, 0);
+  var choices2 = shuffle([{t:en, sub:kana}].concat(ds2.map(function(w){ return {t:w[0], sub:w[1]}; })));
+  return makeQ("kind-word", "たんご", ja, null, "「" + ja + "」は えいごで どれかな？",
+    choices2, en, "「" + ja + "」は えいごで「" + en + "（" + kana + "）」だよ。", true);
+}
+function numberQuestion(entry, pool){
+  var en = entry[0], kana = entry[1], num = entry[2];
+  var others = sample(pool.filter(function(w){ return w !== entry; }), 3);
+  if (Math.random() < 0.5){
+    var choices = shuffle([{t:String(num), sub:null}].concat(others.map(function(w){ return {t:String(w[2]), sub:null}; })));
+    return makeQ("kind-word", "すうじ", en, "よみかた：" + kana, "この すうじは どれかな？",
+      choices, String(num), "「" + en + "（" + kana + "）」は " + num + " だよ。", false);
+  }
+  var choices2 = shuffle([{t:en, sub:kana}].concat(others.map(function(w){ return {t:w[0], sub:w[1]}; })));
+  return makeQ("kind-word", "すうじ", String(num), null, "この すうじは えいごで どれかな？",
+    choices2, en, num + " は えいごで「" + en + "（" + kana + "）」だよ。", false);
+}
+
+/* --- レベルごとの 20問 組み立て（前回と かぶりにくくする） --- */
+var lastPick = {1:[], 2:[], 3:[]};
+function pickFresh(level, items, count, keyFn){
+  var avoid = lastPick[level];
+  var idxs = items.map(function(_, i){ return i; });
+  var fresh = shuffle(idxs.filter(function(i){ return avoid.indexOf(keyFn(items[i])) === -1; }));
+  var picked = fresh.slice(0, count);
+  if (picked.length < count){
+    var rest = shuffle(idxs.filter(function(i){ return picked.indexOf(i) === -1; }));
+    picked = picked.concat(rest.slice(0, count - picked.length));
+  }
+  lastPick[level] = picked.map(function(i){ return keyFn(items[i]); });
+  return picked.map(function(i){ return items[i]; });
+}
+
+function greetingQuestion(entry, pool){
+  var ds = pickDistractors(pool, entry, 2);
+  var choices = shuffle([{t:entry[2], sub:null}].concat(ds.map(function(w){ return {t:w[2], sub:null}; })));
+  return makeQ("kind-phrase", "あいさつ", entry[0], "よみかた：" + entry[1], "いみは どれかな？",
+    choices, entry[2], "「" + entry[0] + "（" + entry[1] + "）」は「" + entry[2] + "」という いみだよ。", false);
+}
+function buildIntro(){
+  var qs = [];
+  var combos = [];
+  LETTERS.forEach(function(L){ combos.push([L, true]); combos.push([L, false]); });
+  sample(combos, 5).forEach(function(c){ qs.push(alphaQuestion(c[0], c[1])); });
+  sample(L1_COLORS, 4).forEach(function(w){ qs.push(wordQuestion(w, L1_COLORS)); });
+  var nums10 = L1_NUMBERS.slice(0, 10);
+  sample(nums10, 4).forEach(function(n){ qs.push(numberQuestion(n, nums10)); });
+  sample(L1_ANIMALS, 4).forEach(function(w){ qs.push(wordQuestion(w, L1_ANIMALS)); });
+  sample(INTRO_GREETINGS, 3).forEach(function(g){ qs.push(greetingQuestion(g, INTRO_GREETINGS)); });
+  return shuffle(qs);
+}
+function buildLevel1(){
+  var qs = [];
+  var combos = [];
+  LETTERS.forEach(function(L){ combos.push([L, true]); combos.push([L, false]); });
+  sample(combos, 8).forEach(function(c){ qs.push(alphaQuestion(c[0], c[1])); });
+  var wordPool = L1_COLORS.concat(L1_ANIMALS, L1_THINGS);
+  var words = pickFresh(1, wordPool, 8, function(w){ return w[0]; });
+  words.forEach(function(w){
+    var cat = L1_COLORS.indexOf(w) !== -1 ? L1_COLORS : (L1_ANIMALS.indexOf(w) !== -1 ? L1_ANIMALS : L1_THINGS);
+    qs.push(wordQuestion(w, cat));
+  });
+  var nums = sample(L1_NUMBERS, 4);
+  nums.forEach(function(n){ qs.push(numberQuestion(n, L1_NUMBERS)); });
+  return shuffle(qs);
+}
+function buildLevel2(){
+  var flat = [];
+  L2_BANK.forEach(function(group){
+    group.words.forEach(function(w){ flat.push({w:w, pool:group.words}); });
+  });
+  var picked = pickFresh(2, flat, 20, function(item){ return item.w[0]; });
+  return shuffle(picked.map(function(item){ return wordQuestion(item.w, item.pool); }));
+}
+function buildLevel3(){
+  var picked = pickFresh(3, L3_BANK, 20, function(item){ return item.text + "|" + item.ask; });
+  return shuffle(picked.map(function(item){
+    return makeQ("kind-phrase", "フレーズ", item.text, "よみかた：" + item.hint, item.ask,
+      shuffle(item.choices), item.answer, item.expl, false);
+  }));
+}
+function buildQuestions(level){
+  if (level === 0) return buildIntro();
+  if (level === 1) return buildLevel1();
+  if (level === 2) return buildLevel2();
+  return buildLevel3();
+}
+
+/* ================= ゲーム状態 ================= */
+var state = { level: 1, questions: [], idx: 0, score: 0, startTime: 0, log: [], locked: false };
+var best = {0:null, 1:null, 2:null, 3:null};
+var LEVEL_LABEL = {0:"1ねんせい（にゅうもん）", 1:"4ねんせい レベル1", 2:"4ねんせい レベル2", 3:"4ねんせい レベル3"};
+
+function showScreen(name){
+  document.getElementById("screen-start").classList.toggle("hidden", name !== "start");
+  document.getElementById("screen-game").classList.toggle("hidden", name !== "game");
+  document.getElementById("screen-result").classList.toggle("hidden", name !== "result");
+  window.scrollTo(0, 0);
+}
+
+function startGame(level){
+  state.level = level;
+  state.questions = buildQuestions(level);
+  state.idx = 0; state.score = 0; state.log = [];
+  state.startTime = Date.now();
+  showScreen("game");
+  renderQuestion();
+}
+
+function renderQuestion(){
+  var q = state.questions[state.idx];
+  state.locked = false;
+  document.getElementById("progress-bar").style.width = (state.idx / 20 * 100) + "%";
+  document.getElementById("qcount").textContent = (state.idx + 1) + " / 20";
+  document.getElementById("score-chip").textContent = "⭐ " + state.score;
+  var kindEl = document.getElementById("q-kind");
+  kindEl.textContent = q.kindLabel;
+  kindEl.className = "q-kind " + q.kindClass;
+  var textEl = document.getElementById("q-text");
+  textEl.textContent = q.text;
+  textEl.className = "q-text" + (q.jp ? " jp" : (q.small ? " small" : ""));
+  var hintEl = document.getElementById("q-hint");
+  hintEl.textContent = q.hint || "";
+  hintEl.style.display = q.hint ? "" : "none";
+  document.getElementById("q-ask").textContent = q.ask;
+  document.getElementById("feedback-zone").innerHTML = "";
+  var box = document.getElementById("choices");
+  box.innerHTML = "";
+  q.choices.forEach(function(c){
+    var btn = document.createElement("button");
+    btn.className = "choice";
+    btn.setAttribute("data-val", c.t);
+    var main = document.createElement("span");
+    main.textContent = c.t;
+    btn.appendChild(main);
+    if (c.sub){
+      var sub = document.createElement("span");
+      sub.className = "c-sub";
+      sub.textContent = c.sub;
+      btn.appendChild(sub);
+    }
+    btn.addEventListener("click", function(){ answer(btn, c.t); });
+    box.appendChild(btn);
+  });
+}
+
+function answer(btn, val){
+  if (state.locked) return;
+  state.locked = true;
+  var q = state.questions[state.idx];
+  var correct = String(val) === String(q.answer);
+  if (correct) state.score++;
+  document.getElementById("score-chip").textContent = "⭐ " + state.score;
+  var btns = document.querySelectorAll(".choice");
+  btns.forEach(function(b){
+    b.disabled = true;
+    if (String(b.getAttribute("data-val")) === String(q.answer)) b.classList.add("correct");
+    else if (b === btn) b.classList.add("wrong");
+    else b.classList.add("dim");
+  });
+  state.log.push({q:q, picked:val, correct:correct});
+  var isLast = state.idx === state.questions.length - 1;
+  var fb = document.createElement("div");
+  fb.className = "feedback " + (correct ? "ok" : "ng");
+  var head = document.createElement("div");
+  head.className = "fb-head";
+  head.textContent = correct ? "⭕ せいかい！ よくできたね！" : "❌ ざんねん… こたえは「" + q.answer + "」だよ";
+  var body = document.createElement("div");
+  body.textContent = q.expl;
+  fb.appendChild(head); fb.appendChild(body);
+  var next = document.createElement("button");
+  next.className = "next-btn";
+  next.textContent = isLast ? "けっかを みる →" : "つぎの もんだい →";
+  next.addEventListener("click", function(){
+    state.idx++;
+    document.getElementById("progress-bar").style.width = (state.idx / 20 * 100) + "%";
+    if (state.idx >= 20) showResult();
+    else renderQuestion();
+  });
+  var zone = document.getElementById("feedback-zone");
+  zone.innerHTML = "";
+  zone.appendChild(fb);
+  zone.appendChild(next);
+  next.focus();
+}
+
+var BIRD_SVG = {
+  egg: "<circle cx='60' cy='66' r='34' fill='#F5EFE0' stroke='#D8C9A3' stroke-width='3'/><path d='M34 58 L48 50 L60 60 L74 50 L88 60' stroke='#D8C9A3' stroke-width='3' fill='none'/><ellipse cx='60' cy='104' rx='30' ry='6' fill='#E8D3B0'/>",
+  chick: "<ellipse cx='60' cy='72' rx='26' ry='24' fill='#FFE066'/><circle cx='76' cy='54' r='15' fill='#FFE873'/><circle cx='80' cy='51' r='2.8' fill='#2B2118'/><path d='M90 54 L100 57 L90 61 Z' fill='#FF8A2A'/><path d='M52 34 Q58 24 66 30' stroke='#E5B800' stroke-width='3' fill='none' stroke-linecap='round'/>",
+  young: "<ellipse cx='58' cy='70' rx='30' ry='25' fill='#C9A876'/><circle cx='80' cy='50' r='17' fill='#D9BC8C'/><circle cx='85' cy='46' r='3' fill='#2B2118'/><path d='M96 50 L107 54 L96 58 Z' fill='#FF8A2A'/><path d='M34 62 Q20 54 16 42 Q30 44 37 53 Z' fill='#A5825C'/><ellipse cx='52' cy='75' rx='13' ry='9' fill='#F0E2C4'/><path d='M46 92 L44 102 M64 94 L64 104' stroke='#E56E0B' stroke-width='3' stroke-linecap='round'/>",
+  adult: "<ellipse cx='58' cy='70' rx='34' ry='28' fill='#B08968'/><circle cx='84' cy='48' r='20' fill='#C49A6C'/><circle cx='90' cy='44' r='3.4' fill='#2B2118'/><path d='M102 48 L114 52 L102 57 Z' fill='#FF8A2A'/><path d='M30 62 Q14 52 10 38 Q26 40 34 52 Z' fill='#8A6A4A'/><ellipse cx='52' cy='76' rx='16' ry='11' fill='#E8D3B0'/><path d='M44 92 L42 104 M66 94 L66 106' stroke='#E56E0B' stroke-width='3.4' stroke-linecap='round'/><path d='M78 30 Q84 22 92 28' stroke='#8A6A4A' stroke-width='3' fill='none' stroke-linecap='round'/>",
+  master: "<ellipse cx='58' cy='70' rx='34' ry='28' fill='#B08968'/><circle cx='84' cy='48' r='20' fill='#C49A6C'/><circle cx='90' cy='44' r='3.4' fill='#2B2118'/><path d='M102 48 L114 52 L102 57 Z' fill='#FF8A2A'/><path d='M30 62 Q14 52 10 38 Q26 40 34 52 Z' fill='#8A6A4A'/><ellipse cx='52' cy='76' rx='16' ry='11' fill='#E8D3B0'/><path d='M44 92 L42 104 M66 94 L66 106' stroke='#E56E0B' stroke-width='3.4' stroke-linecap='round'/><path d='M70 22 L76 10 L84 19 L92 8 L97 22 Z' fill='#FFC93C' stroke='#D9A400' stroke-width='2'/><circle cx='84' cy='24' r='3' fill='#FF6B9D'/>"
+};
+
+function rankOf(score){
+  if (score === 20) return {name:"えいごマスター", key:"master", msg:"かんぺき！ Perfect! すごすぎる！"};
+  if (score >= 16) return {name:"おとなスズメ", key:"adult", msg:"Great! あと すこしで マスターだよ！"};
+  if (score >= 12) return {name:"わかスズメ", key:"young", msg:"Good! よく がんばったね！ あと すこし！"};
+  if (score >= 8) return {name:"ひなスズメ", key:"chick", msg:"いいちょうし！ れんしゅうして もっと 大きくなろう。"};
+  return {name:"たまご", key:"egg", msg:"ここから スタート！ もういちど チャレンジしてみよう。"};
+}
+
+function fmtTime(ms){
+  var sec = Math.round(ms / 1000);
+  var m = Math.floor(sec / 60), s = sec % 60;
+  return m > 0 ? (m + "ふん " + s + "びょう") : (s + "びょう");
+}
+
+function showResult(){
+  var elapsed = Date.now() - state.startTime;
+  var rank = rankOf(state.score);
+  document.getElementById("rank-bird").innerHTML = BIRD_SVG[rank.key];
+  document.getElementById("rank-name").textContent = rank.name;
+  var stars = "";
+  for (var i = 0; i < 20; i++) stars += (i < state.score ? "★" : "☆");
+  document.getElementById("rank-stars").textContent = stars;
+  document.getElementById("rank-score").textContent = "20もん中 " + state.score + "もん せいかい！";
+  document.getElementById("rank-meta").innerHTML =
+    LEVEL_LABEL[state.level] + "<br>" +
+    "かかった じかん： " + fmtTime(elapsed) + "<br>" + rank.msg;
+  var prevBest = best[state.level];
+  var isNew = (prevBest === null || state.score > prevBest);
+  if (isNew) best[state.level] = state.score;
+  document.getElementById("newbest-zone").innerHTML = isNew && prevBest !== null
+    ? "<span class='newbest'>🎉 ベストスコア こうしん！</span>"
+    : (prevBest === null ? "<span class='newbest'>はじめての きろく！</span>" : "");
+  updateBestLabels();
+  var list = document.getElementById("review-list");
+  list.innerHTML = "";
+  state.log.forEach(function(item, i){
+    var q = item.q;
+    var div = document.createElement("div");
+    div.className = "review-item";
+    var rq = document.createElement("div");
+    rq.className = "r-q";
+    rq.textContent = (item.correct ? "⭕ " : "❌ ") + (i + 1) + ". " + q.text + (q.hint ? "（" + q.hint.replace("よみかた：", "") + "）" : "");
+    var ra = document.createElement("div");
+    ra.className = "r-a";
+    ra.textContent = "こたえ： " + q.answer + (item.correct ? "" : " ／ きみの こたえ： " + item.picked);
+    var ex = document.createElement("div");
+    ex.className = "r-a";
+    ex.textContent = q.expl;
+    div.appendChild(rq); div.appendChild(ra); div.appendChild(ex);
+    list.appendChild(div);
+  });
+  showScreen("result");
+}
+
+function updateBestLabels(){
+  [0,1,2,3].forEach(function(lv){
+    var el = document.getElementById("best-" + lv);
+    if (best[lv] === null){ el.textContent = "ベスト： まだ なし"; el.classList.add("none"); }
+    else { el.textContent = "ベスト： 20もん中 " + best[lv] + "もん せいかい"; el.classList.remove("none"); }
+  });
+}
+
+document.querySelectorAll(".start-btn").forEach(function(btn){
+  btn.addEventListener("click", function(){ startGame(Number(btn.getAttribute("data-level"))); });
+});
+document.getElementById("quit-btn").addEventListener("click", function(){ showScreen("start"); });
+document.getElementById("again-btn").addEventListener("click", function(){ startGame(state.level); });
+document.getElementById("home-btn").addEventListener("click", function(){ showScreen("start"); });
+</script>
+</body>
+</html>
