@@ -3,24 +3,21 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ドリルランド</title>
+<title>メニュー</title>
 <style>
   * { box-sizing: border-box; }
   body { margin: 0; font-family: "Hiragino Maru Gothic ProN", "Hiragino Sans", sans-serif; background: #fff8e7; color: #333; }
   .wrap { max-width: 560px; margin: 0 auto; padding: 24px 16px 40px; text-align: center; }
   h1 { font-size: 34px; margin: 12px 0 4px; }
   p.sub { font-size: 17px; color: #777; margin: 0 0 24px; }
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  a.btn { display: block; padding: 26px 8px; border-radius: 18px; text-decoration: none; color: #fff; font-size: 26px; font-weight: bold; box-shadow: 0 4px 0 rgba(0,0,0,.15); }
-  a.btn:active { transform: translateY(3px); box-shadow: none; }
-  .kanji { background: #e4572e; }
-  .kokugo { background: #2e9e5b; }
-  .sansuu { background: #2e7de4; }
-  .shakai { background: #b06ab3; }
-  .rika { background: #00a3a3; }
-  .eigo { background: #f2a007; }
-  .small { display: block; font-size: 14px; font-weight: normal; margin-top: 6px; opacity: .9; }
   .hidden { display: none; }
+  a.menu-btn { display: block; margin-top: 14px; padding: 22px 18px; border-radius: 18px; color: #fff; text-decoration: none; font-size: 26px; font-weight: bold; box-shadow: 0 4px 0 rgba(0,0,0,.15); }
+  a.menu-btn:active { transform: translateY(3px); box-shadow: none; }
+  a.menu-btn .small { display: block; font-size: 14px; font-weight: normal; margin-top: 4px; opacity: .9; }
+  .m-message { background: #e4572e; }
+  .m-drills { background: #7e57c2; }
+  .m-bird { background: #8a5a2b; }
+  .m-help { background: #d92b2b; }
 
   /* ---- PINゲート（GATE.md 参照） ---- */
   .pin-card { background: #fff; border-radius: 18px; padding: 20px 16px; box-shadow: 0 4px 0 rgba(0,0,0,.08); }
@@ -40,7 +37,7 @@
 
   <!-- ============ PINゲート（未開錠のときだけ表示） ============ -->
   <div id="gate-view" class="hidden">
-    <h1>ドリルランド</h1>
+    <h1>メニュー</h1>
     <p class="sub">あんしょうばんごうを いれてね</p>
     <div class="pin-card">
       <div class="pin-dots" id="pin-dots">
@@ -64,22 +61,14 @@
     </div>
   </div>
 
-  <!-- ============ メニュー（開錠後に表示） ============ -->
+  <!-- ============ トップメニュー（開錠後に表示） ============ -->
   <div id="menu-view" class="hidden">
-    <h1>ドリルランド</h1>
-    <p class="sub">やりたい ドリルを えらんでね</p>
-    <div class="grid">
-      <a class="btn kanji" href="kanji.html">かんじ<span class="small">1〜4ねんせい</span></a>
-      <a class="btn kokugo" href="kokugo.html">こくご<span class="small">ことばの ドリル</span></a>
-      <a class="btn sansuu" href="sansuu.html">さんすう<span class="small">1・4ねんせい</span></a>
-      <a class="btn shakai" href="shakai.html">しゃかい<span class="small">4ねんせい</span></a>
-      <a class="btn rika" href="rika.html">りか<span class="small">4ねんせい</span></a>
-      <a class="btn eigo" href="eigo.html">えいご<span class="small">1・4ねんせい</span></a>
-    </div>
-    <a href="kiroku.html" style="display:block;margin-top:18px;padding:18px;border-radius:18px;background:#555;color:#fff;text-decoration:none;font-size:22px;font-weight:bold;box-shadow:0 4px 0 rgba(0,0,0,.15);">きろくを みる<span style="display:block;font-size:14px;font-weight:normal;margin-top:4px;opacity:.9;">そういちろう・つづみの がんばり</span></a>
-    <a href="bird.html" style="display:block;margin-top:14px;padding:18px;border-radius:18px;background:#8a5a2b;color:#fff;text-decoration:none;font-size:22px;font-weight:bold;box-shadow:0 4px 0 rgba(0,0,0,.15);">バード<span style="display:block;font-size:14px;font-weight:normal;margin-top:4px;opacity:.9;">おうち つうか の かんり</span></a>
-    <a href="message.html" style="display:block;margin-top:14px;padding:18px;border-radius:18px;background:#e4572e;color:#fff;text-decoration:none;font-size:22px;font-weight:bold;box-shadow:0 4px 0 rgba(0,0,0,.15);">✉️ ママから<span style="display:block;font-size:14px;font-weight:normal;margin-top:4px;opacity:.9;">ママからの メッセージ</span></a>
-    <a href="help.html" style="display:block;margin-top:14px;padding:18px;border-radius:18px;background:#d92b2b;color:#fff;text-decoration:none;font-size:22px;font-weight:bold;box-shadow:0 4px 0 rgba(0,0,0,.15);">🆘 こまったとき<span style="display:block;font-size:14px;font-weight:normal;margin-top:4px;opacity:.9;">ママ・お父さんに でんわする</span></a>
+    <h1>メニュー</h1>
+    <p class="sub">どれを ひらく？</p>
+    <a class="menu-btn m-message" href="message.html">✉️ ママから<span class="small">ママからの メッセージ</span></a>
+    <a class="menu-btn m-drills" href="drills.html">ドリルランド<span class="small">かんじ・こくご・さんすう・しゃかい・りか・えいご</span></a>
+    <a class="menu-btn m-bird" href="bird.html">バード<span class="small">おうち つうか の かんり</span></a>
+    <a class="menu-btn m-help" href="help.html">🆘 こまったとき<span class="small">ママ・お父さんに でんわする</span></a>
     <button class="lock-btn" id="lock-btn" type="button">🔒 ロックする</button>
   </div>
 
@@ -88,13 +77,13 @@
 <script>
 'use strict';
 /* ============================================================
-   ドリルランド PINゲート（入口）。くわしくは GATE.md。
+   PINゲート（入口）。くわしくは GATE.md。
    LAND_PIN は公開前に実値へ一括置換する（プレースホルダの間は開錠できない）。
    開錠状態は localStorage の land_unlock_v1（=開錠した日付）に保存し、
    その日のうちだけ有効（翌日は再入力）。
    ============================================================ */
 var LAND_PIN = '2002';
-var LAND_PAGES = ['kanji.html', 'kokugo.html', 'sansuu.html', 'shakai.html', 'rika.html', 'eigo.html', 'kiroku.html', 'bird.html', 'message.html', 'help.html'];
+var LAND_PAGES = ['kanji.html', 'kokugo.html', 'sansuu.html', 'shakai.html', 'rika.html', 'eigo.html', 'kiroku.html', 'bird.html', 'message.html', 'help.html', 'drills.html'];
 
 var $ = function (id) { return document.getElementById(id); };
 

@@ -325,7 +325,7 @@
   <body>
     <div class="wrap">
       <nav class="topnav">
-        <a class="navlink" href="index.html">← ドリルランドに もどる</a>
+        <a class="navlink" href="index.html">← トップに もどる</a>
         <button class="parent-btn" id="nav-parent" type="button">おうちの人</button>
       </nav>
 
@@ -339,7 +339,7 @@
           <path d="M16 30 Q4 22 8 12 Q18 16 20 26 Z" fill="#3d9be9"/>
           <path d="M28 48 L28 54 M40 48 L40 54" stroke="#e07f0e" stroke-width="3" stroke-linecap="round"/>
         </svg>
-        <p class="home-q">だれの バードかな？</p>
+        <p class="home-q" id="home-q">だれの バードかな？</p>
         <p class="home-sub muted">じぶんの なまえを タップしてね。<br />タスクを したら「しんせい」して、おうちの人が OKしたら バードが ふえるよ。</p>
         <div class="kid-cards" id="kid-cards"></div>
       </section>
@@ -461,6 +461,15 @@
             <button class="tool-btn" id="rate-save" type="button">レートを保存</button>
           </div>
           <div class="tool-row">
+            <label>この端末は だれの？（選んだ子の画面だけに分かれます）</label>
+            <div class="btn-row" id="device-kid-btns">
+              <button class="tool-btn" type="button" data-dk="">みんな（両方）</button>
+              <button class="tool-btn" type="button" data-dk="soichiro">そういちろう</button>
+              <button class="tool-btn" type="button" data-dk="tsuzumi">つづみ</button>
+            </div>
+            <span class="muted" id="device-kid-now"></span>
+          </div>
+          <div class="tool-row">
             <label>暗証番号の変更（新しい4桁を2回入力）</label>
             <input class="num-input" type="password" id="pin-new1" maxlength="4" inputmode="numeric" placeholder="新しい番号" style="width:130px" />
             <input class="num-input" type="password" id="pin-new2" maxlength="4" inputmode="numeric" placeholder="もう一度" style="width:130px" />
@@ -505,41 +514,44 @@
       /* タスクの区分（子ども画面の表示順） */
       var CATEGORIES = ['あさ', 'やすみのひ', 'かえってきてから ねるまで'];
 
-      /* 家のマグネットボードの実物リスト */
+      /* 家のマグネットボードの実物リスト（タスク一覧の正本）
+         リストを差し替えるときは BOARD_VERSION を上げること。
+         端末に保存された古いリストは、版が変わったときに自動でこのリストへ置き換わる */
+      var BOARD_VERSION = 2;
       function boardTasks() {
-        var T = function (name, cat, s, t) {
-          return { id: uid(), name: name, cat: cat, points: { soichiro: s, tsuzumi: t } };
+        var T = function (id, name, cat, s, t) {
+          return { id: id, name: name, cat: cat, points: { soichiro: s, tsuzumi: t } };
         };
         return [
           /* あさ */
-          T('浅間神社ランニング', 'あさ', 5, 10),
-          T('ふとんを ととのえる', 'あさ', 1, 1),
-          T('あさごはん 20ぷん', 'あさ', 1, 1),
-          T('はみがき', 'あさ', 1, 1),
-          T('きがえ・かおあらう・かみととのえる・クリームつける', 'あさ', 1, 1),
-          T('こころをこめて そうじ（そうじき・クイックルワイパー）', 'あさ', 1, 1),
-          T('走りの教室・フラッグ あさのうんどう', 'あさ', 1, null),
-          T('ラジオたいそう', 'あさ', 1, null),
-          T('わすれものがないか もういちど かくにん', 'あさ', 1, 1),
+          T('bt01', '浅間神社ランニング', 'あさ', 5, 10),
+          T('bt02', 'ふとんを ととのえる', 'あさ', 1, 1),
+          T('bt03', 'あさごはん 20ぷん', 'あさ', 1, 1),
+          T('bt04', 'はみがき', 'あさ', 1, 1),
+          T('bt05', 'きがえ・かおあらう・かみととのえる・クリームつける', 'あさ', 1, 1),
+          T('bt06', 'こころをこめて そうじ（そうじき・クイックルワイパー）', 'あさ', 1, 1),
+          T('bt07', '走りの教室・フラッグ あさのうんどう', 'あさ', 1, null),
+          T('bt08', 'ラジオたいそう', 'あさ', 1, null),
+          T('bt09', 'わすれものがないか もういちど かくにん', 'あさ', 1, 1),
           /* やすみのひ */
-          T('つめを きる', 'やすみのひ', 1, 1),
-          T('へやの せいりせいとん', 'やすみのひ', 1, 1),
-          T('うわぐつを あらう', 'やすみのひ', 1, 1),
-          T('ゆかの ふきそうじ', 'やすみのひ', 1, 1),
+          T('bt10', 'つめを きる', 'やすみのひ', 1, 1),
+          T('bt11', 'へやの せいりせいとん', 'やすみのひ', 1, 1),
+          T('bt12', 'うわぐつを あらう', 'やすみのひ', 1, 1),
+          T('bt13', 'ゆかの ふきそうじ', 'やすみのひ', 1, 1),
           /* かえってきてから ねるまで */
-          T('おたより・きゅうしょくセットを だす', 'かえってきてから ねるまで', 1, 1),
-          T('プールセット・たいそうぎを だす', 'かえってきてから ねるまで', 1, 1),
-          T('しゅくだいを する', 'かえってきてから ねるまで', 1, 1),
-          T('えんぴつを けずる', 'かえってきてから ねるまで', 1, 1),
-          T('じかんわり かくにん', 'かえってきてから ねるまで', 1, 1),
-          T('つぎのひの じゅんび', 'かえってきてから ねるまで', 1, 1),
-          T('よるごはん', 'かえってきてから ねるまで', 1, 1),
-          T('ごはんを つくる', 'かえってきてから ねるまで', 10, null),
-          T('おふろ', 'かえってきてから ねるまで', 1, 1),
-          T('クリームを ぬって ほしつする', 'かえってきてから ねるまで', 1, 1),
-          T('かみのけを かわかす', 'かえってきてから ねるまで', 1, 1),
-          T('はみがき（しあげまで）', 'かえってきてから ねるまで', 1, 1),
-          T('7:30までに 矯正装置を つける', 'かえってきてから ねるまで', 1, null)
+          T('bt14', 'おたより・きゅうしょくセットを だす', 'かえってきてから ねるまで', 1, 1),
+          T('bt15', 'プールセット・たいそうぎを だす', 'かえってきてから ねるまで', 1, 1),
+          T('bt16', 'しゅくだいを する', 'かえってきてから ねるまで', 1, 1),
+          T('bt17', 'えんぴつを けずる', 'かえってきてから ねるまで', 1, 1),
+          T('bt18', 'じかんわり かくにん', 'かえってきてから ねるまで', 1, 1),
+          T('bt19', 'つぎのひの じゅんび', 'かえってきてから ねるまで', 1, 1),
+          T('bt20', 'よるごはん', 'かえってきてから ねるまで', 1, 1),
+          T('bt21', 'ごはんを つくる', 'かえってきてから ねるまで', 10, null),
+          T('bt22', 'おふろ', 'かえってきてから ねるまで', 1, 1),
+          T('bt23', 'クリームを ぬって ほしつする', 'かえってきてから ねるまで', 1, 1),
+          T('bt24', 'かみのけを かわかす', 'かえってきてから ねるまで', 1, 1),
+          T('bt25', 'はみがき（しあげまで）', 'かえってきてから ねるまで', 1, 1),
+          T('bt26', '7:30までに 矯正装置を つける', 'かえってきてから ねるまで', 1, null)
         ];
       }
 
@@ -548,6 +560,8 @@
           v: 1,
           pin: null,
           rate: 3,
+          boardVersion: BOARD_VERSION,
+          deviceKid: null,
           balances: { soichiro: 0, tsuzumi: 0 },
           tasks: boardTasks(),
           requests: [],
@@ -556,6 +570,21 @@
       }
 
       var state = load();
+
+      /* タスク一覧の自動合わせ：保存データの版が古ければ、ボードのリストに置き換える
+         （残高・申請・履歴・暗証番号はそのまま。申請中のタスクは名前で新しいIDに付け替える） */
+      (function syncBoardTasks() {
+        if (state.boardVersion === BOARD_VERSION) return;
+        var board = boardTasks();
+        var byName = {};
+        board.forEach(function (t) { byName[t.name] = t.id; });
+        (state.requests || []).forEach(function (r) {
+          if (r.type === 'task' && byName[r.title]) r.taskId = byName[r.title];
+        });
+        state.tasks = board;
+        state.boardVersion = BOARD_VERSION;
+        save();
+      })();
 
       function load() {
         try {
@@ -620,7 +649,9 @@
       /* ---------- home ---------- */
       function renderHome() {
         var html = '';
-        KID_IDS.forEach(function (id) {
+        var ids = state.deviceKid ? [state.deviceKid] : KID_IDS;
+        $('home-q').textContent = state.deviceKid ? KIDS[state.deviceKid].name + ' の バードちょう' : 'だれの バードかな？';
+        ids.forEach(function (id) {
           var k = KIDS[id];
           var bal = state.balances[id] || 0;
           var pend = pendingOf(id).length;
@@ -869,11 +900,30 @@
         renderParentKids();
         $('rate-input').value = state.rate;
         updateRateInfo();
+        renderDeviceKid();
         renderTaskEdit();
+      }
+
+      /* ---------- この端末の子ども（端末ごとの分離） ---------- */
+      function renderDeviceKid() {
+        $('device-kid-now').textContent = 'いま：' + (state.deviceKid ? KIDS[state.deviceKid].name + ' だけ表示' : 'みんな（両方）表示');
+        Array.prototype.forEach.call($('device-kid-btns').querySelectorAll('[data-dk]'), function (b) {
+          var sel = (b.getAttribute('data-dk') || null) === (state.deviceKid || null);
+          b.style.fontWeight = sel ? '800' : '';
+          b.style.borderColor = sel ? '#e07f0e' : '';
+          b.style.borderWidth = sel ? '2px' : '';
+        });
+      }
+      function setDeviceKid(v) {
+        state.deviceKid = v || null;
+        save();
+        renderParent();
+        toast(state.deviceKid ? 'この端末は ' + KIDS[state.deviceKid].name + ' の画面にしました' : 'この端末は みんなの画面にしました');
       }
 
       function renderQueue() {
         var pend = state.requests.filter(function (r) { return r.status === 'pending'; })
+          .filter(function (r) { return !state.deviceKid || r.child === state.deviceKid; })
           .slice().sort(function (a, b) { return a.at - b.at; });
         var html = '';
         pend.forEach(function (r) {
@@ -920,7 +970,7 @@
 
       function renderParentKids() {
         var html = '';
-        KID_IDS.forEach(function (id) {
+        (state.deviceKid ? [state.deviceKid] : KID_IDS).forEach(function (id) {
           var k = KIDS[id];
           var bal = state.balances[id] || 0;
           var interest = interestFor(bal);
@@ -1035,11 +1085,13 @@
 
       function renderTaskEdit() {
         var html = '';
-        state.tasks.forEach(function (t) {
+        var dk = state.deviceKid;
+        var list = dk ? state.tasks.filter(function (t) { return t.points[dk] != null; }) : state.tasks;
+        list.forEach(function (t) {
           html += '<div class="task-edit-row">'
             + '<input type="text" id="te-name-' + t.id + '" value="' + esc(t.name) + '" />'
-            + '<input type="number" min="0" inputmode="numeric" id="te-s-' + t.id + '" value="' + (t.points.soichiro == null ? '' : t.points.soichiro) + '" />'
-            + '<input type="number" min="0" inputmode="numeric" id="te-t-' + t.id + '" value="' + (t.points.tsuzumi == null ? '' : t.points.tsuzumi) + '" />'
+            + '<input type="number" min="0" inputmode="numeric" id="te-s-' + t.id + '" value="' + (t.points.soichiro == null ? '' : t.points.soichiro) + '"' + (dk === 'tsuzumi' ? ' disabled' : '') + ' />'
+            + '<input type="number" min="0" inputmode="numeric" id="te-t-' + t.id + '" value="' + (t.points.tsuzumi == null ? '' : t.points.tsuzumi) + '"' + (dk === 'soichiro' ? ' disabled' : '') + ' />'
             + '<button type="button" class="mini-btn" data-tesave="' + t.id + '">保存</button>'
             + '<button type="button" class="mini-btn del" data-tedel="' + t.id + '">削除</button>'
             + '<select id="te-cat-' + t.id + '" class="cat-select" aria-label="区分">' + catOptions(t.cat || CATEGORIES[0]) + '</select>'
@@ -1047,6 +1099,10 @@
         });
         $('task-edit-list').innerHTML = html;
         $('new-task-cat').innerHTML = catOptions(CATEGORIES[0]);
+        $('new-task-s').disabled = (dk === 'tsuzumi');
+        $('new-task-t').disabled = (dk === 'soichiro');
+        if (dk === 'tsuzumi') $('new-task-s').value = '';
+        if (dk === 'soichiro') $('new-task-t').value = '';
         Array.prototype.forEach.call($('task-edit-list').querySelectorAll('[data-tesave]'), function (b) {
           b.addEventListener('click', function () { saveTaskEdit(b.getAttribute('data-tesave')); });
         });
@@ -1110,6 +1166,7 @@
         resetArmed = false;
         btn.textContent = 'タスクをボードのリストにリセット';
         state.tasks = boardTasks();
+        state.boardVersion = BOARD_VERSION;
         save();
         renderTaskEdit();
         toast('タスクをボードのリストにリセットしました');
@@ -1201,6 +1258,9 @@
       $('bedtime-input').addEventListener('input', updateBedtimePreview);
       $('bedtime-apply').addEventListener('click', applyBedtime);
       $('rate-save').addEventListener('click', saveRate);
+      Array.prototype.forEach.call($('device-kid-btns').querySelectorAll('[data-dk]'), function (b) {
+        b.addEventListener('click', function () { setDeviceKid(b.getAttribute('data-dk')); });
+      });
       $('new-task-add').addEventListener('click', addTask);
       $('task-reset').addEventListener('click', resetTasksToBoard);
       $('pin-change').addEventListener('click', changePin);

@@ -59,6 +59,16 @@
   .tb-tsuzumi { background: #f27bab; }
   .tadaima-msg { min-height: 26px; font-size: 18px; font-weight: bold; color: #2e9e5b; margin: 12px 0 0; }
 
+  /* ---- ママに へんじ ---- */
+  .who-btn { font-family: inherit; font-size: 21px; font-weight: bold; padding: 14px 6px; border: 3px solid transparent; border-radius: 16px; color: #fff; box-shadow: 0 4px 0 rgba(0,0,0,.15); cursor: pointer; opacity: .45; }
+  .who-btn.sel { opacity: 1; border-color: #333; }
+  .stamp-btns { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 14px; }
+  .stamp-btn { font-family: inherit; font-size: 18px; font-weight: bold; padding: 14px 4px; border: 3px solid #e8dcc0; border-radius: 16px; background: #fdf1dc; color: #333; cursor: pointer; }
+  .stamp-btn.sel { border-color: #e4572e; background: #ffe3d3; }
+  .reply-text { font-family: inherit; font-size: 19px; width: 100%; padding: 12px; margin-top: 14px; border: 2px solid #e8dcc0; border-radius: 12px; }
+  .reply-send { font-family: inherit; font-size: 21px; font-weight: bold; padding: 14px 28px; border: none; border-radius: 14px; background: #e4572e; color: #fff; box-shadow: 0 3px 0 rgba(0,0,0,.15); cursor: pointer; margin-top: 14px; width: 100%; }
+  .reply-send:active { transform: translateY(2px); box-shadow: none; }
+
   /* ---- おるすばんのやくそく ---- */
   .rules { text-align: left; }
   .rules h2 { font-size: 21px; margin: 0 0 10px; text-align: center; }
@@ -124,6 +134,24 @@
       </div>
       <p class="tadaima-msg" id="tadaima-msg"></p>
     </div>
+
+    <!-- ============ ママに へんじ（PIN照合後のみ） ============ -->
+    <div class="card">
+      <p class="tadaima-title">💌 ママに へんじ</p>
+      <p class="tadaima-sub">だれが おくる？ なまえを えらんで、スタンプを おしてね</p>
+      <div class="tadaima-btns">
+        <button class="who-btn tb-soichiro" type="button" data-rwho="soichiro">そういちろう</button>
+        <button class="who-btn tb-tsuzumi" type="button" data-rwho="tsuzumi">つづみ</button>
+      </div>
+      <div class="stamp-btns">
+        <button class="stamp-btn" type="button" data-stamp="わかった！">👍 わかった！</button>
+        <button class="stamp-btn" type="button" data-stamp="ありがとう">🙏 ありがとう</button>
+        <button class="stamp-btn" type="button" data-stamp="たすけて">🆘 たすけて</button>
+      </div>
+      <input class="reply-text" id="reply-text" type="text" maxlength="60" placeholder="ひとこと（なくても OK）">
+      <button class="reply-send" type="button" id="reply-send">へんじを おくる</button>
+      <p class="tadaima-msg" id="reply-msg"></p>
+    </div>
   </section>
 
   <!-- ============ おるすばんのやくそく（PIN不要・固定表示） ============ -->
@@ -139,7 +167,7 @@
     </ul>
   </div>
 
-  <a class="back" href="index.html">← ドリルランドに もどる</a>
+  <a class="back" href="index.html">← トップに もどる</a>
 </div>
 
 <script>
@@ -274,6 +302,54 @@ document.querySelectorAll('.tadaima-btn').forEach(function (btn) {
         msg.textContent = 'つうしんエラー。もういちど おしてね';
       });
   });
+});
+
+/* ---------- ママに へんじ ---------- */
+var replyWho = '';
+var replyStamp = '';
+
+document.querySelectorAll('[data-rwho]').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    replyWho = btn.getAttribute('data-rwho');
+    document.querySelectorAll('[data-rwho]').forEach(function (b) { b.classList.toggle('sel', b === btn); });
+    $('reply-msg').textContent = '';
+  });
+});
+document.querySelectorAll('[data-stamp]').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    replyStamp = btn.getAttribute('data-stamp');
+    document.querySelectorAll('[data-stamp]').forEach(function (b) { b.classList.toggle('sel', b === btn); });
+    $('reply-msg').textContent = '';
+  });
+});
+
+function buildReplyUrl() {
+  return ENDPOINT + '?action=reply&who=' + encodeURIComponent(replyWho)
+    + '&stamp=' + encodeURIComponent(replyStamp)
+    + '&text=' + encodeURIComponent($('reply-text').value.trim())
+    + '&pin=' + encodeURIComponent(currentPin);
+}
+
+$('reply-send').addEventListener('click', function () {
+  var msg = $('reply-msg');
+  if (!replyWho || !replyStamp) {
+    msg.textContent = 'なまえと スタンプを えらんでね';
+    return;
+  }
+  msg.textContent = 'おくってるよ…';
+  fetch(buildReplyUrl(), { method: 'GET' })
+    .then(function (res) { return res.json(); })
+    .then(function (data) {
+      if (data && data.ok) {
+        msg.textContent = 'おくったよ！ 💌';
+        $('reply-text').value = '';
+      } else {
+        msg.textContent = 'つうしんエラー。もういちど おしてね';
+      }
+    })
+    .catch(function () {
+      msg.textContent = 'つうしんエラー。もういちど おしてね';
+    });
 });
 
 updatePinDots();
