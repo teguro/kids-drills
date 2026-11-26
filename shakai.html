@@ -771,11 +771,71 @@ function renderQuestion(){
     box.appendChild(btn);
   });
 }
+/* 効果音（Web Audio API）：外部ファイルなし。回答タップのタイミングで生成・再開する */
+var audioCtx = null;
+function getAudioContext(){
+  try {
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    if (!audioCtx) audioCtx = new AC();
+    if (audioCtx.state === "suspended") {
+      var p = audioCtx.resume();
+      if (p && p.catch) p.catch(function(){});
+    }
+    return audioCtx;
+  } catch(e) { return null; }
+}
+function playTone(ctx, freq, startOffset, dur, type, vol){
+  var t0 = ctx.currentTime + startOffset;
+  var osc = ctx.createOscillator();
+  var gain = ctx.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, t0);
+  gain.gain.setValueAtTime(0.0001, t0);
+  gain.gain.exponentialRampToValueAtTime(vol, t0 + 0.015);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start(t0);
+  osc.stop(t0 + dur + 0.05);
+}
+function playCorrectSound(){
+  var ctx = getAudioContext();
+  if (!ctx) return;
+  try {
+    /* ピンポーン：高い音 → 少し低い音の2音チャイム */
+    playTone(ctx, 1318.51, 0, 0.22, "triangle", 0.24);
+    playTone(ctx, 1046.50, 0.18, 0.42, "triangle", 0.24);
+  } catch(e) {}
+}
+function playWrongSound(){
+  var ctx = getAudioContext();
+  if (!ctx) return;
+  try {
+    /* ブッブー：低いブザーを短く2回 */
+    var t0 = ctx.currentTime;
+    [0, 0.22].forEach(function(off){
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.type = "square";
+      osc.frequency.setValueAtTime(185, t0 + off);
+      gain.gain.setValueAtTime(0.0001, t0 + off);
+      gain.gain.exponentialRampToValueAtTime(0.16, t0 + off + 0.012);
+      gain.gain.setValueAtTime(0.16, t0 + off + 0.12);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + off + 0.16);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(t0 + off);
+      osc.stop(t0 + off + 0.18);
+    });
+  } catch(e) {}
+}
 function answer(btn, val){
   if (state.locked) return;
   state.locked = true;
   var q = state.questions[state.idx];
   var correct = (val === q.answer);
+  if (correct) playCorrectSound(); else playWrongSound();
   if (correct) state.score++;
   document.getElementById("score-chip").textContent = "⭐ " + state.score;
   var btns = document.querySelectorAll(".choice");

@@ -981,11 +981,58 @@ function renderQuestion(){
     box.appendChild(btn);
   });
 }
+var audioCtx = null;
+function ensureAudioContext(){
+  try {
+    if (!audioCtx){
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      audioCtx = new AC();
+    }
+    if (audioCtx.state === "suspended") audioCtx.resume();
+    return audioCtx;
+  } catch(e) { return null; }
+}
+function playTone(ctx, freq, startAt, duration, type, volume){
+  var osc = ctx.createOscillator();
+  var gain = ctx.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, startAt);
+  gain.gain.setValueAtTime(0.0001, startAt);
+  gain.gain.exponentialRampToValueAtTime(volume, startAt + 0.015);
+  gain.gain.setValueAtTime(volume, startAt + Math.max(0.02, duration - 0.05));
+  gain.gain.exponentialRampToValueAtTime(0.0001, startAt + duration);
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start(startAt);
+  osc.stop(startAt + duration + 0.02);
+}
+function playCorrectSound(){
+  var ctx = ensureAudioContext();
+  if (!ctx) return;
+  try {
+    var t = ctx.currentTime + 0.01;
+    /* ピンポーン：高い音 → 少し低い音の2音チャイム */
+    playTone(ctx, 1318.51, t, 0.18, "sine", 0.22);
+    playTone(ctx, 1046.50, t + 0.16, 0.34, "sine", 0.22);
+  } catch(e) {}
+}
+function playWrongSound(){
+  var ctx = ensureAudioContext();
+  if (!ctx) return;
+  try {
+    var t = ctx.currentTime + 0.01;
+    /* ブッブー：低いブザーを短く2回 */
+    playTone(ctx, 185, t, 0.16, "square", 0.16);
+    playTone(ctx, 185, t + 0.22, 0.30, "square", 0.16);
+  } catch(e) {}
+}
 function answer(btn, val){
   if (state.locked) return;
   state.locked = true;
   var q = state.questions[state.idx];
   var correct = String(val) === String(q.answer);
+  if (correct) playCorrectSound(); else playWrongSound();
   if (correct) state.score++;
   document.getElementById("score-chip").textContent = "⭐ " + state.score;
   var btns = document.querySelectorAll(".choice");

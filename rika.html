@@ -720,6 +720,48 @@ function shuffle(arr){
 var best = {1:null,2:null,3:null,4:null};
 var state = {level:1, questions:[], idx:0, score:0, answered:false, history:[]};
 
+/* ---- 効果音（Web Audio API） ---- */
+var audioCtx = null;
+function ensureAudioCtx(){
+  try {
+    if(!audioCtx){
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if(!AC) return null;
+      audioCtx = new AC();
+    }
+    if(audioCtx.state === "suspended") audioCtx.resume();
+    return audioCtx;
+  } catch(e) { return null; }
+}
+function playTone(ctx, freq, delay, duration, type, vol){
+  var t0 = ctx.currentTime + delay;
+  var osc = ctx.createOscillator();
+  var gain = ctx.createGain();
+  osc.type = type || "sine";
+  osc.frequency.setValueAtTime(freq, t0);
+  gain.gain.setValueAtTime(0.0001, t0);
+  gain.gain.exponentialRampToValueAtTime(vol || 0.22, t0 + 0.015);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t0 + duration);
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.start(t0); osc.stop(t0 + duration + 0.05);
+}
+function playCorrectSound(){
+  var ctx = ensureAudioCtx(); if(!ctx) return;
+  /* ピンポーン：高めの音 → 少し低い音 */
+  playTone(ctx, 1318.5, 0, 0.28, "sine", 0.24);   /* E6 */
+  playTone(ctx, 1046.5, 0.16, 0.42, "sine", 0.24); /* C6 */
+  playTone(ctx, 2637, 0, 0.12, "sine", 0.05);
+  playTone(ctx, 2093, 0.16, 0.18, "sine", 0.05);
+}
+function playWrongSound(){
+  var ctx = ensureAudioCtx(); if(!ctx) return;
+  /* ブッブー：低いブザーを短く2回 */
+  playTone(ctx, 147, 0, 0.16, "square", 0.16);
+  playTone(ctx, 147, 0.22, 0.30, "square", 0.16);
+  playTone(ctx, 110, 0, 0.16, "sawtooth", 0.06);
+  playTone(ctx, 110, 0.22, 0.30, "sawtooth", 0.06);
+}
+
 var PLAYERS = ["soichiro","tsuzumi"];
 var currentPlayer = "soichiro";
 try {
@@ -806,7 +848,7 @@ function answer(choice, btn){
   state.answered=true;
   var q=state.questions[state.idx];
   var correct = (choice===q.a);
-  if(correct) state.score++;
+  if(correct){ state.score++; playCorrectSound(); } else { playWrongSound(); }
   var buttons=document.querySelectorAll(".choice");
   buttons.forEach(function(b){
     if(b.textContent===q.a) b.classList.add("correct");

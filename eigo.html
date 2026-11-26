@@ -358,6 +358,55 @@ function stopSpeak(){
     try { window.speechSynthesis.cancel(); } catch (e) {}
   }
 }
+
+/* ================= こうかおん（Web Audio API） ================= */
+/* 外部の 音声ファイルは 使わず、タップの タイミングで 音を 作って 鳴らす。
+   iPad Safari の 自動再生制限に 合わせて、回答タップの中で
+   AudioContext を 生成・再開（resume）する。はつおん（speechSynthesis）とは 別系統。 */
+var audioCtx = null;
+function ensureAudio(){
+  try {
+    if (!audioCtx){
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      audioCtx = new AC();
+    }
+    if (audioCtx.state === "suspended"){
+      var p = audioCtx.resume();
+      if (p && p.catch) p.catch(function(){});
+    }
+    return audioCtx;
+  } catch (e) { return null; }
+}
+function playTone(freq, startDelay, duration, type, volume){
+  var ctx = ensureAudio();
+  if (!ctx) return;
+  try {
+    var t0 = ctx.currentTime + (startDelay || 0);
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.type = type || "sine";
+    osc.frequency.setValueAtTime(freq, t0);
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.exponentialRampToValueAtTime(volume || 0.22, t0 + 0.015);
+    gain.gain.setValueAtTime(volume || 0.22, t0 + Math.max(0.02, duration - 0.06));
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + duration);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(t0);
+    osc.stop(t0 + duration + 0.05);
+  } catch (e) { /* 音が 鳴らせない 環境では 何もしない */ }
+}
+function playCorrectSound(){
+  /* ピンポーン：高い音 → 少し低い音の 2音チャイム */
+  playTone(1318.51, 0, 0.22, "triangle", 0.24); /* E6 ピン */
+  playTone(1046.50, 0.20, 0.42, "triangle", 0.24); /* C6 ポーン（少し長めに） */
+}
+function playWrongSound(){
+  /* ブッブー：低い ブザーを 短く 2回 */
+  playTone(155, 0, 0.16, "square", 0.16);
+  playTone(155, 0.22, 0.30, "square", 0.16);
+}
 var SPEAK_SVG = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16.2 9.2c1.1 1.5 1.1 4.1 0 5.6M18.6 6.8c2.3 3 2.3 7.4 0 10.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
 function makeSpeakBtn(text){
   var b = document.createElement("button");
@@ -1288,7 +1337,7 @@ function answer(wrap, val){
   state.locked = true;
   var q = state.questions[state.idx];
   var correct = String(val) === String(q.answer);
-  if (correct) state.score++;
+  if (correct){ state.score++; playCorrectSound(); } else { playWrongSound(); }
   document.getElementById("score-chip").textContent = "⭐ " + state.score;
   var wraps = document.querySelectorAll(".choice");
   wraps.forEach(function(w){
