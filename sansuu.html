@@ -134,6 +134,49 @@
     .choice.wrong{background:#4A1E20;color:#FFB3B6;}
   }
   .feedback{margin-top:16px;border-radius:18px;padding:14px 16px;font-size:16px;line-height:1.65;font-weight:700;text-align:left;}
+  /* ===== テンキー入力 ===== */
+  .ans-zone{margin-top:16px;}
+  .ans-fields{display:flex;gap:14px;justify-content:center;align-items:flex-end;flex-wrap:wrap;}
+  .ans-field-wrap{display:flex;flex-direction:column;align-items:center;gap:4px;}
+  .ans-field-label{font-size:15px;font-weight:900;color:var(--muted);}
+  .ans-field{
+    min-width:150px;min-height:72px;padding:8px 18px;
+    border:3px solid var(--choice-line);border-radius:16px;background:var(--choice-bg);
+    font-size:36px;font-weight:900;line-height:1.2;text-align:center;color:var(--ink);
+    display:flex;align-items:center;justify-content:center;gap:6px;
+  }
+  .ans-field .unit{font-size:22px;color:var(--muted);}
+  .ans-field.empty{color:var(--muted);opacity:.65;}
+  .ans-field.active{border-color:var(--orange);background:#FFF3D6;box-shadow:0 0 0 3px rgba(255,138,42,.3);}
+  .ans-field.field-ok{border-color:var(--green);background:#DFF7E8;color:#0E6B38;}
+  .ans-field.field-ng{border-color:var(--wrong);background:#FDE3E3;color:#8F1D21;}
+  @media (prefers-color-scheme: dark){
+    .ans-field.active{background:#4A3A1E;}
+    .ans-field.field-ok{background:#17402A;color:#8CF0B4;}
+    .ans-field.field-ng{background:#4A1E20;color:#FFB3B6;}
+  }
+  .frac-input{display:flex;flex-direction:column;align-items:center;gap:6px;}
+  .frac-input .ans-field{min-width:120px;min-height:60px;font-size:30px;}
+  .frac-bar{width:110px;height:4px;border-radius:2px;background:var(--ink);}
+  .keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px;max-width:420px;margin-left:auto;margin-right:auto;}
+  .key{
+    border:3px solid var(--choice-line);background:var(--card);color:var(--ink);
+    border-radius:16px;font-size:30px;font-weight:900;min-height:64px;padding:8px 4px;
+    box-shadow:0 4px 0 rgba(120,80,10,.14);
+  }
+  .key:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(120,80,10,.14);}
+  .key.key-del{font-size:20px;background:var(--choice-bg);color:var(--muted);}
+  .key.key-dot{font-size:30px;}
+  .key-spacer{visibility:hidden;}
+  .key:disabled{opacity:.45;}
+  .key-ok{
+    display:block;width:100%;max-width:420px;margin:12px auto 0;border:none;border-radius:18px;
+    background:var(--green);color:#fff;font-size:24px;font-weight:900;padding:16px;min-height:64px;
+    box-shadow:0 5px 0 var(--green-d);
+  }
+  .key-ok:active{transform:translateY(3px);box-shadow:0 2px 0 var(--green-d);}
+  .key-ok:disabled{opacity:.45;}
+  .entry-hint{margin-top:10px;font-size:15px;font-weight:900;color:var(--wrong);min-height:1.4em;text-align:center;}
   .feedback.ok{background:#DFF7E8;color:#0E5A30;border:2px solid var(--green);}
   .feedback.ng{background:#FDECEC;color:#7C1A1E;border:2px solid var(--wrong);}
   @media (prefers-color-scheme: dark){
@@ -213,7 +256,7 @@
 
     <div class="howto">
       あそびかた： まず <b>だれが やるか</b> えらんでね。つぎに がくねんを えらぶと <b>20もん</b> でるよ。
-      こたえは <b>4つの ボタン</b>から タップして えらんでね。
+      こたえは <b>テンキー</b>で 数字を 入力して、<b>「決定」ボタン</b>を おしてね（分数の 大きさくらべだけは、ボタンから えらぶよ）。
       1もんごとに せいかい・ふせいかいと かいせつが すぐ 出るよ。
       20もん ぜんぶ こたえると、とりの ランクが もらえるよ！ たくさん せいかいするほど、大きな とりに なれるよ。
     </div>
@@ -281,7 +324,8 @@
       <span class="q-kind kind-add" id="q-kind">たしざん</span>
       <div class="q-text" id="q-text">3 ＋ 4 ＝ ？</div>
       <div class="q-ask" id="q-ask">こたえは どれかな？</div>
-      <div class="choices" id="choices"></div>
+      <div class="choices hidden" id="choices"></div>
+      <div id="input-zone"></div>
       <div id="feedback-zone"></div>
     </div>
   </section>
@@ -354,9 +398,10 @@ function fracHTML(s){
   var esc = String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   return esc.replace(/(\d+)\/(\d+)/g, '<span class="frac"><span>$1</span><span>$2</span></span>');
 }
-function makeQ(kindClass, kindLabel, text, ask, choices, answer, expl, small){
+function makeQ(kindClass, kindLabel, text, ask, choices, answer, expl, small, input){
   return { kindClass: kindClass, kindLabel: kindLabel, text: text, ask: ask,
-           choices: choices, answer: answer, expl: expl, small: !!small };
+           choices: choices, answer: answer, expl: expl, small: !!small,
+           input: input || {type:"choice"} };
 }
 
 /* ================= 1ねんせい ================= */
@@ -371,8 +416,8 @@ function g1AddCarry(){
   var expl = a + " ＋ " + b + " は、おおきい " + big + " を ベースに、ちいさい " + small +
     " を " + need + " と " + rest + " に わけて、" + big + " ＋ " + need + " ＝ 10、のこりの " +
     rest + " を 10 に たして " + ans + " だよ。";
-  return makeQ("kind-add", "たしざん", a + " ＋ " + b + " ＝ ？", "こたえは どれかな？",
-    numChoices(ans, [-2,-1,1,2,-3,3,10,-10]), String(ans), expl, false);
+  return makeQ("kind-add", "たしざん", a + " ＋ " + b + " ＝ ？", "テンキーで こたえを 入力してね",
+    [], String(ans), expl, false, {type:"int", value:ans});
 }
 /* くりあがりなしの たしざん */
 function g1AddSimple(){
@@ -385,8 +430,8 @@ function g1AddSimple(){
   }
   var ans = a + b;
   var expl = a + " ＋ " + b + " は、くりあがりが ないから そのまま たせるよ。" + a + " ＋ " + b + " ＝ " + ans + " だよ。";
-  return makeQ("kind-add", "たしざん", a + " ＋ " + b + " ＝ ？", "こたえは どれかな？",
-    numChoices(ans, [-2,-1,1,2,-3,3,10,-10]), String(ans), expl, false);
+  return makeQ("kind-add", "たしざん", a + " ＋ " + b + " ＝ ？", "テンキーで こたえを 入力してね",
+    [], String(ans), expl, false, {type:"int", value:ans});
 }
 /* くりさがりの ひきざん：減減法（引く数 − 一の位 → 10 − 残り） */
 function g1SubBorrow(){
@@ -397,8 +442,8 @@ function g1SubBorrow(){
   var rest = b - ones;
   var expl = a + " − " + b + " は、" + a + " の 一のくらい " + ones + " を つかって、" +
     b + " − " + ones + " ＝ " + rest + "、10 − " + rest + " ＝ " + ans + " だよ。";
-  return makeQ("kind-sub", "ひきざん", a + " − " + b + " ＝ ？", "こたえは どれかな？",
-    numChoices(ans, [-2,-1,1,2,-3,3,10,-10]), String(ans), expl, false);
+  return makeQ("kind-sub", "ひきざん", a + " − " + b + " ＝ ？", "テンキーで こたえを 入力してね",
+    [], String(ans), expl, false, {type:"int", value:ans});
 }
 /* くりさがりなしの ひきざん */
 function g1SubSimple(){
@@ -410,8 +455,8 @@ function g1SubSimple(){
   }
   var ans = a - b;
   var expl = a + " − " + b + " は、一のくらいから そのまま ひけるよ。" + a + " − " + b + " ＝ " + ans + " だよ。";
-  return makeQ("kind-sub", "ひきざん", a + " − " + b + " ＝ ？", "こたえは どれかな？",
-    numChoices(ans, [-2,-1,1,2,-3,3,10,-10]), String(ans), expl, false);
+  return makeQ("kind-sub", "ひきざん", a + " − " + b + " ＝ ？", "テンキーで こたえを 入力してね",
+    [], String(ans), expl, false, {type:"int", value:ans});
 }
 function buildGrade1(){
   var makers = [];
@@ -443,19 +488,14 @@ function g4Div(){
     var expl = divisor + " × " + q + " ＝ " + (divisor * q) + "、" + a + " − " + (divisor * q) +
       " ＝ " + r + "。だから " + a + " ÷ " + divisor + " ＝ " + q + " あまり " + r +
       " だよ。あまりは 割る数 " + divisor + " より 小さくなるよ。";
-    var combos = [[q+1, r],[q, r+1],[q-1, r],[q, r-1],[q+1, r+1],[q+2, r],[q-1, Math.max(0, r-1)]];
-    var cands = [];
-    combos.forEach(function(c){
-      if (c[0] >= 1 && c[1] >= 0 && c[1] < divisor) cands.push(c[0] + " あまり " + c[1]);
-    });
-    return makeQ("kind-div", "わりざん", a + " ÷ " + divisor + " ＝ ？ あまり ？", "商と あまりは どれかな？",
-      strChoices(ansStr, cands), ansStr, expl, true);
+    return makeQ("kind-div", "わりざん", a + " ÷ " + divisor + " ＝ ？ あまり ？", "「しょう」と「あまり」を テンキーで 入力してね",
+      [], ansStr, expl, true, {type:"div", q:q, r:r});
   }
   var qq = randInt(3, 19);
   var aa = divisor * qq;
   var expl2 = divisor + " × " + qq + " ＝ " + aa + " だから、" + aa + " ÷ " + divisor + " ＝ " + qq + " だよ。";
-  return makeQ("kind-div", "わりざん", aa + " ÷ " + divisor + " ＝ ？", "こたえは どれかな？",
-    numChoices(qq, [-3,-2,-1,1,2,3,-10,10]), String(qq), expl2, false);
+  return makeQ("kind-div", "わりざん", aa + " ÷ " + divisor + " ＝ ？", "テンキーで こたえを 入力してね",
+    [], String(qq), expl2, false, {type:"int", value:qq});
 }
 /* 小数の たしざん・ひきざん */
 function g4DecAddSub(){
@@ -464,16 +504,16 @@ function g4DecAddSub(){
     var ans = round2(a + b);
     var expl = "小数は 小数点の 位置を そろえて 計算するよ。" + a.toFixed(1) + " ＋ " + b.toFixed(1) +
       " ＝ " + ans.toFixed(1) + " だよ。整数と 同じように たして、小数点も 同じ 位置に 下ろそう。";
-    return makeQ("kind-dec", "小数", a.toFixed(1) + " ＋ " + b.toFixed(1) + " ＝ ？", "こたえは どれかな？",
-      numChoices(ans, [-1,-0.2,-0.1,0.1,0.2,1,-2,2], fmtDec1), ans.toFixed(1), expl, false);
+    return makeQ("kind-dec", "小数", a.toFixed(1) + " ＋ " + b.toFixed(1) + " ＝ ？", "テンキーで こたえを 入力してね",
+      [], ans.toFixed(1), expl, false, {type:"dec", value:ans});
   }
   if (b > a){ var t = a; a = b; b = t; }
   if (a === b) a = round2(a + 0.5);
   var ans2 = round2(a - b);
   var expl2 = "小数は 小数点の 位置を そろえて 計算するよ。" + a.toFixed(1) + " − " + b.toFixed(1) +
     " ＝ " + ans2.toFixed(1) + " だよ。整数と 同じように ひいて、小数点も 同じ 位置に 下ろそう。";
-  return makeQ("kind-dec", "小数", a.toFixed(1) + " − " + b.toFixed(1) + " ＝ ？", "こたえは どれかな？",
-    numChoices(ans2, [-1,-0.2,-0.1,0.1,0.2,1,-2,2], fmtDec1), ans2.toFixed(1), expl2, false);
+  return makeQ("kind-dec", "小数", a.toFixed(1) + " − " + b.toFixed(1) + " ＝ ？", "テンキーで こたえを 入力してね",
+    [], ans2.toFixed(1), expl2, false, {type:"dec", value:ans2});
 }
 /* 小数 × 整数 */
 function g4DecMul(){
@@ -483,8 +523,8 @@ function g4DecMul(){
   var a10 = Math.round(a * 10);
   var expl = a.toFixed(1) + " × " + b + " は、まず " + a10 + " × " + b + " ＝ " + (a10 * b) +
     " と 計算して、小数点を 1つ 左へ うつして " + ans.toFixed(1) + " だよ。";
-  return makeQ("kind-dec", "小数", a.toFixed(1) + " × " + b + " ＝ ？", "こたえは どれかな？",
-    numChoices(ans, [-1,-0.2,-0.1,0.1,0.2,1,-10,10], fmtDec1), ans.toFixed(1), expl, false);
+  return makeQ("kind-dec", "小数", a.toFixed(1) + " × " + b + " ＝ ？", "テンキーで こたえを 入力してね",
+    [], ans.toFixed(1), expl, false, {type:"dec", value:ans});
 }
 /* 分母が 同じ 分数の たしざん・ひきざん */
 function g4FracAddSub(){
@@ -496,9 +536,8 @@ function g4FracAddSub(){
     var ans = an + "/" + den;
     var expl = "分母が 同じ 分数は、分母は そのままで 分子同士を たすよ。" + n1 + " ＋ " + n2 +
       " ＝ " + an + " だから、こたえは " + ans + " だよ。";
-    var cands = [(an+1)+"/"+den, (an-1)+"/"+den, (an+2)+"/"+den, an+"/"+(den+1), an+"/"+(den-1), (an-2)+"/"+den];
-    return makeQ("kind-frac", "分数", n1 + "/" + den + " ＋ " + n2 + "/" + den + " ＝ ？", "こたえは どれかな？",
-      strChoices(ans, cands.filter(function(c){ return c.charAt(0) !== "0" && c.indexOf("-") === -1; })), ans, expl, false);
+    return makeQ("kind-frac", "分数", n1 + "/" + den + " ＋ " + n2 + "/" + den + " ＝ ？", "分子と 分母を テンキーで 入力してね",
+      [], ans, expl, false, {type:"frac", n:an, d:den});
   }
   var m1 = randInt(3, den - 1);
   var m2 = randInt(1, m1 - 1);
@@ -506,9 +545,8 @@ function g4FracAddSub(){
   var ans2 = an2 + "/" + den;
   var expl2 = "分母が 同じ 分数は、分母は そのままで 分子同士を ひくよ。" + m1 + " − " + m2 +
     " ＝ " + an2 + " だから、こたえは " + ans2 + " だよ。";
-  var cands2 = [(an2+1)+"/"+den, (an2-1)+"/"+den, (an2+2)+"/"+den, an2+"/"+(den+1), an2+"/"+(den-1), (an2+3)+"/"+den];
-  return makeQ("kind-frac", "分数", m1 + "/" + den + " − " + m2 + "/" + den + " ＝ ？", "こたえは どれかな？",
-    strChoices(ans2, cands2.filter(function(c){ return c.charAt(0) !== "0" && c.indexOf("-") === -1; })), ans2, expl2, false);
+  return makeQ("kind-frac", "分数", m1 + "/" + den + " − " + m2 + "/" + den + " ＝ ？", "分子と 分母を テンキーで 入力してね",
+    [], ans2, expl2, false, {type:"frac", n:an2, d:den});
 }
 /* 分数の 大きさくらべ */
 function g4FracCompare(){
@@ -551,11 +589,8 @@ function g4Gaisu(){
     var expl = pl.keep + "までの がい数は、その下の " + pl.under + "を 四捨五入するよ。" +
       fmtComma(n) + " の " + pl.under + "は " + digit + " だから " +
       (digit >= 5 ? "切り上げて " : "切り捨てて ") + fmtComma(rounded) + " になるよ。";
-    var cands = [fl, ce, rounded + pl.p, rounded - pl.p, rounded + pl.p * 10, rounded + pl.p * 2, fl - pl.p, n];
-    var choices = strChoices(fmtComma(rounded),
-      cands.filter(function(c){ return c > 0; }).map(fmtComma));
     return makeQ("kind-gaisu", "がい数", fmtComma(n) + " を " + pl.keep + "までの がい数にすると？",
-      "こたえは どれかな？", choices, fmtComma(rounded), expl, true);
+      "テンキーで こたえを 入力してね", [], fmtComma(rounded), expl, true, {type:"int", value:rounded, comma:true});
   }
   /* 上から ○けたの がい数 */
   var keepK = randInt(1, 2);
@@ -570,11 +605,8 @@ function g4Gaisu(){
   var expl2 = "上から " + keepK + "けたの がい数は、" + (keepK + 1) + "けた目を 四捨五入するよ。" +
     fmtComma(n2) + " の " + (keepK + 1) + "けた目は " + digit2 + " だから " +
     (digit2 >= 5 ? "切り上げて " : "切り捨てて ") + fmtComma(rounded2) + " になるよ。";
-  var cands2 = [fl2, ce2, rounded2 + p2, rounded2 - p2, rounded2 + p2 * 10, rounded2 + p2 * 2, fl2 - p2, n2];
-  var choices2 = strChoices(fmtComma(rounded2),
-    cands2.filter(function(c){ return c > 0; }).map(fmtComma));
   return makeQ("kind-gaisu", "がい数", fmtComma(n2) + " を 上から " + keepK + "けたの がい数にすると？",
-    "こたえは どれかな？", choices2, fmtComma(rounded2), expl2, true);
+    "テンキーで こたえを 入力してね", [], fmtComma(rounded2), expl2, true, {type:"int", value:rounded2, comma:true});
 }
 function buildGrade4(){
   var makers = [];
@@ -611,8 +643,8 @@ function g1cAdd(){
     expl = a + " ＋ " + b + " は、" + a + " を " + aT + " と " + aO + " に わけて、" +
       aO + " ＋ " + b + " ＝ " + (aO + b) + "、" + aT + " ＋ " + (aO + b) + " ＝ " + ans + " だよ。";
   }
-  return makeQ("kind-add", "たしざん", a + " ＋ " + b + " ＝ ？", "こたえは どれかな？",
-    numChoices(ans, [-10,-2,-1,1,2,10,-11,11]), String(ans), expl, false);
+  return makeQ("kind-add", "たしざん", a + " ＋ " + b + " ＝ ？", "テンキーで こたえを 入力してね",
+    [], String(ans), expl, false, {type:"int", value:ans});
 }
 /* 100までの ひきざん（2けた − 2けた／1けた） */
 function g1cSub(){
@@ -634,8 +666,8 @@ function g1cSub(){
       (ones + 10) + " − " + b + " ＝ " + (ones + 10 - b) + "。十のくらいは " + (Math.floor(a / 10) - 1) +
       " こ のこるから、こたえは " + ans + " だよ。";
   }
-  return makeQ("kind-sub", "ひきざん", a + " − " + b + " ＝ ？", "こたえは どれかな？",
-    numChoices(ans, [-10,-2,-1,1,2,10,-11,11]), String(ans), expl, false);
+  return makeQ("kind-sub", "ひきざん", a + " − " + b + " ＝ ？", "テンキーで こたえを 入力してね",
+    [], String(ans), expl, false, {type:"int", value:ans});
 }
 /* かけ算九九の 入門 */
 function g1cMul(){
@@ -646,8 +678,8 @@ function g1cMul(){
   for (var i = 1; i <= b; i++) list.push(a * i);
   var expl = a + " の だんは " + list.join("、") + " と ふえていくよ。" + b + " つ目が " + ans +
     " だから、" + a + " × " + b + " ＝ " + ans + " だよ。";
-  return makeQ("kind-mul", "かけ算九九", a + " × " + b + " ＝ ？", "こたえは どれかな？",
-    numChoices(ans, [-a, a, -2, -1, 1, 2, -10, 10]), String(ans), expl, false);
+  return makeQ("kind-mul", "かけ算九九", a + " × " + b + " ＝ ？", "テンキーで こたえを 入力してね",
+    [], String(ans), expl, false, {type:"int", value:ans});
 }
 function buildGrade1C(){
   var makers = [];
@@ -681,16 +713,16 @@ function g4cDecAddSub(){
     var ans = round2(a + b);
     var expl = "小数は 小数点の 位置を そろえて、右の くらいから 計算するよ。" + a.toFixed(2) + " ＋ " + b.toFixed(2) +
       " ＝ " + ans.toFixed(2) + " だよ。小数第2位まで あるときも、やり方は 同じだよ。";
-    return makeQ("kind-dec", "小数", a.toFixed(2) + " ＋ " + b.toFixed(2) + " ＝ ？", "こたえは どれかな？",
-      numChoices(ans, [-1,-0.11,-0.1,-0.01,0.01,0.1,0.11,1], fmtDec2), ans.toFixed(2), expl, false);
+    return makeQ("kind-dec", "小数", a.toFixed(2) + " ＋ " + b.toFixed(2) + " ＝ ？", "テンキーで こたえを 入力してね",
+      [], ans.toFixed(2), expl, false, {type:"dec", value:ans});
   }
   if (b > a){ var t = a; a = b; b = t; }
   if (a === b) a = round2(a + 0.35);
   var ans2 = round2(a - b);
   var expl2 = "小数は 小数点の 位置を そろえて、右の くらいから 計算するよ。" + a.toFixed(2) + " − " + b.toFixed(2) +
     " ＝ " + ans2.toFixed(2) + " だよ。小数第2位まで あるときも、やり方は 同じだよ。";
-  return makeQ("kind-dec", "小数", a.toFixed(2) + " − " + b.toFixed(2) + " ＝ ？", "こたえは どれかな？",
-    numChoices(ans2, [-1,-0.11,-0.1,-0.01,0.01,0.1,0.11,1], fmtDec2), ans2.toFixed(2), expl2, false);
+  return makeQ("kind-dec", "小数", a.toFixed(2) + " − " + b.toFixed(2) + " ＝ ？", "テンキーで こたえを 入力してね",
+    [], ans2.toFixed(2), expl2, false, {type:"dec", value:ans2});
 }
 /* 小数 × 小数の 入門 */
 function g4cDecMulDec(){
@@ -701,8 +733,8 @@ function g4cDecMulDec(){
   var expl = a.toFixed(1) + " × " + b.toFixed(1) + " は、小数点を とって " + aI + " × " + bI + " ＝ " + (aI * bI) +
     " と 計算してから、小数点以下の けた数の 合計（1けた ＋ 1けた ＝ 2けた）だけ 小数点を 左へ うつして " +
     fmtTrim(ans) + " だよ。";
-  return makeQ("kind-dec", "小数", a.toFixed(1) + " × " + b.toFixed(1) + " ＝ ？", "こたえは どれかな？",
-    numChoices(ans, [ans * 9, -1, -0.5, -0.1, -0.01, 0.01, 0.1, 0.5, 1], fmtTrim), fmtTrim(ans), expl, false);
+  return makeQ("kind-dec", "小数", a.toFixed(1) + " × " + b.toFixed(1) + " ＝ ？", "テンキーで こたえを 入力してね",
+    [], fmtTrim(ans), expl, false, {type:"dec", value:ans});
 }
 /* 分母が ことなる 分数の たしざん 入門（通分） */
 function g4cFracDiff(){
@@ -720,16 +752,8 @@ function g4cFracDiff(){
     n1 + "/" + d1 + " は " + (n1 * (L / d1)) + "/" + L + "、" + n2 + "/" + d2 + " は " + (n2 * (L / d2)) + "/" + L +
     " になるから、分子を たして " + sumN + "/" + L +
     (g > 1 ? "。約分すると " + ans + " だよ。" : " ＝ " + ans + " だよ。");
-  var raw = [[sumN + 1, L], [sumN - 1, L], [sumN + 2, L], [sumN + 3, L], [n1 + n2, L], [rn + 1, rd], [rn, rd + 1], [rn + 1, rd + 1]];
-  var cands = [];
-  raw.forEach(function(p){
-    if (p[0] < 1) return;
-    var gg = gcd(p[0], p[1]);
-    var cn = p[0] / gg, cd = p[1] / gg;
-    if (cn * rd !== rn * cd) cands.push(cn + "/" + cd);
-  });
-  return makeQ("kind-frac", "分数", n1 + "/" + d1 + " ＋ " + n2 + "/" + d2 + " ＝ ？", "こたえは どれかな？",
-    strChoices(ans, cands), ans, expl, false);
+  return makeQ("kind-frac", "分数", n1 + "/" + d1 + " ＋ " + n2 + "/" + d2 + " ＝ ？", "分子と 分母を テンキーで 入力してね",
+    [], ans, expl, false, {type:"frac", n:rn, d:rd});
 }
 /* 分母が ことなる 分数の 大きさくらべ */
 function g4cFracCompareDiff(){
@@ -761,8 +785,8 @@ function g4cAvg(){
   vals.push(last); sum += last;
   var expl = "平均（へいきん）は、全部の 合計を 個数で わって もとめるよ。合計は " + vals.join(" ＋ ") +
     " ＝ " + sum + "、" + sum + " ÷ " + count + " ＝ " + avg + " だよ。";
-  return makeQ("kind-avg", "平均", vals.join("、") + " の 平均は？", "平均は どれかな？",
-    numChoices(avg, [-5,-3,-2,-1,1,2,3,5]), String(avg), expl, true);
+  return makeQ("kind-avg", "平均", vals.join("、") + " の 平均は？", "テンキーで こたえを 入力してね",
+    [], String(avg), expl, true, {type:"int", value:avg});
 }
 /* 直方体の 体積 */
 function g4cVol(){
@@ -771,9 +795,9 @@ function g4cVol(){
   var expl = "直方体の 体積（たいせき）は、たて × 横 × 高さ で もとめるよ。" +
     a + " × " + b + " × " + c + " ＝ " + ans + " だから、体積は " + ans + " cm³ だよ。";
   return makeQ("kind-vol", "体積", "たて " + a + " cm、横 " + b + " cm、高さ " + c + " cm の 直方体の 体積は？",
-    "体積は どれかな？",
-    numChoices(ans, [-a * b, -12, -6, -2 * c, 2 * c, 6, 12, a * b], function(v){ return v + " cm³"; }),
-    ans + " cm³", expl, true);
+    "テンキーで こたえを 入力してね",
+    [],
+    ans + " cm³", expl, true, {type:"int", value:ans, unit:"cm³"});
 }
 function buildGrade4C(){
   var makers = [];
@@ -902,9 +926,23 @@ function startGame(level){
   renderQuestion();
 }
 
+/* テンキー入力の 状態（問題ごとに リセットする） */
+var entry = { single:"", q:"", r:"", n:"", d:"", active:"single" };
+function resetEntry(q){
+  entry = { single:"", q:"", r:"", n:"", d:"", active:"single" };
+  if (q.input.type === "div") entry.active = "q";
+  if (q.input.type === "frac") entry.active = "n";
+}
+function entryFields(q){
+  if (q.input.type === "div") return ["q", "r"];
+  if (q.input.type === "frac") return ["n", "d"];
+  return ["single"];
+}
+
 function renderQuestion(){
   var q = state.questions[state.idx];
   state.locked = false;
+  resetEntry(q);
   document.getElementById("progress-bar").style.width = (state.idx / 20 * 100) + "%";
   document.getElementById("qcount").textContent = (state.idx + 1) + " / 20";
   document.getElementById("score-chip").textContent = "⭐ " + state.score;
@@ -917,24 +955,214 @@ function renderQuestion(){
   document.getElementById("q-ask").textContent = q.ask;
   document.getElementById("feedback-zone").innerHTML = "";
   var box = document.getElementById("choices");
+  var zone = document.getElementById("input-zone");
   box.innerHTML = "";
-  q.choices.forEach(function(c){
-    var btn = document.createElement("button");
-    btn.className = "choice";
-    btn.setAttribute("data-val", c);
-    btn.innerHTML = fracHTML(c);
-    btn.addEventListener("click", function(){ answer(btn, c); });
-    box.appendChild(btn);
+  zone.innerHTML = "";
+  if (q.input.type === "choice"){
+    box.classList.remove("hidden");
+    q.choices.forEach(function(c){
+      var btn = document.createElement("button");
+      btn.className = "choice";
+      btn.setAttribute("data-val", c);
+      btn.innerHTML = fracHTML(c);
+      btn.addEventListener("click", function(){ answerChoice(btn, c); });
+      box.appendChild(btn);
+    });
+  } else {
+    box.classList.add("hidden");
+    renderInputUI(q, zone);
+  }
+}
+
+/* 入力欄＋テンキーを 描く */
+function renderInputUI(q, zone){
+  var wrap = document.createElement("div");
+  wrap.className = "ans-zone";
+  var fields = document.createElement("div");
+  fields.className = "ans-fields";
+  if (q.input.type === "div"){
+    fields.appendChild(makeField(q, "q", "しょう"));
+    fields.appendChild(makeField(q, "r", "あまり"));
+  } else if (q.input.type === "frac"){
+    var fi = document.createElement("div");
+    fi.className = "frac-input";
+    fi.appendChild(makeField(q, "n", "分子（ぶんし）"));
+    var bar = document.createElement("div");
+    bar.className = "frac-bar";
+    fi.appendChild(bar);
+    fi.appendChild(makeField(q, "d", "分母（ぶんぼ）"));
+    fields.appendChild(fi);
+  } else {
+    fields.appendChild(makeField(q, "single", null));
+  }
+  wrap.appendChild(fields);
+
+  var hint = document.createElement("div");
+  hint.className = "entry-hint";
+  hint.id = "entry-hint";
+  wrap.appendChild(hint);
+
+  var pad = document.createElement("div");
+  pad.className = "keypad";
+  var keys = ["1","2","3","4","5","6","7","8","9"];
+  keys.forEach(function(k){
+    pad.appendChild(makeKey(k, k, ""));
+  });
+  if (q.input.type === "dec"){
+    pad.appendChild(makeKey(".", ".", "key-dot"));
+  } else {
+    var sp = document.createElement("span");
+    sp.className = "key key-spacer";
+    sp.textContent = "・";
+    pad.appendChild(sp);
+  }
+  pad.appendChild(makeKey("0", "0", ""));
+  pad.appendChild(makeKey("del", "けす", "key-del"));
+  wrap.appendChild(pad);
+
+  var ok = document.createElement("button");
+  ok.className = "key-ok";
+  ok.id = "key-ok";
+  ok.textContent = "決定（けってい）";
+  ok.addEventListener("click", function(){ submitInput(); ok.blur(); });
+  wrap.appendChild(ok);
+
+  zone.appendChild(wrap);
+  refreshFields(q);
+}
+
+function makeField(q, name, label){
+  var w = document.createElement("div");
+  w.className = "ans-field-wrap";
+  if (label){
+    var lb = document.createElement("div");
+    lb.className = "ans-field-label";
+    lb.textContent = label;
+    w.appendChild(lb);
+  }
+  var f = document.createElement("div");
+  f.className = "ans-field";
+  f.id = "field-" + name;
+  f.setAttribute("role", "button");
+  f.setAttribute("aria-label", label ? label + "の 入力らん" : "こたえの 入力らん");
+  f.addEventListener("click", function(){
+    if (state.locked) return;
+    entry.active = name;
+    refreshFields(state.questions[state.idx]);
+  });
+  w.appendChild(f);
+  return w;
+}
+
+function makeKey(val, label, cls){
+  var b = document.createElement("button");
+  b.className = "key " + cls;
+  b.textContent = label;
+  b.setAttribute("data-key", val);
+  b.addEventListener("click", function(){ pressKey(val); b.blur(); });
+  return b;
+}
+
+/* 入力欄の 表示を いまの entry に 合わせる */
+function refreshFields(q){
+  entryFields(q).forEach(function(name){
+    var f = document.getElementById("field-" + name);
+    if (!f) return;
+    var v = entry[name];
+    f.classList.toggle("active", entry.active === name && !state.locked);
+    f.classList.toggle("empty", v === "");
+    var disp = v === "" ? "？" : v;
+    if (name === "single" && q.input.comma && v !== "") disp = fmtComma(parseInt(v, 10));
+    f.innerHTML = "";
+    var span = document.createElement("span");
+    span.textContent = disp;
+    f.appendChild(span);
+    if (name === "single" && q.input.unit){
+      var u = document.createElement("span");
+      u.className = "unit";
+      u.textContent = q.input.unit;
+      f.appendChild(u);
+    }
   });
 }
 
-function answer(btn, val){
+function pressKey(k){
+  if (state.locked) return;
+  var q = state.questions[state.idx];
+  if (!q || q.input.type === "choice") return;
+  var name = entry.active;
+  var cur = entry[name];
+  if (k === "del"){
+    entry[name] = cur.slice(0, -1);
+  } else if (k === "."){
+    if (q.input.type !== "dec") return;
+    if (cur.indexOf(".") >= 0) return;
+    entry[name] = (cur === "" ? "0" : cur) + ".";
+  } else {
+    if (cur.replace(".", "").length >= 7) return;
+    entry[name] = (cur === "0" ? k : cur + k);
+  }
+  var hint = document.getElementById("entry-hint");
+  if (hint) hint.textContent = "";
+  refreshFields(q);
+}
+
+/* 「決定」：入力を 判定する */
+function submitInput(){
+  if (state.locked) return;
+  var q = state.questions[state.idx];
+  var spec = q.input;
+  var hint = document.getElementById("entry-hint");
+  function needInput(msg){
+    if (hint) hint.textContent = msg;
+  }
+  var correct = false, picked = "";
+  if (spec.type === "int"){
+    if (entry.single === ""){ needInput("まず 数字を 入力してから「決定」を おしてね。"); return; }
+    var v = parseInt(entry.single, 10);
+    correct = (v === spec.value);
+    picked = spec.comma ? fmtComma(v) : (spec.unit ? v + " " + spec.unit : String(v));
+  } else if (spec.type === "dec"){
+    if (entry.single === "" || entry.single === "."){ needInput("まず 数字を 入力してから「決定」を おしてね。"); return; }
+    var dv = parseFloat(entry.single);
+    correct = Math.abs(dv - spec.value) < 0.001;
+    picked = entry.single;
+  } else if (spec.type === "div"){
+    if (entry.q === "" || entry.r === ""){ needInput("「しょう」と「あまり」の 両方を 入力してね。"); return; }
+    var qv = parseInt(entry.q, 10), rv = parseInt(entry.r, 10);
+    correct = (qv === spec.q && rv === spec.r);
+    picked = qv + " あまり " + rv;
+  } else if (spec.type === "frac"){
+    if (entry.n === "" || entry.d === ""){ needInput("分子と 分母の 両方を 入力してね。"); return; }
+    var nv = parseInt(entry.n, 10), dvv = parseInt(entry.d, 10);
+    if (dvv === 0){ needInput("分母に 0は 入れられないよ。"); return; }
+    /* 約分していなくても、値が 等しければ せいかい */
+    correct = (nv * spec.d === spec.n * dvv);
+    picked = nv + "/" + dvv;
+  } else {
+    return;
+  }
+  state.locked = true;
+  /* 入力欄に 色を つける */
+  entryFields(q).forEach(function(name){
+    var f = document.getElementById("field-" + name);
+    if (f){
+      f.classList.remove("active");
+      f.classList.add(correct ? "field-ok" : "field-ng");
+    }
+  });
+  var okBtn = document.getElementById("key-ok");
+  if (okBtn) okBtn.disabled = true;
+  document.querySelectorAll(".key").forEach(function(b){ b.disabled = true; });
+  finishAnswer(correct, picked);
+}
+
+/* 分数の 大きさくらべなど、タップで えらぶ 問題 */
+function answerChoice(btn, val){
   if (state.locked) return;
   state.locked = true;
   var q = state.questions[state.idx];
   var correct = String(val) === String(q.answer);
-  if (correct) state.score++;
-  document.getElementById("score-chip").textContent = "⭐ " + state.score;
   var btns = document.querySelectorAll(".choice");
   btns.forEach(function(b){
     b.disabled = true;
@@ -942,7 +1170,15 @@ function answer(btn, val){
     else if (b === btn) b.classList.add("wrong");
     else b.classList.add("dim");
   });
-  state.log.push({q:q, picked:val, correct:correct});
+  finishAnswer(correct, val);
+}
+
+/* 判定後の 共通処理：スコア・ログ・かいせつ表示 */
+function finishAnswer(correct, picked){
+  var q = state.questions[state.idx];
+  if (correct) state.score++;
+  document.getElementById("score-chip").textContent = "⭐ " + state.score;
+  state.log.push({q:q, picked:picked, correct:correct});
   var isLast = state.idx === state.questions.length - 1;
   var fb = document.createElement("div");
   fb.className = "feedback " + (correct ? "ok" : "ng");
@@ -967,6 +1203,31 @@ function answer(btn, val){
   zone.appendChild(next);
   next.focus();
 }
+
+/* パソコンの キーボードでも 入力できるように */
+document.addEventListener("keydown", function(e){
+  if (document.getElementById("screen-game").classList.contains("hidden")) return;
+  var q = state.questions[state.idx];
+  if (!q || q.input.type === "choice") return;
+  if (state.locked){
+    if (e.key === "Enter"){
+      var nb = document.querySelector(".next-btn");
+      if (nb && document.activeElement !== nb) nb.click();
+    }
+    return;
+  }
+  if (/^[0-9]$/.test(e.key)) pressKey(e.key);
+  else if (e.key === ".") pressKey(".");
+  else if (e.key === "Backspace"){ e.preventDefault(); pressKey("del"); }
+  else if (e.key === "Enter") submitInput();
+  else if (e.key === "Tab" && entryFields(q).length > 1){
+    e.preventDefault();
+    var fs = entryFields(q);
+    var i = fs.indexOf(entry.active);
+    entry.active = fs[(i + 1) % fs.length];
+    refreshFields(q);
+  }
+});
 
 var BIRD_SVG = {
   egg: "<circle cx='60' cy='66' r='34' fill='#F5EFE0' stroke='#D8C9A3' stroke-width='3'/><path d='M34 58 L48 50 L60 60 L74 50 L88 60' stroke='#D8C9A3' stroke-width='3' fill='none'/><ellipse cx='60' cy='104' rx='30' ry='6' fill='#E8D3B0'/>",
