@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<script>
+/* ===== ドリルランド PINゲート（そとがわチェック） =====
+   きょう開錠していなければ入口（index.html）へもどす。くわしくは GATE.md。
+   ドリルを再エクスポートしたら、このスニペットを再適用すること。 */
+(function () {
+  function todayStr() {
+    var d = new Date();
+    function p(n) { return (n < 10 ? "0" : "") + n; }
+    return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate());
+  }
+  var ok = false;
+  try { ok = localStorage.getItem("land_unlock_v1") === todayStr(); } catch (e) { ok = false; }
+  if (!ok) location.replace("index.html?next=message.html");
+})();
+</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ママからの メッセージ</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Hiragino Maru Gothic ProN", "Hiragino Sans", sans-serif; background: #fff8e7; color: #333; }
+  .wrap { max-width: 560px; margin: 0 auto; padding: 24px 16px 40px; text-align: center; }
+  h1 { font-size: 32px; margin: 12px 0 4px; }
+  p.sub { font-size: 17px; color: #777; margin: 0 0 20px; }
+  .card { background: #fff; border-radius: 18px; padding: 20px 16px; box-shadow: 0 4px 0 rgba(0,0,0,.08); margin-bottom: 18px; }
+  .hidden { display: none; }
+  a.back { display: block; margin-top: 18px; padding: 16px; border-radius: 18px; background: #555; color: #fff; text-decoration: none; font-size: 20px; font-weight: bold; box-shadow: 0 4px 0 rgba(0,0,0,.15); }
+  a.back:active { transform: translateY(3px); box-shadow: none; }
+
+  /* ---- PIN ---- */
+  .pin-dots { display: flex; justify-content: center; gap: 14px; margin: 16px 0 8px; }
+  .pin-dot { width: 22px; height: 22px; border-radius: 50%; border: 3px solid #bbb; background: transparent; }
+  .pin-dot.on { background: #e4572e; border-color: #e4572e; }
+  .pin-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 320px; margin: 12px auto 0; }
+  .pin-key { font-family: inherit; font-size: 28px; font-weight: bold; padding: 16px 0; border: none; border-radius: 16px; background: #fdf1dc; color: #333; box-shadow: 0 3px 0 rgba(0,0,0,.12); cursor: pointer; }
+  .pin-key:active { transform: translateY(2px); box-shadow: none; background: #f7e3c2; }
+  .pin-msg { min-height: 26px; font-size: 17px; font-weight: bold; color: #d33; margin: 10px 0 0; }
+
+  /* ---- メッセージ表示 ---- */
+  .latest-label { font-size: 16px; color: #e4572e; font-weight: bold; margin: 0 0 6px; }
+  .latest-text { font-size: 30px; font-weight: bold; line-height: 1.5; margin: 0; white-space: pre-wrap; word-break: break-word; }
+  .latest-time { font-size: 15px; color: #999; margin: 8px 0 0; }
+  .today-title { font-size: 18px; font-weight: bold; margin: 0 0 10px; text-align: left; }
+  .today-item { text-align: left; font-size: 19px; padding: 10px 4px; border-top: 2px dashed #f0e2c8; white-space: pre-wrap; word-break: break-word; }
+  .today-item .t { color: #999; font-size: 14px; margin-right: 8px; }
+  .empty { font-size: 24px; font-weight: bold; margin: 8px 0; }
+  .retry-btn { font-family: inherit; font-size: 20px; font-weight: bold; padding: 12px 28px; border: none; border-radius: 14px; background: #2e7de4; color: #fff; box-shadow: 0 3px 0 rgba(0,0,0,.15); cursor: pointer; margin-top: 10px; }
+
+  /* ---- ただいま ---- */
+  .tadaima-title { font-size: 20px; font-weight: bold; margin: 0 0 4px; }
+  .tadaima-sub { font-size: 15px; color: #777; margin: 0 0 14px; }
+  .tadaima-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .tadaima-btn { font-family: inherit; font-size: 23px; font-weight: bold; padding: 20px 6px; border: none; border-radius: 16px; color: #fff; box-shadow: 0 4px 0 rgba(0,0,0,.15); cursor: pointer; }
+  .tadaima-btn:active { transform: translateY(3px); box-shadow: none; }
+  .tb-soichiro { background: #2e9e5b; }
+  .tb-tsuzumi { background: #f27bab; }
+  .tadaima-msg { min-height: 26px; font-size: 18px; font-weight: bold; color: #2e9e5b; margin: 12px 0 0; }
+
+  /* ---- おるすばんのやくそく ---- */
+  .rules { text-align: left; }
+  .rules h2 { font-size: 21px; margin: 0 0 10px; text-align: center; }
+  .rules ul { margin: 0; padding-left: 24px; font-size: 18px; line-height: 1.7; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>✉️ ママからの メッセージ</h1>
+  <p class="sub">あんしょうばんごうを いれると メッセージが よめるよ</p>
+
+  <!-- ============ PIN入力 ============ -->
+  <section id="view-pin">
+    <div class="card">
+      <div class="pin-dots" id="pin-dots">
+        <span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span>
+      </div>
+      <p class="pin-msg" id="pin-msg"></p>
+      <div class="pin-pad" id="pin-pad">
+        <button class="pin-key" type="button" data-k="1">1</button>
+        <button class="pin-key" type="button" data-k="2">2</button>
+        <button class="pin-key" type="button" data-k="3">3</button>
+        <button class="pin-key" type="button" data-k="4">4</button>
+        <button class="pin-key" type="button" data-k="5">5</button>
+        <button class="pin-key" type="button" data-k="6">6</button>
+        <button class="pin-key" type="button" data-k="7">7</button>
+        <button class="pin-key" type="button" data-k="8">8</button>
+        <button class="pin-key" type="button" data-k="9">9</button>
+        <button class="pin-key" type="button" data-k="c">けす</button>
+        <button class="pin-key" type="button" data-k="0">0</button>
+        <button class="pin-key" type="button" data-k="b">←</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ メッセージ表示 ============ -->
+  <section id="view-message" class="hidden">
+    <div class="card" id="latest-card">
+      <p class="latest-label">✉️ あたらしい メッセージ</p>
+      <p class="latest-text" id="latest-text"></p>
+      <p class="latest-time" id="latest-time"></p>
+    </div>
+    <div class="card hidden" id="today-card">
+      <p class="today-title">きょうの メッセージ</p>
+      <div id="today-list"></div>
+    </div>
+    <div class="card hidden" id="empty-card">
+      <p class="empty">きょうの メッセージは まだ ないよ</p>
+    </div>
+    <div class="card hidden" id="error-card">
+      <p class="empty">つうしんエラー</p>
+      <p style="font-size:17px;margin:4px 0 0;">もう いちど やってみてね</p>
+      <button class="retry-btn" type="button" id="retry-btn">もういちど</button>
+    </div>
+
+    <!-- ============ ただいま（PIN照合後のみ） ============ -->
+    <div class="card">
+      <p class="tadaima-title">🏠 ただいま！</p>
+      <p class="tadaima-sub">かえってきたら、じぶんの なまえを おしてね</p>
+      <div class="tadaima-btns">
+        <button class="tadaima-btn tb-soichiro" type="button" data-who="soichiro">そういちろう</button>
+        <button class="tadaima-btn tb-tsuzumi" type="button" data-who="tsuzumi">つづみ</button>
+      </div>
+      <p class="tadaima-msg" id="tadaima-msg"></p>
+    </div>
+  </section>
+
+  <!-- ============ おるすばんのやくそく（PIN不要・固定表示） ============ -->
+  <!-- ★文面はプレースホルダです。家族で話し合って、実際のルールに書き換えてください。
+       実在の電話番号・住所などの個人情報は書かないでください。 -->
+  <div class="card rules">
+    <h2>🤝 おるすばんの やくそく</h2>
+    <ul>
+      <li>インターホンが なっても でない。かぎは あけない</li>
+      <li>こまったことが あったら、おとうさん・おかあさんに でんわする</li>
+      <li>かじや じしんの ときは、そとに でて ちかくの あんぜんな ばしょへ いく</li>
+      <li>おやつは キッチンの きめられた ものだけ たべる</li>
+    </ul>
+  </div>
+
+  <a class="back" href="index.html">← ドリルランドに もどる</a>
+</div>
+
+<script>
+'use strict';
+/* ============================================================
+   エンドポイントURL（Apps Script ウェブアプリの /exec URL）
+   デプロイ後にここを差し替える。プレースホルダのままでは通信エラーになる。
+   ============================================================ */
+var ENDPOINT = 'https://script.google.com/macros/s/AKfycbyurtmUMcRCv2MmyBu96IlMEbBIpReYApm1QwtaI52hEh1JWn_fK4BrMhHgDkhszmZIBg/exec';
+
+var $ = function (id) { return document.getElementById(id); };
+
+/* ---------- PINパッド ---------- */
+var pinBuf = '';
+var pinBusy = false; // 照合リクエスト中は入力を受け付けない
+var currentPin = ''; // 照合OKだったPIN（メモリ内だけに保持し、保存はしない）。ただいま送信に使う
+
+function updatePinDots() {
+  var dots = $('pin-dots').children;
+  for (var i = 0; i < 4; i++) dots[i].classList.toggle('on', i < pinBuf.length);
+}
+
+function pinKey(k) {
+  if (pinBusy) return;
+  if (k === 'c') { pinBuf = ''; }
+  else if (k === 'b') { pinBuf = pinBuf.slice(0, -1); }
+  else if (pinBuf.length < 4) { pinBuf += k; }
+  $('pin-msg').textContent = '';
+  updatePinDots();
+  if (pinBuf.length === 4) {
+    submitPin(pinBuf);
+  }
+}
+
+$('pin-pad').addEventListener('click', function (ev) {
+  var btn = ev.target.closest('[data-k]');
+  if (btn) pinKey(btn.getAttribute('data-k'));
+});
+
+/* ---------- read 照合 ---------- */
+function buildReadUrl(pin) {
+  return ENDPOINT + '?action=read&pin=' + encodeURIComponent(pin);
+}
+
+function submitPin(pin) {
+  pinBusy = true;
+  fetch(buildReadUrl(pin), { method: 'GET' })
+    .then(function (res) { return res.json(); })
+    .then(function (data) {
+      pinBusy = false;
+      pinBuf = '';
+      updatePinDots();
+      if (data && data.ok) {
+        currentPin = pin;
+        showMessages(data);
+      } else {
+        $('pin-msg').textContent = 'あんしょうばんごうが ちがうみたい';
+      }
+    })
+    .catch(function () {
+      pinBusy = false;
+      pinBuf = '';
+      updatePinDots();
+      showView('message');
+      showOnlyCard('error-card');
+    });
+}
+
+function showMessages(data) {
+  showView('message');
+  var today = Array.isArray(data.today) ? data.today : [];
+  if (today.length === 0 && !data.latest) {
+    showOnlyCard('empty-card');
+    return;
+  }
+  if (data.latest) {
+    showOnlyCard('latest-card');
+    $('latest-text').textContent = data.latest.text;
+    $('latest-time').textContent = data.latest.time || '';
+    if (today.length > 0) {
+      $('today-card').classList.remove('hidden');
+      var list = $('today-list');
+      list.innerHTML = '';
+      today.forEach(function (m) {
+        var div = document.createElement('div');
+        div.className = 'today-item';
+        var t = document.createElement('span');
+        t.className = 't';
+        t.textContent = m.time || '';
+        div.appendChild(t);
+        div.appendChild(document.createTextNode(m.text));
+        list.appendChild(div);
+      });
+    }
+  } else {
+    showOnlyCard('empty-card');
+  }
+}
+
+/* ---------- 画面切替 ---------- */
+function showView(name) {
+  $('view-pin').classList.toggle('hidden', name !== 'pin');
+  $('view-message').classList.toggle('hidden', name !== 'message');
+}
+function showOnlyCard(id) {
+  ['latest-card', 'today-card', 'empty-card', 'error-card'].forEach(function (c) {
+    $(c).classList.toggle('hidden', c !== id);
+  });
+}
+
+$('retry-btn').addEventListener('click', function () {
+  showView('pin');
+  $('pin-msg').textContent = '';
+});
+
+/* ---------- ただいま ---------- */
+function buildTadaimaUrl(who) {
+  return ENDPOINT + '?action=tadaima&who=' + encodeURIComponent(who) + '&pin=' + encodeURIComponent(currentPin);
+}
+
+document.querySelectorAll('.tadaima-btn').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    var who = btn.getAttribute('data-who');
+    var msg = $('tadaima-msg');
+    msg.textContent = 'おくってるよ…';
+    fetch(buildTadaimaUrl(who), { method: 'GET' })
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        msg.textContent = (data && data.ok) ? 'つたえたよ！ 🏠' : 'つうしんエラー。もういちど おしてね';
+      })
+      .catch(function () {
+        msg.textContent = 'つうしんエラー。もういちど おしてね';
+      });
+  });
+});
+
+updatePinDots();
+</script>
+</body>
+</html>
