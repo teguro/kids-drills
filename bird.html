@@ -1,0 +1,1117 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>バード管理</title>
+    <style>
+      button, [role="button"], select, summary, input:not([type="checkbox"], [type="radio"]) { min-height: 2rem; }
+    </style>
+    <style>
+      :root{
+        color-scheme: light dark;
+        --bg:#eaf5ff;
+        --bg2:#fdf6e3;
+        --card:#ffffff;
+        --card-border:#cfe4f5;
+        --ink:#2b3a4a;
+        --ink-soft:#5b7186;
+        --accent:#ff9f2e;
+        --accent-dark:#e07f0e;
+        --good:#2fbf71;
+        --good-dark:#1f9d58;
+        --bad:#f26076;
+        --bad-dark:#d63c54;
+        --blue:#3d9be9;
+        --blue-soft:#e2f1fd;
+        --pink:#f27bab;
+        --pink-soft:#fde7f1;
+        --chip:#eef4fa;
+        --input-bg:#f7fbff;
+        --shadow:0 4px 14px rgba(61,120,180,.12);
+        --radius:20px;
+      }
+      @media (prefers-color-scheme: dark){
+        :root{
+          --bg:#16222e;
+          --bg2:#1d2a38;
+          --card:#223242;
+          --card-border:#38506a;
+          --ink:#eef5fb;
+          --ink-soft:#a9c0d4;
+          --chip:#2c4258;
+          --input-bg:#1a2a3a;
+          --blue-soft:#274b6b;
+          --pink-soft:#5b3347;
+          --shadow:0 4px 14px rgba(0,0,0,.35);
+        }
+      }
+      *{ box-sizing:border-box; }
+      html{ -webkit-text-size-adjust:100%; }
+      body{
+        margin:0;
+        font-family:"Hiragino Maru Gothic ProN","Hiragino Maru Gothic Pro","M PLUS Rounded 1c","Hiragino Sans","Yu Gothic UI","Yu Gothic",sans-serif;
+        background:linear-gradient(180deg,var(--bg) 0%,var(--bg2) 100%);
+        background-attachment:fixed;
+        color:var(--ink);
+        line-height:1.55;
+      }
+      .wrap{ max-width:760px; margin:0 auto; padding:14px 14px 48px; }
+      button{ font-family:inherit; cursor:pointer; }
+      input, textarea{ font-family:inherit; }
+
+      /* ---- top nav ---- */
+      .topnav{ display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:14px; }
+      .navlink{
+        display:inline-flex; align-items:center; gap:6px;
+        min-height:44px; padding:8px 16px;
+        background:var(--card); color:var(--ink); text-decoration:none;
+        border:2px solid var(--card-border); border-radius:999px;
+        font-weight:700; font-size:15px; box-shadow:var(--shadow);
+      }
+      .parent-btn{
+        min-height:44px; padding:8px 18px;
+        background:var(--card); color:var(--ink);
+        border:2px solid var(--card-border); border-radius:999px;
+        font-weight:700; font-size:15px; box-shadow:var(--shadow);
+      }
+
+      /* ---- generic ---- */
+      .card{
+        background:var(--card); border:2px solid var(--card-border);
+        border-radius:var(--radius); box-shadow:var(--shadow);
+        padding:18px; margin-bottom:16px;
+      }
+      .sec-title{ font-size:19px; font-weight:800; margin:0 0 12px; display:flex; align-items:center; gap:8px; }
+      .sec-title .dot{ width:12px; height:12px; border-radius:50%; background:var(--accent); flex:none; }
+      .muted{ color:var(--ink-soft); font-size:14px; }
+      .hidden{ display:none !important; }
+      .big-btn{
+        display:block; width:100%; min-height:56px;
+        border:none; border-radius:16px;
+        background:var(--accent); color:#fff;
+        font-size:18px; font-weight:800;
+        box-shadow:0 4px 0 var(--accent-dark);
+      }
+      .big-btn:active{ transform:translateY(3px); box-shadow:0 1px 0 var(--accent-dark); }
+      .big-btn:disabled{ background:#b9c8d4; box-shadow:0 4px 0 #93a7b8; cursor:not-allowed; }
+      .ghost-btn{
+        min-height:48px; padding:8px 18px;
+        background:var(--card); color:var(--ink);
+        border:2px solid var(--card-border); border-radius:14px;
+        font-size:16px; font-weight:700;
+      }
+      .back-btn{
+        min-height:48px; padding:8px 20px; margin-bottom:14px;
+        background:var(--card); color:var(--ink);
+        border:2px solid var(--card-border); border-radius:999px;
+        font-size:16px; font-weight:800; box-shadow:var(--shadow);
+      }
+
+      /* ---- home: kid select ---- */
+      .home-q{ font-size:24px; font-weight:800; text-align:center; margin:8px 0 4px; }
+      .home-sub{ text-align:center; margin:0 0 18px; }
+      .kid-cards{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+      @media (max-width:520px){ .kid-cards{ grid-template-columns:1fr; } }
+      .kid-card{
+        text-align:left; width:100%;
+        background:var(--card); border:3px solid var(--card-border);
+        border-radius:24px; padding:20px; box-shadow:var(--shadow);
+        color:var(--ink); position:relative;
+      }
+      .kid-card.blue{ border-color:var(--blue); }
+      .kid-card.pink{ border-color:var(--pink); }
+      .kid-name{ font-size:26px; font-weight:800; }
+      .kid-grade{ font-size:14px; color:var(--ink-soft); font-weight:700; }
+      .kid-balance{ font-size:40px; font-weight:800; margin-top:8px; line-height:1.1; }
+      .kid-balance small{ font-size:18px; font-weight:800; }
+      .kid-yen{ font-size:14px; color:var(--ink-soft); font-weight:700; }
+      .pending-badge{
+        display:inline-block; margin-top:10px;
+        background:#fff3d6; color:#9a6200; border:2px solid #ffd97a;
+        border-radius:999px; padding:4px 12px; font-weight:800; font-size:14px;
+      }
+      @media (prefers-color-scheme: dark){
+        .pending-badge{ background:#4d3d14; color:#ffd97a; border-color:#8a6d1f; }
+      }
+      .pending-badge.none{ background:var(--chip); color:var(--ink-soft); border-color:var(--card-border); }
+      .tap-hint{ margin-top:10px; font-weight:800; color:var(--accent-dark); font-size:15px; }
+
+      /* ---- child view ---- */
+      .child-head{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+      .child-head .who{ font-size:24px; font-weight:800; }
+      .balance-big{ font-size:44px; font-weight:800; line-height:1.1; }
+      .balance-big small{ font-size:20px; }
+      .task-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+      @media (max-width:520px){ .task-grid{ grid-template-columns:1fr; } }
+      .task-btn{
+        display:flex; justify-content:space-between; align-items:center; gap:10px;
+        min-height:64px; padding:12px 16px; text-align:left;
+        background:var(--input-bg); color:var(--ink);
+        border:2px solid var(--card-border); border-radius:16px;
+        font-size:17px; font-weight:700;
+      }
+      .task-btn:active{ transform:scale(.98); }
+      .task-btn .pts{
+        flex:none; background:var(--good); color:#fff; font-weight:800;
+        border-radius:999px; padding:4px 12px; font-size:15px;
+      }
+      .task-btn.pending{ opacity:.65; background:var(--chip); }
+      .task-btn.pending .pts{ background:#c7a13b; }
+      .bedtime-row{ display:flex; gap:12px; align-items:stretch; flex-wrap:wrap; }
+      .time-input{
+        font-size:26px; font-weight:800; padding:10px 14px;
+        border:2px solid var(--card-border); border-radius:14px;
+        background:var(--input-bg); color:var(--ink); min-height:60px;
+      }
+      .bedtime-preview{
+        margin-top:12px; padding:14px 16px; border-radius:14px;
+        background:var(--blue-soft); font-size:17px; font-weight:700;
+      }
+      .bedtime-preview .pts-big{ font-size:24px; font-weight:800; }
+      .plus{ color:var(--good-dark); }
+      .minus{ color:var(--bad-dark); }
+      @media (prefers-color-scheme: dark){ .plus{ color:#5fd598; } .minus{ color:#ff8fa0; } }
+
+      .list{ list-style:none; margin:0; padding:0; }
+      .list li{
+        display:flex; justify-content:space-between; align-items:center; gap:10px;
+        padding:12px 4px; border-bottom:2px dashed var(--card-border);
+      }
+      .list li:last-child{ border-bottom:none; }
+      .list .main{ font-weight:700; font-size:16px; }
+      .list .sub{ font-size:13px; color:var(--ink-soft); }
+      .pts-chip{ flex:none; font-weight:800; font-size:17px; }
+      .cancel-btn{
+        flex:none; min-height:44px; padding:6px 14px;
+        background:var(--card); color:var(--bad-dark);
+        border:2px solid var(--bad); border-radius:12px; font-weight:800; font-size:14px;
+      }
+      .empty{ text-align:center; color:var(--ink-soft); padding:14px 0 6px; font-weight:700; }
+      .hist-tag{
+        display:inline-block; font-size:12px; font-weight:800; color:#fff;
+        border-radius:999px; padding:2px 9px; margin-right:6px; vertical-align:2px;
+      }
+      .tag-earn{ background:var(--good); }
+      .tag-reject{ background:var(--bad); }
+      .tag-exchange{ background:var(--blue); }
+      .tag-interest{ background:#c7a13b; }
+      .tag-adjust{ background:#8b9bab; }
+
+      /* ---- PIN ---- */
+      .pin-wrap{ max-width:340px; margin:0 auto; text-align:center; }
+      .pin-dots{ display:flex; justify-content:center; gap:14px; margin:20px 0 24px; }
+      .pin-dot{ width:22px; height:22px; border-radius:50%; border:3px solid var(--ink-soft); background:transparent; }
+      .pin-dot.on{ background:var(--accent); border-color:var(--accent); }
+      .pin-pad{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+      .pin-key{
+        min-height:64px; font-size:26px; font-weight:800;
+        background:var(--card); color:var(--ink);
+        border:2px solid var(--card-border); border-radius:18px; box-shadow:var(--shadow);
+      }
+      .pin-key:active{ background:var(--chip); }
+      .pin-msg{ min-height:24px; font-weight:800; color:var(--bad-dark); }
+      @media (prefers-color-scheme: dark){ .pin-msg{ color:#ff8fa0; } }
+
+      /* ---- parent ---- */
+      .queue-item{
+        border:2px solid var(--card-border); border-radius:16px;
+        padding:14px; margin-bottom:12px; background:var(--input-bg);
+      }
+      .queue-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+      .child-chip{
+        display:inline-block; font-weight:800; font-size:13px; color:#fff;
+        border-radius:999px; padding:3px 11px; margin-bottom:6px;
+      }
+      .chip-blue{ background:var(--blue); }
+      .chip-pink{ background:var(--pink); }
+      .queue-pts{ font-size:26px; font-weight:800; flex:none; }
+      .queue-btns{ display:flex; gap:10px; margin-top:12px; }
+      .approve-btn{
+        flex:1; min-height:52px; border:none; border-radius:14px;
+        background:var(--good); color:#fff; font-size:17px; font-weight:800;
+        box-shadow:0 3px 0 var(--good-dark);
+      }
+      .reject-btn{
+        flex:1; min-height:52px; border:none; border-radius:14px;
+        background:var(--bad); color:#fff; font-size:17px; font-weight:800;
+        box-shadow:0 3px 0 var(--bad-dark);
+      }
+      .approve-btn:active,.reject-btn:active{ transform:translateY(2px); box-shadow:none; }
+      .parent-kid{ border:2px solid var(--card-border); border-radius:16px; padding:14px; margin-bottom:14px; background:var(--input-bg); }
+      .parent-kid h3{ margin:0 0 4px; font-size:19px; }
+      .tool-row{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:10px; }
+      .tool-row label{ font-weight:700; font-size:14px; width:100%; color:var(--ink-soft); }
+      .num-input,.text-input{
+        padding:10px 12px; font-size:16px; font-weight:700;
+        border:2px solid var(--card-border); border-radius:12px;
+        background:var(--card); color:var(--ink); min-height:48px;
+      }
+      .num-input{ width:110px; }
+      .text-input{ flex:1; min-width:140px; }
+      .tool-btn{
+        min-height:48px; padding:8px 16px; border:none; border-radius:12px;
+        background:var(--blue); color:#fff; font-weight:800; font-size:15px;
+      }
+      .tool-btn.warn{ background:var(--accent); }
+      .tool-btn:disabled{ background:#b9c8d4; cursor:not-allowed; }
+      .task-edit-row{
+        display:grid; grid-template-columns:1fr 74px 74px auto auto; gap:8px;
+        align-items:center; margin-bottom:10px;
+      }
+      @media (max-width:560px){
+        .task-edit-row{ grid-template-columns:1fr 64px 64px; }
+      }
+      .task-edit-row input{
+        padding:9px 10px; font-size:15px; font-weight:700; width:100%;
+        border:2px solid var(--card-border); border-radius:10px;
+        background:var(--input-bg); color:var(--ink); min-height:44px;
+      }
+      .mini-btn{
+        min-height:44px; padding:6px 12px; border:none; border-radius:10px;
+        background:var(--good); color:#fff; font-weight:800; font-size:14px;
+      }
+      .mini-btn.del{ background:var(--bad); }
+      .col-head{ display:grid; grid-template-columns:1fr 74px 74px auto auto; gap:8px; font-size:12px; font-weight:800; color:var(--ink-soft); margin-bottom:6px; }
+      @media (max-width:560px){ .col-head{ grid-template-columns:1fr 64px 64px; } .col-head .sp{ display:none; } }
+      textarea{
+        width:100%; min-height:110px; padding:12px; font-size:13px;
+        border:2px solid var(--card-border); border-radius:12px;
+        background:var(--input-bg); color:var(--ink);
+      }
+      .btn-row{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+      .btn-row .tool-btn{ flex:1; }
+      .danger-btn{
+        min-height:48px; padding:8px 16px; border:none; border-radius:12px;
+        background:var(--bad); color:#fff; font-weight:800; font-size:15px;
+      }
+
+      /* ---- toast ---- */
+      #toast{
+        position:fixed; left:50%; bottom:26px; transform:translateX(-50%) translateY(20px);
+        background:#2b3a4a; color:#fff; font-weight:800; font-size:16px;
+        padding:14px 22px; border-radius:999px; box-shadow:0 8px 24px rgba(0,0,0,.3);
+        opacity:0; pointer-events:none; transition:opacity .25s, transform .25s;
+        max-width:92vw; text-align:center; z-index:50;
+      }
+      #toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+      .bird-illo{ display:block; margin:0 auto 4px; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <nav class="topnav">
+        <a class="navlink" href="index.html">← ドリルランドに もどる</a>
+        <button class="parent-btn" id="nav-parent" type="button">おうちの人</button>
+      </nav>
+
+      <!-- ============ ホーム（子を選ぶ） ============ -->
+      <section id="view-home">
+        <svg class="bird-illo" width="72" height="56" viewBox="0 0 72 56" aria-hidden="true">
+          <ellipse cx="34" cy="34" rx="22" ry="16" fill="#ffd94d"/>
+          <circle cx="50" cy="22" r="11" fill="#ffd94d"/>
+          <circle cx="53" cy="20" r="2.2" fill="#2b3a4a"/>
+          <path d="M60 22 L70 25 L60 28 Z" fill="#ff9f2e"/>
+          <path d="M16 30 Q4 22 8 12 Q18 16 20 26 Z" fill="#3d9be9"/>
+          <path d="M28 48 L28 54 M40 48 L40 54" stroke="#e07f0e" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+        <p class="home-q">だれの バードかな？</p>
+        <p class="home-sub muted">じぶんの なまえを タップしてね。<br />タスクを したら「しんせい」して、おうちの人が OKしたら バードが ふえるよ。</p>
+        <div class="kid-cards" id="kid-cards"></div>
+      </section>
+
+      <!-- ============ 子ども画面 ============ -->
+      <section id="view-child" class="hidden">
+        <button class="back-btn" id="child-back" type="button">← もどる</button>
+
+        <div class="card">
+          <div class="child-head">
+            <div>
+              <div class="who" id="child-name"></div>
+              <div class="muted" id="child-grade"></div>
+            </div>
+          </div>
+          <div class="balance-big"><span id="child-balance">0</span> <small>バード</small></div>
+          <div class="muted" id="child-yen"></div>
+        </div>
+
+        <div class="card">
+          <h2 class="sec-title"><span class="dot"></span>タスクを えらんで しんせい</h2>
+          <p class="muted" style="margin-top:0">できたら タップ！ まだ バードは ふえないよ。おうちの人の OKを まってね。</p>
+          <div class="task-grid" id="task-grid"></div>
+        </div>
+
+        <div class="card">
+          <h2 class="sec-title"><span class="dot"></span>ねる じかん</h2>
+          <p class="muted" style="margin-top:0" id="bedtime-target"></p>
+          <div class="bedtime-row">
+            <input class="time-input" type="time" id="bedtime-input" step="60" />
+          </div>
+          <div class="bedtime-preview" id="bedtime-preview"></div>
+          <button class="big-btn" id="bedtime-apply" type="button" style="margin-top:14px">この じかんで しんせいする</button>
+        </div>
+
+        <div class="card">
+          <h2 class="sec-title"><span class="dot"></span>しんせいちゅう</h2>
+          <ul class="list" id="pending-list"></ul>
+          <p class="empty hidden" id="pending-empty">いま しんせいちゅうの ものは ないよ</p>
+        </div>
+
+        <div class="card">
+          <h2 class="sec-title"><span class="dot"></span>りれき</h2>
+          <ul class="list" id="history-list"></ul>
+          <p class="empty hidden" id="history-empty">まだ りれきは ないよ</p>
+        </div>
+      </section>
+
+      <!-- ============ PIN ============ -->
+      <section id="view-pin" class="hidden">
+        <button class="back-btn" id="pin-back" type="button">← もどる</button>
+        <div class="card pin-wrap">
+          <h2 class="sec-title" style="justify-content:center"><span class="dot"></span>おうちの人</h2>
+          <p id="pin-label" style="font-weight:700; margin:4px 0 0">あんしょうばんごう（4けた）を いれてね</p>
+          <div class="pin-dots" id="pin-dots">
+            <span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span>
+          </div>
+          <p class="pin-msg" id="pin-msg"></p>
+          <div class="pin-pad" id="pin-pad">
+            <button class="pin-key" type="button" data-k="1">1</button>
+            <button class="pin-key" type="button" data-k="2">2</button>
+            <button class="pin-key" type="button" data-k="3">3</button>
+            <button class="pin-key" type="button" data-k="4">4</button>
+            <button class="pin-key" type="button" data-k="5">5</button>
+            <button class="pin-key" type="button" data-k="6">6</button>
+            <button class="pin-key" type="button" data-k="7">7</button>
+            <button class="pin-key" type="button" data-k="8">8</button>
+            <button class="pin-key" type="button" data-k="9">9</button>
+            <button class="pin-key" type="button" data-k="c">けす</button>
+            <button class="pin-key" type="button" data-k="0">0</button>
+            <button class="pin-key" type="button" data-k="b">←</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 親モード ============ -->
+      <section id="view-parent" class="hidden">
+        <button class="back-btn" id="parent-exit" type="button">← おわる（こども画面へ）</button>
+
+        <div class="card">
+          <h2 class="sec-title"><span class="dot"></span>承認キュー</h2>
+          <div id="queue-list"></div>
+          <p class="empty hidden" id="queue-empty">承認待ちの申請はありません</p>
+        </div>
+
+        <div class="card">
+          <h2 class="sec-title"><span class="dot"></span>換金・利子・残高の修正</h2>
+          <div id="parent-kids"></div>
+        </div>
+
+        <div class="card">
+          <h2 class="sec-title"><span class="dot"></span>タスクの編集</h2>
+          <div class="col-head"><span>タスク名</span><span>そういちろう</span><span>つづみ</span><span class="sp"></span><span class="sp"></span></div>
+          <div id="task-edit-list"></div>
+          <p class="muted">ポイント欄を空にすると、その子のタスク一覧に出なくなります。</p>
+          <h3 style="margin:16px 0 8px; font-size:16px">タスクを追加</h3>
+          <div class="task-edit-row">
+            <input type="text" id="new-task-name" placeholder="タスク名" />
+            <input type="number" id="new-task-s" placeholder="そう" min="0" inputmode="numeric" />
+            <input type="number" id="new-task-t" placeholder="つづ" min="0" inputmode="numeric" />
+            <button class="mini-btn" id="new-task-add" type="button">追加</button>
+            <span></span>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="sec-title"><span class="dot"></span>設定</h2>
+          <div class="tool-row">
+            <label for="rate-input">買取レート（1バード＝何円か）／ 利子率は 3÷レート で自動計算</label>
+            <input class="num-input" type="number" id="rate-input" min="1" step="1" inputmode="numeric" />
+            <span style="font-weight:800">円</span>
+            <span class="muted" id="rate-info"></span>
+            <button class="tool-btn" id="rate-save" type="button">レートを保存</button>
+          </div>
+          <div class="tool-row">
+            <label>暗証番号の変更（新しい4桁を2回入力）</label>
+            <input class="num-input" type="password" id="pin-new1" maxlength="4" inputmode="numeric" placeholder="新しい番号" style="width:130px" />
+            <input class="num-input" type="password" id="pin-new2" maxlength="4" inputmode="numeric" placeholder="もう一度" style="width:130px" />
+            <button class="tool-btn" id="pin-change" type="button">変更する</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="sec-title"><span class="dot"></span>バックアップ</h2>
+          <p class="muted" style="margin-top:0">全データ（残高・申請・履歴・タスク・設定）の書き出しと復元です。データはこの端末のブラウザ内にだけ保存されます。</p>
+          <textarea id="export-text" readonly placeholder="「書き出す」を押すとここに表示されます"></textarea>
+          <div class="btn-row">
+            <button class="tool-btn" id="export-btn" type="button">書き出す</button>
+            <button class="tool-btn" id="copy-btn" type="button">コピー</button>
+            <button class="tool-btn" id="download-btn" type="button">ダウンロード</button>
+          </div>
+          <h3 style="margin:18px 0 8px; font-size:16px">読み込み（復元）</h3>
+          <textarea id="import-text" placeholder="バックアップのJSONをここに貼り付け"></textarea>
+          <div class="btn-row">
+            <button class="danger-btn" id="import-btn" type="button">この内容で復元する</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div id="toast" role="status"></div>
+
+    <script>
+      'use strict';
+      var KEY = 'bird_ledger_v1';
+
+      var KIDS = {
+        soichiro: { id: 'soichiro', name: 'そういちろう', grade: 'しょうがく 4ねんせい', color: 'blue', bedtime: '20:30', bedtimeLabel: '20:30' },
+        tsuzumi:  { id: 'tsuzumi',  name: 'つづみ',       grade: 'しょうがく 1ねんせい', color: 'pink', bedtime: '20:00', bedtimeLabel: '20:00' }
+      };
+      var KID_IDS = ['soichiro', 'tsuzumi'];
+
+      function uid() {
+        return 'id' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+      }
+
+      function defaultState() {
+        return {
+          v: 1,
+          pin: null,
+          rate: 3,
+          balances: { soichiro: 0, tsuzumi: 0 },
+          tasks: [
+            { id: uid(), name: 'はみがきを する',           points: { soichiro: 1,    tsuzumi: 1 } },
+            { id: uid(), name: 'てあらい・うがいを する',   points: { soichiro: 1,    tsuzumi: 1 } },
+            { id: uid(), name: 'じぶんの ものを かたづける', points: { soichiro: 1,    tsuzumi: 1 } },
+            { id: uid(), name: 'しゅくだいを する',         points: { soichiro: 1,    tsuzumi: 1 } },
+            { id: uid(), name: 'おてつだいを する',         points: { soichiro: 1,    tsuzumi: 1 } },
+            { id: uid(), name: 'あさ やまを はしる',         points: { soichiro: 5,    tsuzumi: 10 } },
+            { id: uid(), name: 'ゆうしょくを つくる',       points: { soichiro: 10,   tsuzumi: null } }
+          ],
+          requests: [],
+          history: []
+        };
+      }
+
+      var state = load();
+
+      function load() {
+        try {
+          var raw = localStorage.getItem(KEY);
+          if (!raw) return defaultState();
+          var s = JSON.parse(raw);
+          if (!s || typeof s !== 'object' || !s.balances || !Array.isArray(s.tasks)) return defaultState();
+          return s;
+        } catch (e) {
+          return defaultState();
+        }
+      }
+      function save() {
+        try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* 保存できない環境では何もしない */ }
+      }
+
+      /* ---------- helpers ---------- */
+      function $(id) { return document.getElementById(id); }
+      function esc(s) {
+        return String(s == null ? '' : s)
+          .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+      }
+      function fmtDate(ts) {
+        var d = new Date(ts);
+        var p = function (n) { return (n < 10 ? '0' : '') + n; };
+        return (d.getMonth() + 1) + '/' + d.getDate() + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+      }
+      function fmtPts(n) { return (n > 0 ? '+' : '') + n; }
+      function interestRatePercent() { return 3 / state.rate; }
+      function interestFor(balance) {
+        if (balance <= 0) return 0;
+        return Math.floor(balance * interestRatePercent() / 100);
+      }
+      function pendingOf(kidId) {
+        return state.requests.filter(function (r) { return r.child === kidId && r.status === 'pending'; });
+      }
+      var toastTimer = null;
+      function toast(msg) {
+        var t = $('toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2600);
+      }
+      function pushHistory(entry) {
+        entry.id = uid();
+        entry.at = Date.now();
+        state.history.unshift(entry);
+        if (state.history.length > 500) state.history.length = 500;
+      }
+
+      /* ---------- view switching ---------- */
+      var currentKid = null;
+      function show(view) {
+        ['view-home', 'view-child', 'view-pin', 'view-parent'].forEach(function (v) {
+          $(v).classList.toggle('hidden', v !== view);
+        });
+        window.scrollTo(0, 0);
+      }
+
+      /* ---------- home ---------- */
+      function renderHome() {
+        var html = '';
+        KID_IDS.forEach(function (id) {
+          var k = KIDS[id];
+          var bal = state.balances[id] || 0;
+          var pend = pendingOf(id).length;
+          html += '<button type="button" class="kid-card ' + k.color + '" data-kid="' + id + '">'
+            + '<div class="kid-name">' + esc(k.name) + '</div>'
+            + '<div class="kid-grade">' + esc(k.grade) + '</div>'
+            + '<div class="kid-balance">' + bal + ' <small>バード</small></div>'
+            + '<div class="kid-yen">だいたい ' + (bal * state.rate) + '円分</div>'
+            + (pend > 0
+                ? '<span class="pending-badge">しょうにんまち ' + pend + 'けん</span>'
+                : '<span class="pending-badge none">しょうにんまち なし</span>')
+            + '<div class="tap-hint">タップして ひらく →</div>'
+            + '</button>';
+        });
+        $('kid-cards').innerHTML = html;
+        Array.prototype.forEach.call($('kid-cards').querySelectorAll('[data-kid]'), function (b) {
+          b.addEventListener('click', function () { openChild(b.getAttribute('data-kid')); });
+        });
+      }
+
+      /* ---------- child view ---------- */
+      function openChild(kidId) {
+        currentKid = kidId;
+        renderChild();
+        show('view-child');
+      }
+
+      function renderChild() {
+        var k = KIDS[currentKid];
+        var bal = state.balances[currentKid] || 0;
+        $('child-name').textContent = k.name;
+        $('child-grade').textContent = k.grade;
+        $('child-balance').textContent = bal;
+        $('child-yen').textContent = '1バード＝' + state.rate + '円だから、だいたい ' + (bal * state.rate) + '円分だよ';
+
+        /* tasks */
+        var pend = pendingOf(currentKid);
+        var pendTaskIds = {};
+        pend.forEach(function (r) { if (r.type === 'task') pendTaskIds[r.taskId] = true; });
+        var html = '';
+        state.tasks.forEach(function (t) {
+          var pts = t.points[currentKid];
+          if (pts == null) return;
+          var isPend = !!pendTaskIds[t.id];
+          html += '<button type="button" class="task-btn' + (isPend ? ' pending' : '') + '" data-task="' + t.id + '"' + (isPend ? ' disabled' : '') + '>'
+            + '<span>' + esc(t.name) + '</span>'
+            + (isPend ? '<span class="pts">しんせいちゅう</span>' : '<span class="pts">+' + pts + '</span>')
+            + '</button>';
+        });
+        if (!html) html = '<p class="empty">いま できる タスクは ないよ</p>';
+        $('task-grid').innerHTML = html;
+        Array.prototype.forEach.call($('task-grid').querySelectorAll('[data-task]'), function (b) {
+          b.addEventListener('click', function () { applyTask(b.getAttribute('data-task')); });
+        });
+
+        /* bedtime */
+        $('bedtime-target').textContent = 'もくひょうは ' + k.bedtimeLabel + '。はやく ねるほど バードが ふえて、おそいと へっちゃうよ（1分で 1バード）。';
+        updateBedtimePreview();
+
+        /* pending list */
+        var ph = '';
+        pend.forEach(function (r) {
+          ph += '<li><div><div class="main">' + esc(r.title) + '</div>'
+            + '<div class="sub">' + fmtDate(r.at) + ' に しんせい ／ ' + fmtPts(r.points) + ' バード</div></div>'
+            + '<button type="button" class="cancel-btn" data-cancel="' + r.id + '">とりけす</button></li>';
+        });
+        $('pending-list').innerHTML = ph;
+        $('pending-empty').classList.toggle('hidden', pend.length > 0);
+        Array.prototype.forEach.call($('pending-list').querySelectorAll('[data-cancel]'), function (b) {
+          b.addEventListener('click', function () { cancelRequest(b.getAttribute('data-cancel')); });
+        });
+
+        /* history */
+        var mine = state.history.filter(function (h) { return h.child === currentKid; }).slice(0, 40);
+        var hh = '';
+        mine.forEach(function (h) { hh += historyRow(h); });
+        $('history-list').innerHTML = hh;
+        $('history-empty').classList.toggle('hidden', mine.length > 0);
+      }
+
+      var HIST_TAGS = {
+        earn:     ['かくとく', 'tag-earn'],
+        reject:   ['きゃっか', 'tag-reject'],
+        exchange: ['こうかん', 'tag-exchange'],
+        interest: ['りし', 'tag-interest'],
+        adjust:   ['しゅうせい', 'tag-adjust']
+      };
+      function historyRow(h) {
+        var tag = HIST_TAGS[h.type] || ['きろく', 'tag-adjust'];
+        var ptsHtml = '';
+        if (h.type !== 'reject' && h.points) {
+          ptsHtml = '<span class="pts-chip ' + (h.points > 0 ? 'plus' : 'minus') + '">' + fmtPts(h.points) + '</span>';
+        }
+        return '<li><div><div class="main"><span class="hist-tag ' + tag[1] + '">' + tag[0] + '</span>' + esc(h.title) + '</div>'
+          + '<div class="sub">' + fmtDate(h.at) + (h.note ? ' ／ ' + esc(h.note) : '') + '</div></div>'
+          + ptsHtml + '</li>';
+      }
+
+      function applyTask(taskId) {
+        var t = null;
+        state.tasks.forEach(function (x) { if (x.id === taskId) t = x; });
+        if (!t) return;
+        var pts = t.points[currentKid];
+        if (pts == null) return;
+        state.requests.push({
+          id: uid(), child: currentKid, type: 'task', taskId: t.id,
+          title: t.name, points: pts, at: Date.now(), status: 'pending'
+        });
+        save();
+        renderChild();
+        toast('しんせいしたよ！おうちの人の OKを まってね');
+      }
+
+      function cancelRequest(reqId) {
+        state.requests = state.requests.filter(function (r) { return r.id !== reqId; });
+        save();
+        renderChild();
+        toast('とりけしたよ');
+      }
+
+      /* ---------- bedtime ---------- */
+      function toMinutes(hhmm) {
+        var p = String(hhmm || '').split(':');
+        if (p.length !== 2) return null;
+        var h = parseInt(p[0], 10), m = parseInt(p[1], 10);
+        if (isNaN(h) || isNaN(m)) return null;
+        return h * 60 + m;
+      }
+      function bedtimePoints() {
+        var k = KIDS[currentKid];
+        var target = toMinutes(k.bedtime);
+        var actual = toMinutes($('bedtime-input').value);
+        if (actual == null) return null;
+        return { diff: target - actual, time: $('bedtime-input').value };
+      }
+      function updateBedtimePreview() {
+        var box = $('bedtime-preview');
+        var r = bedtimePoints();
+        if (!r) {
+          box.innerHTML = 'ねた じかんを えらんでね';
+          $('bedtime-apply').disabled = false;
+          return;
+        }
+        var k = KIDS[currentKid];
+        var already = pendingOf(currentKid).some(function (x) { return x.type === 'bedtime'; });
+        var msg;
+        if (r.diff > 0) msg = r.time + ' に ねた → もくひょうより <span class="pts-big plus">' + r.diff + '分 はやい</span> → <span class="pts-big plus">+' + r.diff + ' バード</span>';
+        else if (r.diff < 0) msg = r.time + ' に ねた → もくひょうより <span class="pts-big minus">' + (-r.diff) + '分 おそい</span> → <span class="pts-big minus">' + r.diff + ' バード</span>';
+        else msg = r.time + ' に ねた → もくひょう ぴったり！ → <span class="pts-big">0 バード</span>';
+        if (already) msg += '<br /><span class="minus">きょうの ねるじかんは もう しんせいちゅうだよ</span>';
+        box.innerHTML = msg;
+        $('bedtime-apply').disabled = already;
+        $('bedtime-target').textContent = 'もくひょうは ' + k.bedtimeLabel + '。はやく ねるほど バードが ふえて、おそいと へっちゃうよ（1分で 1バード）。';
+      }
+      function applyBedtime() {
+        var r = bedtimePoints();
+        if (!r) { toast('じかんを えらんでね'); return; }
+        var k = KIDS[currentKid];
+        var title;
+        if (r.diff > 0) title = 'ねるじかん ' + r.time + '（' + r.diff + '分 はやい）';
+        else if (r.diff < 0) title = 'ねるじかん ' + r.time + '（' + (-r.diff) + '分 おそい）';
+        else title = 'ねるじかん ' + r.time + '（ぴったり）';
+        state.requests.push({
+          id: uid(), child: currentKid, type: 'bedtime', taskId: null,
+          title: title, points: r.diff, at: Date.now(), status: 'pending'
+        });
+        save();
+        renderChild();
+        toast('しんせいしたよ！おうちの人の OKを まってね');
+      }
+
+      /* ---------- PIN ---------- */
+      var pinBuf = '';
+      var pinStage = 'enter'; /* enter | setup1 | setup2 */
+      var pinSetupFirst = '';
+      function openPin() {
+        pinBuf = '';
+        pinSetupFirst = '';
+        pinStage = state.pin ? 'enter' : 'setup1';
+        updatePinUI(state.pin ? '' : 'はじめに、おうちの人が あんしょうばんごう（4けた）を きめてね');
+        show('view-pin');
+      }
+      function updatePinUI(msg) {
+        var label = $('pin-label');
+        if (pinStage === 'setup1') label.textContent = 'あんしょうばんごう（4けた）を きめてね';
+        else if (pinStage === 'setup2') label.textContent = 'かくにんのため、もういちど いれてね';
+        else label.textContent = 'あんしょうばんごう（4けた）を いれてね';
+        $('pin-msg').textContent = msg || '';
+        var dots = $('pin-dots').children;
+        for (var i = 0; i < 4; i++) dots[i].classList.toggle('on', i < pinBuf.length);
+      }
+      function pinKey(k) {
+        if (k === 'c') { pinBuf = ''; updatePinUI(''); return; }
+        if (k === 'b') { pinBuf = pinBuf.slice(0, -1); updatePinUI(''); return; }
+        if (pinBuf.length >= 4) return;
+        pinBuf += k;
+        updatePinUI('');
+        if (pinBuf.length === 4) {
+          var entered = pinBuf;
+          pinBuf = '';
+          if (pinStage === 'setup1') {
+            pinSetupFirst = entered;
+            pinStage = 'setup2';
+            updatePinUI('');
+          } else if (pinStage === 'setup2') {
+            if (entered === pinSetupFirst) {
+              state.pin = entered;
+              save();
+              toast('あんしょうばんごうを とうろくしたよ');
+              openParent();
+            } else {
+              pinStage = 'setup1';
+              pinSetupFirst = '';
+              updatePinUI('あわなかったよ。さいしょから やりなおしてね');
+            }
+          } else {
+            if (entered === state.pin) {
+              openParent();
+            } else {
+              updatePinUI('あんしょうばんごうが ちがうよ');
+            }
+          }
+        }
+      }
+
+      /* ---------- parent ---------- */
+      function openParent() {
+        renderParent();
+        show('view-parent');
+      }
+
+      function renderParent() {
+        renderQueue();
+        renderParentKids();
+        $('rate-input').value = state.rate;
+        updateRateInfo();
+        renderTaskEdit();
+      }
+
+      function renderQueue() {
+        var pend = state.requests.filter(function (r) { return r.status === 'pending'; })
+          .slice().sort(function (a, b) { return a.at - b.at; });
+        var html = '';
+        pend.forEach(function (r) {
+          var k = KIDS[r.child];
+          html += '<div class="queue-item">'
+            + '<div class="queue-top"><div>'
+            + '<span class="child-chip chip-' + k.color + '">' + esc(k.name) + '</span>'
+            + '<div class="main" style="font-weight:800; font-size:17px">' + esc(r.title) + '</div>'
+            + '<div class="sub muted">' + fmtDate(r.at) + ' に申請' + (r.type === 'bedtime' ? '（就寝時刻）' : '（タスク）') + '</div>'
+            + '</div><div class="queue-pts ' + (r.points >= 0 ? 'plus' : 'minus') + '">' + fmtPts(r.points) + '</div></div>'
+            + '<div class="queue-btns">'
+            + '<button type="button" class="approve-btn" data-approve="' + r.id + '">承認する</button>'
+            + '<button type="button" class="reject-btn" data-reject="' + r.id + '">却下する</button>'
+            + '</div></div>';
+        });
+        $('queue-list').innerHTML = html;
+        $('queue-empty').classList.toggle('hidden', pend.length > 0);
+        Array.prototype.forEach.call($('queue-list').querySelectorAll('[data-approve]'), function (b) {
+          b.addEventListener('click', function () { decide(b.getAttribute('data-approve'), true); });
+        });
+        Array.prototype.forEach.call($('queue-list').querySelectorAll('[data-reject]'), function (b) {
+          b.addEventListener('click', function () { decide(b.getAttribute('data-reject'), false); });
+        });
+      }
+
+      function decide(reqId, ok) {
+        var idx = -1;
+        state.requests.forEach(function (r, i) { if (r.id === reqId) idx = i; });
+        if (idx < 0) return;
+        var r = state.requests[idx];
+        state.requests.splice(idx, 1);
+        if (ok) {
+          state.balances[r.child] = (state.balances[r.child] || 0) + r.points;
+          pushHistory({ child: r.child, type: 'earn', title: r.title, points: r.points, note: '承認されました' });
+          toast(KIDS[r.child].name + ' に ' + fmtPts(r.points) + ' バードを反映しました');
+        } else {
+          pushHistory({ child: r.child, type: 'reject', title: r.title, points: r.points, note: '却下されました' });
+          toast('却下しました（残高は変わりません）');
+        }
+        save();
+        renderQueue();
+        renderParentKids();
+      }
+
+      function renderParentKids() {
+        var html = '';
+        KID_IDS.forEach(function (id) {
+          var k = KIDS[id];
+          var bal = state.balances[id] || 0;
+          var interest = interestFor(bal);
+          html += '<div class="parent-kid">'
+            + '<h3><span class="child-chip chip-' + k.color + '">' + esc(k.name) + '</span></h3>'
+            + '<div style="font-size:26px; font-weight:800">' + bal + ' バード <span class="muted" style="font-size:14px">（' + (bal * state.rate) + '円分）</span></div>'
+
+            + '<div class="tool-row"><label>週1回の換金（100バード → 300円：遊び代200円＋残し100円）</label>'
+            + '<button type="button" class="tool-btn warn" data-ex100="' + id + '"' + (bal >= 100 ? '' : ' disabled') + '>100バード換金する</button>'
+            + (bal >= 100 ? '' : '<span class="muted">あと ' + (100 - bal) + ' バードで換金できます</span>')
+            + '</div>'
+
+            + '<div class="tool-row"><label>上限なし換金（前期・後期の終わり用）</label>'
+            + '<input class="num-input" type="number" min="1" inputmode="numeric" id="exfree-' + id + '" placeholder="バード数" />'
+            + '<button type="button" class="tool-btn warn" data-exfree="' + id + '">換金する</button>'
+            + '</div>'
+
+            + '<div class="tool-row"><label>日曜の利子（残高 × ' + trimNum(interestRatePercent()) + '%、端数切り捨て）</label>'
+            + '<span style="font-weight:800">+' + interest + ' バード</span>'
+            + '<button type="button" class="tool-btn" data-interest="' + id + '"' + (interest > 0 ? '' : ' disabled') + '>利子をつける</button>'
+            + '</div>'
+
+            + '<div class="tool-row"><label>残高の手動修正（±の数と理由メモ）</label>'
+            + '<input class="num-input" type="number" inputmode="numeric" id="adj-num-' + id + '" placeholder="例：-5" />'
+            + '<input class="text-input" type="text" id="adj-note-' + id + '" placeholder="理由メモ（必須）" />'
+            + '<button type="button" class="tool-btn" data-adjust="' + id + '">修正する</button>'
+            + '</div>'
+            + '</div>';
+        });
+        $('parent-kids').innerHTML = html;
+
+        Array.prototype.forEach.call($('parent-kids').querySelectorAll('[data-ex100]'), function (b) {
+          b.addEventListener('click', function () { exchange100(b.getAttribute('data-ex100')); });
+        });
+        Array.prototype.forEach.call($('parent-kids').querySelectorAll('[data-exfree]'), function (b) {
+          b.addEventListener('click', function () { exchangeFree(b.getAttribute('data-exfree')); });
+        });
+        Array.prototype.forEach.call($('parent-kids').querySelectorAll('[data-interest]'), function (b) {
+          b.addEventListener('click', function () { applyInterest(b.getAttribute('data-interest')); });
+        });
+        Array.prototype.forEach.call($('parent-kids').querySelectorAll('[data-adjust]'), function (b) {
+          b.addEventListener('click', function () { applyAdjust(b.getAttribute('data-adjust')); });
+        });
+      }
+
+      function trimNum(n) {
+        return (Math.round(n * 100) / 100).toString();
+      }
+
+      function exchange100(kidId) {
+        if ((state.balances[kidId] || 0) < 100) return;
+        state.balances[kidId] -= 100;
+        pushHistory({ child: kidId, type: 'exchange', title: '100バード換金', points: -100, note: (100 * state.rate) + '円（遊び代200円＋残し100円）' });
+        save();
+        renderParentKids();
+        toast(KIDS[kidId].name + ' の100バードを換金しました');
+      }
+      function exchangeFree(kidId) {
+        var v = parseInt($('exfree-' + kidId).value, 10);
+        var bal = state.balances[kidId] || 0;
+        if (isNaN(v) || v <= 0) { toast('バード数を入力してください'); return; }
+        if (v > bal) { toast('残高が足りません（残高 ' + bal + ' バード）'); return; }
+        state.balances[kidId] = bal - v;
+        pushHistory({ child: kidId, type: 'exchange', title: v + 'バード換金（上限なし）', points: -v, note: (v * state.rate) + '円分' });
+        save();
+        renderParentKids();
+        toast(KIDS[kidId].name + ' の ' + v + ' バードを換金しました');
+      }
+      function applyInterest(kidId) {
+        var bal = state.balances[kidId] || 0;
+        var amt = interestFor(bal);
+        if (amt <= 0) { toast('利子は0バードです'); return; }
+        state.balances[kidId] = bal + amt;
+        pushHistory({ child: kidId, type: 'interest', title: '日曜の利子', points: amt, note: '残高' + bal + ' × ' + trimNum(interestRatePercent()) + '%' });
+        save();
+        renderParentKids();
+        toast(KIDS[kidId].name + ' に利子 +' + amt + ' バード');
+      }
+      function applyAdjust(kidId) {
+        var v = parseInt($('adj-num-' + kidId).value, 10);
+        var note = $('adj-note-' + kidId).value.trim();
+        if (isNaN(v) || v === 0) { toast('修正する数を入力してください'); return; }
+        if (!note) { toast('理由メモを入力してください'); return; }
+        state.balances[kidId] = (state.balances[kidId] || 0) + v;
+        pushHistory({ child: kidId, type: 'adjust', title: '残高の手動修正', points: v, note: note });
+        save();
+        renderParentKids();
+        toast('残高を修正しました');
+      }
+
+      /* ---------- rate / tasks / pin change ---------- */
+      function updateRateInfo() {
+        $('rate-info').textContent = '利子率：' + trimNum(interestRatePercent()) + '%（3 ÷ ' + state.rate + '）';
+      }
+      function saveRate() {
+        var v = parseInt($('rate-input').value, 10);
+        if (isNaN(v) || v < 1) { toast('レートは1以上の整数で入力してください'); return; }
+        state.rate = v;
+        save();
+        updateRateInfo();
+        renderParentKids();
+        toast('レートを 1バード＝' + v + '円 にしました');
+      }
+
+      function renderTaskEdit() {
+        var html = '';
+        state.tasks.forEach(function (t) {
+          html += '<div class="task-edit-row">'
+            + '<input type="text" id="te-name-' + t.id + '" value="' + esc(t.name) + '" />'
+            + '<input type="number" min="0" inputmode="numeric" id="te-s-' + t.id + '" value="' + (t.points.soichiro == null ? '' : t.points.soichiro) + '" />'
+            + '<input type="number" min="0" inputmode="numeric" id="te-t-' + t.id + '" value="' + (t.points.tsuzumi == null ? '' : t.points.tsuzumi) + '" />'
+            + '<button type="button" class="mini-btn" data-tesave="' + t.id + '">保存</button>'
+            + '<button type="button" class="mini-btn del" data-tedel="' + t.id + '">削除</button>'
+            + '</div>';
+        });
+        $('task-edit-list').innerHTML = html;
+        Array.prototype.forEach.call($('task-edit-list').querySelectorAll('[data-tesave]'), function (b) {
+          b.addEventListener('click', function () { saveTaskEdit(b.getAttribute('data-tesave')); });
+        });
+        Array.prototype.forEach.call($('task-edit-list').querySelectorAll('[data-tedel]'), function (b) {
+          b.addEventListener('click', function () { deleteTask(b.getAttribute('data-tedel')); });
+        });
+      }
+      function parsePts(v) {
+        if (v === '' || v == null) return null;
+        var n = parseInt(v, 10);
+        if (isNaN(n) || n < 0) return null;
+        return n;
+      }
+      function saveTaskEdit(taskId) {
+        var name = $('te-name-' + taskId).value.trim();
+        var ps = parsePts($('te-s-' + taskId).value);
+        var pt = parsePts($('te-t-' + taskId).value);
+        if (!name) { toast('タスク名を入力してください'); return; }
+        if (ps == null && pt == null) { toast('どちらかの子のポイントを入れてください'); return; }
+        state.tasks.forEach(function (t) {
+          if (t.id === taskId) { t.name = name; t.points = { soichiro: ps, tsuzumi: pt }; }
+        });
+        save();
+        toast('タスクを保存しました');
+      }
+      function deleteTask(taskId) {
+        state.tasks = state.tasks.filter(function (t) { return t.id !== taskId; });
+        save();
+        renderTaskEdit();
+        toast('タスクを削除しました');
+      }
+      function addTask() {
+        var name = $('new-task-name').value.trim();
+        var ps = parsePts($('new-task-s').value);
+        var pt = parsePts($('new-task-t').value);
+        if (!name) { toast('タスク名を入力してください'); return; }
+        if (ps == null && pt == null) { toast('どちらかの子のポイントを入れてください'); return; }
+        state.tasks.push({ id: uid(), name: name, points: { soichiro: ps, tsuzumi: pt } });
+        save();
+        $('new-task-name').value = '';
+        $('new-task-s').value = '';
+        $('new-task-t').value = '';
+        renderTaskEdit();
+        toast('タスクを追加しました');
+      }
+
+      function changePin() {
+        var a = $('pin-new1').value.trim();
+        var b = $('pin-new2').value.trim();
+        if (!/^\d{4}$/.test(a)) { toast('新しい暗証番号は4桁の数字で入力してください'); return; }
+        if (a !== b) { toast('2回の入力が合いません'); return; }
+        state.pin = a;
+        save();
+        $('pin-new1').value = '';
+        $('pin-new2').value = '';
+        toast('暗証番号を変更しました');
+      }
+
+      /* ---------- backup ---------- */
+      function doExport() {
+        $('export-text').value = JSON.stringify(state, null, 2);
+        toast('書き出しました');
+      }
+      function doCopy() {
+        if (!$('export-text').value) doExport();
+        var ta = $('export-text');
+        ta.focus();
+        ta.select();
+        var done = function () { toast('コピーしました'); };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(ta.value).then(done, function () {
+            try { document.execCommand('copy'); done(); } catch (e) { toast('コピーできませんでした。長押しで選んでコピーしてください'); }
+          });
+        } else {
+          try { document.execCommand('copy'); done(); } catch (e) { toast('コピーできませんでした'); }
+        }
+      }
+      function doDownload() {
+        if (!$('export-text').value) doExport();
+        var blob = new Blob([$('export-text').value], { type: 'application/json' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        var d = new Date();
+        a.href = url;
+        a.download = 'bird-backup-' + d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + '.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+      }
+      var importArmed = false;
+      function doImport() {
+        var btn = $('import-btn');
+        var raw = $('import-text').value.trim();
+        if (!raw) { toast('JSONを貼り付けてください'); return; }
+        var parsed;
+        try { parsed = JSON.parse(raw); } catch (e) { toast('JSONの形式が正しくありません'); return; }
+        if (!parsed || typeof parsed !== 'object' || !parsed.balances || !Array.isArray(parsed.tasks) || !Array.isArray(parsed.history) || !Array.isArray(parsed.requests)) {
+          toast('バード管理のバックアップではないようです');
+          return;
+        }
+        if (!importArmed) {
+          importArmed = true;
+          btn.textContent = '本当に復元しますか？（今のデータは上書きされます）もう一度押すと実行';
+          setTimeout(function () {
+            importArmed = false;
+            btn.textContent = 'この内容で復元する';
+          }, 5000);
+          return;
+        }
+        importArmed = false;
+        btn.textContent = 'この内容で復元する';
+        state = parsed;
+        save();
+        $('import-text').value = '';
+        $('export-text').value = '';
+        renderParent();
+        toast('復元しました');
+      }
+
+      /* ---------- wiring ---------- */
+      $('nav-parent').addEventListener('click', openPin);
+      $('pin-back').addEventListener('click', function () { renderHome(); show('view-home'); });
+      $('child-back').addEventListener('click', function () { renderHome(); show('view-home'); });
+      $('parent-exit').addEventListener('click', function () { renderHome(); show('view-home'); });
+      Array.prototype.forEach.call($('pin-pad').querySelectorAll('[data-k]'), function (b) {
+        b.addEventListener('click', function () { pinKey(b.getAttribute('data-k')); });
+      });
+      $('bedtime-input').addEventListener('change', updateBedtimePreview);
+      $('bedtime-input').addEventListener('input', updateBedtimePreview);
+      $('bedtime-apply').addEventListener('click', applyBedtime);
+      $('rate-save').addEventListener('click', saveRate);
+      $('new-task-add').addEventListener('click', addTask);
+      $('pin-change').addEventListener('click', changePin);
+      $('export-btn').addEventListener('click', doExport);
+      $('copy-btn').addEventListener('click', doCopy);
+      $('download-btn').addEventListener('click', doDownload);
+      $('import-btn').addEventListener('click', doImport);
+
+      /* bedtime default = now */
+      (function () {
+        var d = new Date();
+        var p = function (n) { return (n < 10 ? '0' : '') + n; };
+        $('bedtime-input').value = p(d.getHours()) + ':' + p(d.getMinutes());
+      })();
+
+      renderHome();
+      show('view-home');
+    </script>
+  </body>
+</html>
