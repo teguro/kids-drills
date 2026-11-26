@@ -3,24 +3,51 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>メニュー</title>
+<title>ただいま</title>
 <style>
   * { box-sizing: border-box; }
-  body { margin: 0; font-family: "Hiragino Maru Gothic ProN", "Hiragino Sans", sans-serif; background: #fff8e7; color: #333; }
-  .wrap { max-width: 560px; margin: 0 auto; padding: 24px 16px 40px; text-align: center; }
-  h1 { font-size: 34px; margin: 12px 0 4px; }
-  p.sub { font-size: 17px; color: #777; margin: 0 0 24px; }
+  body { margin: 0; font-family: "Hiragino Maru Gothic ProN", "Hiragino Sans", sans-serif; background: linear-gradient(180deg, #0a5d8a 0%, #074a75 45%, #04263f 100%); background-attachment: fixed; color: #333; min-height: 100vh; }
+  .wrap { position: relative; z-index: 1; max-width: 560px; margin: 0 auto; padding: 24px 16px 40px; text-align: center; }
+  h1 { font-size: 38px; margin: 10px 0 4px; color: #fff8e7; letter-spacing: .1em; text-shadow: 0 2px 0 #b3231b, 0 4px 10px rgba(0,0,0,.35); }
+  p.sub { font-size: 17px; color: #cfeaf7; margin: 0 0 24px; }
   .hidden { display: none; }
-  a.menu-btn { display: block; margin-top: 14px; padding: 22px 18px; border-radius: 18px; color: #fff; text-decoration: none; font-size: 26px; font-weight: bold; box-shadow: 0 4px 0 rgba(0,0,0,.15); }
+
+  /* ---- 海底温泉の飾り（魚と泡） ---- */
+  .sea-deco { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+  .sea-deco .fish { position: absolute; animation: swim 7s ease-in-out infinite alternate; }
+  .sea-deco .bubble { position: absolute; bottom: -30px; border-radius: 50%; border: 2px solid rgba(255,255,255,.5); animation: rise linear infinite; }
+  @keyframes swim { from { transform: translateX(0) } to { transform: translateX(26px) } }
+  @keyframes rise { from { transform: translateY(0); opacity: 0 } 12% { opacity: .9 } to { transform: translateY(-108vh); opacity: 0 } }
+
+  /* ---- ブランドヘッダー ---- */
+  .brand-badge { display: inline-flex; align-items: center; justify-content: center; width: 66px; height: 66px; border-radius: 50%; background: #d92b2b; border: 3px solid #f5d67b; color: #fff; font-size: 34px; box-shadow: 0 0 0 4px rgba(245,214,123,.25), 0 3px 0 rgba(0,0,0,.25); }
+  .song-pill { display: inline-block; font-size: 13.5px; color: #ffe9a8; border: 1.5px solid rgba(255,233,168,.65); border-radius: 999px; padding: 3px 12px; margin-top: 6px; }
+
+  /* ---- ただいまカード ---- */
+  .home-card { background: #fff8e7; border: 4px solid #2e9e5b; border-radius: 18px; padding: 18px 16px; box-shadow: 0 4px 0 rgba(0,0,0,.3); margin-top: 18px; }
+  .home-title { font-size: 22px; font-weight: bold; margin: 0 0 4px; color: #22703f; }
+  .home-sub { font-size: 15px; color: #7a6a53; margin: 0 0 14px; }
+  .home-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .home-btn { font-family: inherit; font-size: 23px; font-weight: bold; padding: 18px 6px; border: none; border-radius: 16px; color: #fff; box-shadow: 0 4px 0 rgba(0,0,0,.15); cursor: pointer; }
+  .home-btn:active { transform: translateY(3px); box-shadow: none; }
+  .hb-soichiro { background: #2e9e5b; }
+  .hb-tsuzumi { background: #f27bab; }
+  .home-msg { min-height: 26px; font-size: 18px; font-weight: bold; color: #2e9e5b; margin: 12px 0 0; }
+
+  /* ---- メニュー（ホーロー看板風） ---- */
+  a.menu-btn { display: block; margin-top: 14px; padding: 20px 18px; border-radius: 14px; background: #fff8e7; text-decoration: none; font-size: 26px; font-weight: bold; box-shadow: 0 4px 0 rgba(0,0,0,.3); border: 4px solid #999; }
   a.menu-btn:active { transform: translateY(3px); box-shadow: none; }
-  a.menu-btn .small { display: block; font-size: 14px; font-weight: normal; margin-top: 4px; opacity: .9; }
-  .m-message { background: #e4572e; }
-  .m-drills { background: #7e57c2; }
-  .m-bird { background: #8a5a2b; }
-  .m-help { background: #d92b2b; }
+  a.menu-btn .small { display: block; font-size: 14px; font-weight: normal; margin-top: 4px; color: #7a6a53; }
+  .m-message { border-color: #d92b2b; color: #b3231b; }
+  .m-drills { border-color: #2e9bd6; color: #0b5e8f; }
+  .m-bird { border-color: #d9a01f; color: #9a6b12; }
+  .m-help { background: #d92b2b; border-color: #f5d67b; color: #fff; }
+  .m-help .small { color: #ffe9d6; }
+
+  .sea-footer { margin-top: 22px; font-size: 12.5px; color: #a8d8ea; }
 
   /* ---- PINゲート（GATE.md 参照） ---- */
-  .pin-card { background: #fff; border-radius: 18px; padding: 20px 16px; box-shadow: 0 4px 0 rgba(0,0,0,.08); }
+  .pin-card { background: #fff8e7; border: 4px solid #d92b2b; border-radius: 18px; padding: 20px 16px; box-shadow: 0 4px 0 rgba(0,0,0,.3); }
   .pin-dots { display: flex; justify-content: center; gap: 14px; margin: 16px 0 8px; }
   .pin-dot { width: 22px; height: 22px; border-radius: 50%; border: 3px solid #bbb; background: transparent; }
   .pin-dot.on { background: #e4572e; border-color: #e4572e; }
@@ -31,11 +58,36 @@
 </style>
 </head>
 <body>
+<div class="sea-deco" aria-hidden="true">
+  <span class="fish" style="top:4%;left:6%;font-size:24px;">🐠</span>
+  <span class="fish" style="top:10%;right:8%;font-size:20px;animation-duration:9s;">🐟</span>
+  <span class="fish" style="top:22%;left:3%;font-size:18px;animation-duration:6s;">🐟</span>
+  <span class="fish" style="top:30%;right:4%;font-size:26px;animation-duration:8s;">🐡</span>
+  <span class="fish" style="top:44%;left:5%;font-size:22px;animation-duration:10s;">🦑</span>
+  <span class="fish" style="top:55%;right:6%;font-size:20px;animation-duration:7s;">🐠</span>
+  <span class="fish" style="top:66%;left:4%;font-size:24px;animation-duration:9s;">🐙</span>
+  <span class="fish" style="top:76%;right:5%;font-size:19px;animation-duration:6.5s;">🦐</span>
+  <span class="fish" style="top:86%;left:8%;font-size:21px;animation-duration:8.5s;">🐢</span>
+  <span class="fish" style="top:92%;right:10%;font-size:18px;animation-duration:7.5s;">🪼</span>
+  <span class="bubble" style="left:8%;width:12px;height:12px;animation-duration:9s;"></span>
+  <span class="bubble" style="left:16%;width:7px;height:7px;animation-duration:7s;animation-delay:2s;"></span>
+  <span class="bubble" style="left:26%;width:10px;height:10px;animation-duration:11s;animation-delay:1s;"></span>
+  <span class="bubble" style="left:38%;width:6px;height:6px;animation-duration:8s;animation-delay:3.5s;"></span>
+  <span class="bubble" style="left:50%;width:13px;height:13px;animation-duration:10s;animation-delay:.5s;"></span>
+  <span class="bubble" style="left:61%;width:8px;height:8px;animation-duration:7.5s;animation-delay:2.8s;"></span>
+  <span class="bubble" style="left:72%;width:11px;height:11px;animation-duration:9.5s;animation-delay:1.6s;"></span>
+  <span class="bubble" style="left:83%;width:6px;height:6px;animation-duration:8.5s;animation-delay:4s;"></span>
+  <span class="bubble" style="left:91%;width:10px;height:10px;animation-duration:10.5s;animation-delay:.9s;"></span>
+  <span class="bubble" style="left:45%;width:7px;height:7px;animation-duration:9s;animation-delay:5s;"></span>
+  <span class="bubble" style="left:67%;width:5px;height:5px;animation-duration:7s;animation-delay:5.6s;"></span>
+  <span class="bubble" style="left:20%;width:5px;height:5px;animation-duration:8s;animation-delay:6.2s;"></span>
+</div>
 <div class="wrap">
 
   <!-- ============ PINゲート（未開錠のときだけ表示） ============ -->
   <div id="gate-view" class="hidden">
-    <h1>メニュー</h1>
+    <div class="brand-badge">🕊️</div>
+    <h1>ただいま</h1>
     <p class="sub">あんしょうばんごうを いれてね</p>
     <div class="pin-card">
       <div class="pin-dots" id="pin-dots">
@@ -61,12 +113,27 @@
 
   <!-- ============ トップメニュー（開錠後に表示） ============ -->
   <div id="menu-view" class="hidden">
-    <h1>メニュー</h1>
-    <p class="sub">どれを ひらく？</p>
+    <div class="brand-badge">🕊️</div>
+    <h1>ただいま</h1>
+    <span class="song-pill">♪ かえってきたら ただいま、ただいまに きめた ♪</span>
+
+    <!-- ============ ただいま（帰宅したらまず押す） ============ -->
+    <div class="home-card">
+      <p class="home-title">🏠 ただいま！</p>
+      <p class="home-sub">かえってきたら、じぶんの なまえを おしてね</p>
+      <div class="home-btns">
+        <button class="home-btn hb-soichiro" type="button" data-tadaima="soichiro">そういちろう</button>
+        <button class="home-btn hb-tsuzumi" type="button" data-tadaima="tsuzumi">つづみ</button>
+      </div>
+      <p class="home-msg" id="home-msg"></p>
+    </div>
+
     <a class="menu-btn m-message" href="message.html">✉️ ママから<span class="small">ママからの メッセージ</span></a>
     <a class="menu-btn m-drills" href="drills.html">ドリルランド<span class="small">かんじ・こくご・さんすう・しゃかい・りか・えいご</span></a>
-    <a class="menu-btn m-bird" href="bird.html">バード<span class="small">おうち つうか の かんり</span></a>
+    <a class="menu-btn m-bird" href="bird.html">🕊️ バード<span class="small">おうち つうか の かんり</span></a>
     <a class="menu-btn m-help" href="help.html">🆘 こまったとき<span class="small">ママ・お父さんに でんわする</span></a>
+
+    <p class="sea-footer">🐚 🦀 でんわは 4126（よいふろ）…じゃなくて「こまったとき」から 🪸</p>
   </div>
 
 </div>
@@ -121,10 +188,16 @@ function updatePinDots() {
 }
 
 function unlock() {
+  currentPin = pinBuf;
   try { localStorage.setItem('land_unlock_v1', landToday()); } catch (e) {}
   var next = landGetNext();
-  if (next) { location.replace(next); }
-  else { showView('menu'); }
+  if (next) { location.replace(next); return; }
+  showView('menu');
+  if (pendingTadaima) {
+    var who = pendingTadaima;
+    pendingTadaima = '';
+    sendTadaima(who);
+  }
 }
 
 function pinKey(k) {
@@ -147,6 +220,42 @@ function pinKey(k) {
 $('pin-pad').addEventListener('click', function (ev) {
   var btn = ev.target.closest('[data-k]');
   if (btn) pinKey(btn.getAttribute('data-k'));
+});
+
+/* ---------- ただいま（トップから直接送る） ---------- */
+var ENDPOINT = 'https://script.google.com/macros/s/AKfycbyurtmUMcRCv2MmyBu96IlMEbBIpReYApm1QwtaI52hEh1JWn_fK4BrMhHgDkhszmZIBg/exec';
+var currentPin = '';      // この画面で照合OKだったPIN（メモリ内だけ。保存しない）
+var pendingTadaima = '';  // PIN再入力後に自動送信する「ただいま」の宛先
+
+function sendTadaima(who) {
+  var msg = $('home-msg');
+  msg.textContent = 'おくってるよ…';
+  var url = ENDPOINT + '?action=tadaima&who=' + encodeURIComponent(who) + '&pin=' + encodeURIComponent(currentPin);
+  fetch(url, { method: 'GET' })
+    .then(function (res) { return res.json(); })
+    .then(function (data) {
+      msg.textContent = (data && data.ok) ? 'つたえたよ！ 🏠' : 'つうしんエラー。もういちど おしてね';
+    })
+    .catch(function () {
+      msg.textContent = 'つうしんエラー。もういちど おしてね';
+    });
+}
+
+document.querySelectorAll('[data-tadaima]').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    var who = btn.getAttribute('data-tadaima');
+    if (!currentPin) {
+      // 開錠済みの端末でも、この画面でPINを入れていないと送れない。
+      // ゲートに戻ってPINを入れてもらい、開錠後に自動で送る。
+      pendingTadaima = who;
+      pinBuf = '';
+      updatePinDots();
+      showView('gate');
+      $('pin-msg').textContent = 'ただいま を おくるために、もういちど あんしょうばんごうを いれてね';
+      return;
+    }
+    sendTadaima(who);
+  });
 });
 
 /* ---------- 初期表示 ---------- */
