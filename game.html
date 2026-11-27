@@ -19,7 +19,7 @@
    version.json をキャッシュなしで確認し、版が違えば URL を変えて読み直す。
    公開のたびに SITE_VERSION と version.json を同じ値に上げること（GATE.md 参照）。 */
 (function () {
-  var SITE_VERSION = "20261127-7";
+  var SITE_VERSION = "20261127-8";
   function alreadyTried() {
     try { return new URLSearchParams(location.search).get("_v") === SITE_VERSION; }
     catch (e) { return false; }
