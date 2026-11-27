@@ -21,7 +21,7 @@
    version.json をキャッシュなしで確認し、版が違えば URL を変えて読み直す。
    公開のたびに SITE_VERSION と version.json を同じ値に上げること（GATE.md 参照）。 */
 (function () {
-  var SITE_VERSION = "20261127-11";
+  var SITE_VERSION = "20261127-12";
   function alreadyTried() {
     try { return new URLSearchParams(location.search).get("_v") === SITE_VERSION; }
     catch (e) { return false; }
@@ -101,6 +101,21 @@
   .rules h2 { font-size: 21px; margin: 0 0 10px; text-align: center; }
   .rules ul { margin: 0; padding-left: 24px; font-size: 18px; line-height: 1.7; }
   .rules ul + ul { margin-top: 14px; }
+  /* ---- やくそく（ポスター風デザイン） ---- */
+  .yaku-ill { width: 100%; border-radius: 14px; display: block; margin: 2px 0 4px; }
+  .yaku-sec { border-radius: 16px; padding: 14px 16px 10px; margin-top: 12px; }
+  .yaku-sec h3 { font-size: 19px; margin: 0 0 4px; }
+  .yaku-s1 { background: #e4f3ef; } .yaku-s1 h3 { color: #177e70; }
+  .yaku-s2 { background: #e7effc; } .yaku-s2 h3 { color: #2f5cb8; }
+  .yaku-s3 { background: #e9f5e2; } .yaku-s3 h3 { color: #4d7c2a; }
+  .yaku-s4 { background: #fdf0da; } .yaku-s4 h3 { color: #a86a12; }
+  .yaku-item { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-bottom: 1.5px dotted #c9b995; }
+  .yaku-item:last-child { border-bottom: none; }
+  .yaku-badge { flex: 0 0 auto; width: 30px; height: 30px; border: 1.7px solid #b49b6d; border-radius: 50%; background: #fffdf6; color: #7d6234; font-weight: bold; font-size: 16px; text-align: center; line-height: 28px; margin-top: 1px; }
+  .yaku-badge.heart { color: #b3543f; border-color: #cfa06a; font-size: 14px; }
+  .yaku-txt { font-size: 17.5px; line-height: 1.6; }
+  .yaku-ill-in { width: 100%; border-radius: 12px; display: block; margin-top: 10px; }
+  .yaku-thanks { text-align: center; color: #a08b6d; font-size: 14px; margin: 12px 0 2px; }
 </style>
 <script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("kidsdrills_theme_v1")||"sora");}catch(e){}</script>
 <style>
@@ -184,25 +199,33 @@
   <!-- 文面は2026-11-27に家族で決定した正式版 -->
   <div class="card rules">
     <h2>🤝 おるすばんの やくそく</h2>
-    <ul>
-      <li>かぎを あけて いえに はいったら、かぎを しめる</li>
-      <li>いえに ついたら、まず「ただいま」ボタンを おして、ママからの メッセージを かくにんする</li>
-      <li>インターホンが なっても、でない</li>
-      <li>おやつは、じゅんびされている ものを たべる</li>
-      <li>ベランダには でない</li>
-    </ul>
-    <ul>
-      <li>とても こまったことが あったら、おとうさんか ママに でんわする</li>
-      <li>じしんの ときは、まず つくえの したに かくれて あたまを まもる</li>
-      <li>ゆれが おさまったら、そとに でて、ときわこうえんの ふんすいひろばに いく（おとうさんか ママが かならず むかえに いくよ）</li>
-    </ul>
-    <ul>
-      <li>かじや じしん いがいで こまったことが あったら、1かいの いりぐちから「呼出」ボタンを おしたあとに みほちゃんの へやばんごうを おして、みほちゃんが いたら たすけて もらう</li>
-      <li>みほちゃんが いなかったら、1かいの いすに すわって ママが かえってくるのを まっててね</li>
-    </ul>
-    <ul>
-      <li>ママが かえる じかんは、だいたい4じ10ふんごろから 5じごろ。5じより かえりが おくれるときは、「ママからのメッセージ」に かならず れんらくするね</li>
-    </ul>
+    <img class="yaku-ill" src="orusuban-door.jpg" alt="">
+    <div class="yaku-sec yaku-s1">
+      <h3>おうちでの やくそく</h3>
+      <div class="yaku-item"><div class="yaku-badge">1</div><div class="yaku-txt">かぎを あけて いえに はいったら、<b>かぎを しめる</b></div></div>
+      <div class="yaku-item"><div class="yaku-badge">2</div><div class="yaku-txt">いえに ついたら、まず <b>「ただいま」ボタンを おして</b>、ママからの メッセージを かくにんする</div></div>
+      <div class="yaku-item"><div class="yaku-badge">3</div><div class="yaku-txt">インターホンが なっても、<b>でない</b></div></div>
+      <div class="yaku-item"><div class="yaku-badge">4</div><div class="yaku-txt">おやつは、<b>じゅんびされている ものを</b> たべる</div></div>
+      <div class="yaku-item"><div class="yaku-badge">5</div><div class="yaku-txt">ベランダには <b>でない</b></div></div>
+    </div>
+    <div class="yaku-sec yaku-s2">
+      <h3>こまったとき・じしんのとき</h3>
+      <div class="yaku-item"><div class="yaku-badge">6</div><div class="yaku-txt">とても こまったことが あったら、<b>おとうさんか ママに でんわする</b></div></div>
+      <div class="yaku-item"><div class="yaku-badge">7</div><div class="yaku-txt">じしんの ときは、まず <b>つくえの したに かくれて あたまを まもる</b></div></div>
+      <div class="yaku-item"><div class="yaku-badge">8</div><div class="yaku-txt">ゆれが おさまったら、そとに でて、<b>ときわこうえんの ふんすいひろばに いく</b>（おとうさんか ママが かならず むかえに いくよ）</div></div>
+      <img class="yaku-ill-in" src="orusuban-park.jpg" alt="">
+    </div>
+    <div class="yaku-sec yaku-s3">
+      <h3>いえに はいるまえに こまったら</h3>
+      <div class="yaku-item"><div class="yaku-badge">9</div><div class="yaku-txt">かじや じしん いがいで こまったことが あったら、1かいの いりぐちから <b>「呼出」ボタンを おしたあとに みほちゃんの へやばんごうを おして</b>、<b>みほちゃん</b>が いたら たすけて もらう</div></div>
+      <div class="yaku-item"><div class="yaku-badge">10</div><div class="yaku-txt">みほちゃんが いなかったら、<b>1かいの いすに すわって</b> ママが かえってくるのを まっててね</div></div>
+    </div>
+    <div class="yaku-sec yaku-s4">
+      <h3>ママからの やくそく</h3>
+      <div class="yaku-item"><div class="yaku-badge heart">♥</div><div class="yaku-txt">ママが かえる じかんは、だいたい <b>4じ10ふんごろから 5じごろ</b></div></div>
+      <div class="yaku-item"><div class="yaku-badge heart">♥</div><div class="yaku-txt">5じより かえりが おくれるときは、<b>「ママからのメッセージ」に、かならず れんらくするね</b></div></div>
+    </div>
+    <p class="yaku-thanks">ふたりとも、まもってくれて ありがとう</p>
   </div>
 
   <a class="back" href="index.html">← トップに もどる</a>
