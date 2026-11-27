@@ -21,7 +21,7 @@
    version.json をキャッシュなしで確認し、版が違えば URL を変えて読み直す。
    公開のたびに SITE_VERSION と version.json を同じ値に上げること（GATE.md 参照）。 */
 (function () {
-  var SITE_VERSION = "20261127-2";
+  var SITE_VERSION = "20261127-3";
   function alreadyTried() {
     try { return new URLSearchParams(location.search).get("_v") === SITE_VERSION; }
     catch (e) { return false; }
@@ -245,6 +245,14 @@
     box-shadow:0 5px 0 var(--orange-d);
   }
   .next-btn:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-d);}
+  .nav-row{display:flex;gap:10px;margin-top:14px;}
+  .nav-row .next-btn{margin-top:0;flex:1;width:auto;}
+  .prev-btn{
+    flex:0 0 40%;border:3px solid var(--orange);border-radius:18px;background:#fff;color:var(--orange);
+    font-size:19px;font-weight:900;padding:14px 8px;min-height:60px;box-shadow:0 5px 0 var(--orange-d);
+    cursor:pointer;touch-action:manipulation;
+  }
+  .prev-btn:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-d);}
   .result-card{
     background:var(--card);border:2px solid var(--line);border-radius:24px;
     padding:24px 18px 20px;box-shadow:var(--shadow);text-align:center;
@@ -1465,6 +1473,8 @@ function renderQuestion(){
     box.classList.add("hidden");
     renderInputUI(q, zone);
   }
+  var logEntry = state.log[state.idx];
+  if (logEntry) showReview(logEntry);
 }
 
 /* 入力欄＋テンキーを 描く */
@@ -1749,13 +1759,53 @@ function playJudgeSound(correct){
 }
 
 /* 判定後の 共通処理：スコア・ログ・かいせつ表示 */
-function finishAnswer(correct, picked){
-  /* タップのタイミングで AudioContext を作って鳴らす（自動再生制限・iPad Safari対策） */
-  playJudgeSound(correct);
+/* ===== まえにもどる（読み直し）：回答ずみの もんだいは 答えと かいせつを そのまま 見直せる ===== */
+function goBack(){
+  if (state.idx <= 0) return;
+  state.idx--;
+  renderQuestion();
+}
+function makeNavRow(next){
+  var row = document.createElement("div");
+  row.className = "nav-row";
+  if (state.idx > 0){
+    var prev = document.createElement("button");
+    prev.className = "prev-btn";
+    prev.type = "button";
+    prev.textContent = "← まえにもどる";
+    prev.addEventListener("click", goBack);
+    row.appendChild(prev);
+  }
+  row.appendChild(next);
+  return row;
+}
+
+function showReview(logEntry){
   var q = state.questions[state.idx];
-  if (correct) state.score++;
-  document.getElementById("score-chip").textContent = "⭐ " + state.score;
-  state.log.push({q:q, picked:picked, correct:correct});
+  state.locked = true;
+  var correct = logEntry.correct;
+  if (q.input.type === "choice"){
+    var btns = document.querySelectorAll(".choice");
+    btns.forEach(function(b){
+      b.disabled = true;
+      if (String(b.getAttribute("data-val")) === String(q.answer)) b.classList.add("correct");
+      else if (String(b.getAttribute("data-val")) === String(logEntry.picked)) b.classList.add("wrong");
+      else b.classList.add("dim");
+    });
+  } else {
+    if (logEntry.entry){
+      entry.single = logEntry.entry.single; entry.q = logEntry.entry.q;
+      entry.r = logEntry.entry.r; entry.n = logEntry.entry.n; entry.d = logEntry.entry.d;
+    }
+    refreshFields(q);
+    entryFields(q).forEach(function(name){
+      var fld = document.getElementById("field-" + name);
+      if (fld){ fld.classList.remove("active"); fld.classList.add(correct ? "field-ok" : "field-ng"); }
+    });
+    var okBtn = document.getElementById("key-ok");
+    if (okBtn) okBtn.disabled = true;
+    document.querySelectorAll(".key").forEach(function(b){ b.disabled = true; });
+  }
   var isLast = state.idx === state.questions.length - 1;
   var fb = document.createElement("div");
   fb.className = "feedback " + (correct ? "ok" : "ng");
@@ -1777,7 +1827,38 @@ function finishAnswer(correct, picked){
   var zone = document.getElementById("feedback-zone");
   zone.innerHTML = "";
   zone.appendChild(fb);
-  zone.appendChild(next);
+  zone.appendChild(makeNavRow(next));
+}
+
+function finishAnswer(correct, picked){
+  /* タップのタイミングで AudioContext を作って鳴らす（自動再生制限・iPad Safari対策） */
+  playJudgeSound(correct);
+  var q = state.questions[state.idx];
+  if (correct) state.score++;
+  document.getElementById("score-chip").textContent = "⭐ " + state.score;
+  state.log.push({q:q, picked:picked, correct:correct, entry:{single:entry.single, q:entry.q, r:entry.r, n:entry.n, d:entry.d}});
+  var isLast = state.idx === state.questions.length - 1;
+  var fb = document.createElement("div");
+  fb.className = "feedback " + (correct ? "ok" : "ng");
+  var head = document.createElement("div");
+  head.className = "fb-head";
+  head.textContent = correct ? "⭕ せいかい！ よくできたね！" : "❌ ざんねん… こたえは「" + q.answer + "」だよ";
+  var body = document.createElement("div");
+  body.textContent = q.expl;
+  fb.appendChild(head); fb.appendChild(body);
+  var next = document.createElement("button");
+  next.className = "next-btn";
+  next.textContent = isLast ? "けっかを みる →" : "つぎの もんだい →";
+  next.addEventListener("click", function(){
+    state.idx++;
+    document.getElementById("progress-bar").style.width = (state.idx / state.questions.length * 100) + "%";
+    if (state.idx >= state.questions.length) showResult();
+    else renderQuestion();
+  });
+  var zone = document.getElementById("feedback-zone");
+  zone.innerHTML = "";
+  zone.appendChild(fb);
+  zone.appendChild(makeNavRow(next));
   next.focus();
 }
 

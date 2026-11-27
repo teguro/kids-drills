@@ -21,7 +21,7 @@
    version.json をキャッシュなしで確認し、版が違えば URL を変えて読み直す。
    公開のたびに SITE_VERSION と version.json を同じ値に上げること（GATE.md 参照）。 */
 (function () {
-  var SITE_VERSION = "20261127-2";
+  var SITE_VERSION = "20261127-3";
   function alreadyTried() {
     try { return new URLSearchParams(location.search).get("_v") === SITE_VERSION; }
     catch (e) { return false; }
@@ -169,6 +169,14 @@
     box-shadow:0 5px 0 var(--orange-d);
   }
   .next-btn:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-d);}
+  .nav-row{display:flex;gap:10px;margin-top:14px;}
+  .nav-row .next-btn{margin-top:0;flex:1;width:auto;}
+  .prev-btn{
+    flex:0 0 40%;border:3px solid var(--orange);border-radius:18px;background:#fff;color:var(--orange);
+    font-size:19px;font-weight:900;padding:14px 8px;min-height:60px;box-shadow:0 5px 0 var(--orange-d);
+    cursor:pointer;touch-action:manipulation;
+  }
+  .prev-btn:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-d);}
   .result-card{
     background:var(--card);border:2px solid var(--line);border-radius:24px;
     padding:24px 18px 20px;box-shadow:var(--shadow);text-align:center;
@@ -834,6 +842,8 @@ function renderQuestion(){
     btn.addEventListener("click", function(){ answer(btn, c); });
     box.appendChild(btn);
   });
+  var entry = state.log[state.idx];
+  if (entry) showReview(entry);
 }
 /* 効果音（Web Audio API）：外部ファイルなし。回答タップのタイミングで生成・再開する */
 var audioCtx = null;
@@ -894,8 +904,60 @@ function playWrongSound(){
     });
   } catch(e) {}
 }
+/* ===== まえにもどる（読み直し）：回答ずみの もんだいは 答えと かいせつを そのまま 見直せる ===== */
+function goBack(){
+  if (state.idx <= 0) return;
+  state.idx--;
+  renderQuestion();
+}
+function makeNavRow(next){
+  var row = document.createElement("div");
+  row.className = "nav-row";
+  if (state.idx > 0){
+    var prev = document.createElement("button");
+    prev.className = "prev-btn";
+    prev.type = "button";
+    prev.textContent = "← まえにもどる";
+    prev.addEventListener("click", goBack);
+    row.appendChild(prev);
+  }
+  row.appendChild(next);
+  return row;
+}
+
+function showReview(entry){
+  var q = state.questions[state.idx];
+  state.locked = true;
+  var correct = entry.correct;
+  var btns = document.querySelectorAll(".choice");
+  btns.forEach(function(b){
+    b.disabled = true;
+    if (b.textContent === q.answer) b.classList.add("correct");
+    else if (b.textContent === entry.picked) b.classList.add("wrong");
+    else b.classList.add("dim");
+  });
+  var isLast = state.idx === state.questions.length - 1;
+  var fb = document.createElement("div");
+  fb.className = "feedback " + (correct ? "ok" : "ng");
+  fb.innerHTML = "<div class='fb-head'>" + (correct ? "⭕ せいかい！ よくできたね！" : "❌ ざんねん… こたえは「" + q.answer + "」だよ") + "</div><div>" + q.expl + "</div>";
+  var next = document.createElement("button");
+  next.className = "next-btn";
+  next.textContent = isLast ? "けっかを みる →" : "つぎの もんだい →";
+  next.addEventListener("click", function(){
+    state.idx++;
+    document.getElementById("progress-bar").style.width = (state.idx / state.questions.length * 100) + "%";
+    if (state.idx >= state.questions.length) showResult();
+    else renderQuestion();
+  });
+  var zone = document.getElementById("feedback-zone");
+  zone.innerHTML = "";
+  zone.appendChild(fb);
+  zone.appendChild(makeNavRow(next));
+}
+
 function answer(btn, val){
   if (state.locked) return;
+  if (state.log[state.idx]) return;
   state.locked = true;
   var q = state.questions[state.idx];
   var correct = (val === q.answer);
@@ -926,7 +988,7 @@ function answer(btn, val){
   var zone = document.getElementById("feedback-zone");
   zone.innerHTML = "";
   zone.appendChild(fb);
-  zone.appendChild(next);
+  zone.appendChild(makeNavRow(next));
   next.focus();
 }
 
