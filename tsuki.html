@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<script>
+/* ===== ドリルランド PINゲート（そとがわチェック） =====
+   きょう開錠していなければ入口（index.html）へもどす。くわしくは GATE.md。 */
+(function () {
+  function todayStr() {
+    var d = new Date();
+    function p(n) { return (n < 10 ? "0" : "") + n; }
+    return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate());
+  }
+  var ok = false;
+  try { ok = localStorage.getItem("land_unlock_v1") === todayStr(); } catch (e) { ok = false; }
+  if (!ok) location.replace("index.html?next=tsuki.html");
+})();
+</script>
+<script>
+/* ===== バージョンチェック：新しい版が出ていたら自動で最新を取り直す =====
+   version.json をキャッシュなしで確認し、版が違えば URL を変えて読み直す。
+   公開のたびに SITE_VERSION と version.json を同じ値に上げること（GATE.md 参照）。 */
+(function () {
+  var SITE_VERSION = "20261127-7";
+  function alreadyTried() {
+    try { return new URLSearchParams(location.search).get("_v") === SITE_VERSION; }
+    catch (e) { return false; }
+  }
+  if (alreadyTried()) return;
+  fetch("version.json?x=" + Date.now(), { cache: "no-store" })
+    .then(function (r) { return r.json(); })
+    .then(function (j) {
+      if (!j || !j.version || j.version === SITE_VERSION) return;
+      var key = "sitever_try_" + j.version;
+      var n = 0;
+      try {
+        n = parseInt(sessionStorage.getItem(key) || "0", 10) || 0;
+        if (n >= 2) return;
+        sessionStorage.setItem(key, String(n + 1));
+      } catch (e) {}
+      location.replace(location.pathname + "?_v=" + encodeURIComponent(j.version));
+    })
+    .catch(function () {});
+})();
+</script>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>つき | ただいま</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Hiragino Maru Gothic ProN", "Hiragino Sans", sans-serif; background: #fff8e7; color: #333; }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 20px 16px 44px; }
+  h1 { font-size: 30px; text-align: center; margin: 6px 0 4px; }
+  .sub { text-align: center; color: #777; font-size: 15px; margin-bottom: 16px; }
+  .sky { position: relative; background: linear-gradient(180deg, #141c3f, #2a3670); border-radius: 24px; padding: 26px 16px 20px; text-align: center; box-shadow: 0 4px 0 rgba(0,0,0,.18); overflow: hidden; }
+  .sky .star { position: absolute; color: #ffe98a; opacity: .85; }
+  .phase-name { color: #ffe98a; font-size: 24px; font-weight: bold; margin: 14px 0 2px; }
+  .age-line { color: #fff; font-size: 19px; margin: 0; }
+  .age-line b { font-size: 30px; color: #ffe98a; }
+  .illum-line { color: #cfd8ff; font-size: 15px; margin: 6px 0 0; }
+  .next-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+  .next-box { background: #fff; border-radius: 18px; box-shadow: 0 2px 6px rgba(0,0,0,.08); padding: 14px 10px; text-align: center; }
+  .next-box .nb-title { font-size: 16px; font-weight: bold; color: #555; }
+  .next-box .nb-date { font-size: 23px; font-weight: bold; margin: 4px 0 2px; }
+  .next-box .nb-ago { font-size: 14px; color: #888; }
+  .week-box { background: #fff; border-radius: 18px; box-shadow: 0 2px 6px rgba(0,0,0,.08); padding: 16px 10px 12px; margin-top: 16px; }
+  .week-title { text-align: center; font-size: 17px; font-weight: bold; color: #555; margin-bottom: 10px; }
+  .week-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .day { text-align: center; }
+  .day .d-lab { font-size: 12.5px; color: #888; margin-top: 4px; line-height: 1.25; }
+  .day.today .d-lab { color: #c22e2e; font-weight: bold; }
+  .mini-sky { background: #232c5c; border-radius: 10px; padding: 4px 0 2px; }
+  a.back { display: block; margin: 30px auto 0; max-width: 320px; text-align: center; padding: 16px; border-radius: 16px; background: #555; color: #fff; font-size: 20px; font-weight: bold; text-decoration: none; box-shadow: 0 4px 0 rgba(0,0,0,.15); }
+  .hidden { display: none !important; }
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("kidsdrills_theme_v1")||"sora");}catch(e){}</script>
+<style>
+  /* はいけい テーマ（トップで えらぶ・この端末に 保存される） */
+  html[data-theme="yuyake"] body{background:linear-gradient(180deg,#ff9d76 0%,#ffc98a 45%,#ffe9c9 100%);background-attachment:fixed;}
+  html[data-theme="mori"] body{background:linear-gradient(180deg,#8fd694 0%,#cdf0c0 55%,#f4fae4 100%);background-attachment:fixed;}
+  html[data-theme="umi"] body{background:linear-gradient(180deg,#4fb3d9 0%,#a5e3f5 55%,#eafcfd 100%);background-attachment:fixed;}
+  html[data-theme="sakura"] body{background:linear-gradient(180deg,#ffb7cd 0%,#ffd9e4 55%,#fff2f6 100%);background-attachment:fixed;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🌙 きょうの つき</h1>
+  <p class="sub" id="today-line"></p>
+
+  <div class="sky" id="sky">
+    <span class="star" style="top:14px;left:22px;font-size:15px;">✦</span>
+    <span class="star" style="top:38px;right:30px;font-size:11px;">✦</span>
+    <span class="star" style="top:96px;left:14px;font-size:11px;">✦</span>
+    <span class="star" style="top:150px;right:16px;font-size:14px;">✦</span>
+    <span class="star" style="bottom:18px;left:44px;font-size:10px;">✦</span>
+    <span class="star" style="bottom:30px;right:52px;font-size:10px;">✦</span>
+    <div id="moon-big"></div>
+    <p class="phase-name" id="phase-name"></p>
+    <p class="age-line">げつれい <b id="age-num"></b> にち</p>
+    <p class="illum-line" id="illum-line"></p>
+  </div>
+
+  <div class="next-row">
+    <div class="next-box">
+      <div class="nb-title">🌕 つぎの まんげつ</div>
+      <div class="nb-date" id="next-full"></div>
+      <div class="nb-ago" id="next-full-ago"></div>
+    </div>
+    <div class="next-box">
+      <div class="nb-title">🌑 つぎの しんげつ</div>
+      <div class="nb-date" id="next-new"></div>
+      <div class="nb-ago" id="next-new-ago"></div>
+    </div>
+  </div>
+
+  <div class="week-box">
+    <div class="week-title">これからの つき</div>
+    <div class="week-row" id="week-row"></div>
+  </div>
+
+  <a class="back" href="index.html">トップにもどる</a>
+</div>
+
+<script>
+'use strict';
+/* 月齢計算：基準の新月（2000-01-06 18:14 UTC）からの経過で求める近似計算。
+   まんげつ・しんげつの「日にち」は合うが、時刻は数時間ずれることがあるので日付だけ出す。 */
+var SYNODIC = 29.530588853;
+var REF_MS = Date.UTC(2000, 0, 6, 18, 14);
+
+function moonAge(date) {
+  var a = ((date.getTime() - REF_MS) / 86400000) % SYNODIC;
+  if (a < 0) a += SYNODIC;
+  return a;
+}
+
+/* 光っている部分の輪郭（SVGパス）。p = 月齢 / 朔望月（0..1） */
+function moonPath(cx, cy, r, age) {
+  var p = age / SYNODIC;
+  var theta = 2 * Math.PI * p;
+  var rx = Math.max(0.01, Math.abs(Math.cos(theta)) * r);
+  var waxing = p < 0.5;
+  var outerSweep = waxing ? 1 : 0;
+  var termSweep = (Math.cos(theta) > 0) ? (waxing ? 0 : 1) : (waxing ? 1 : 0);
+  return 'M ' + cx + ' ' + (cy - r) +
+    ' A ' + r + ' ' + r + ' 0 0 ' + outerSweep + ' ' + cx + ' ' + (cy + r) +
+    ' A ' + rx.toFixed(2) + ' ' + r + ' 0 0 ' + termSweep + ' ' + cx + ' ' + (cy - r) + ' Z';
+}
+
+function moonSvg(size, age, withCraters) {
+  var c = 50, r = 46;
+  var lit = moonPath(c, c, r, age);
+  var s = '<svg width="' + size + '" height="' + size + '" viewBox="0 0 100 100">' +
+    '<circle cx="' + c + '" cy="' + c + '" r="' + r + '" fill="#39406e"/>' +
+    '<path d="' + lit + '" fill="#f9e08a"/>';
+  if (withCraters) {
+    s += '<clipPath id="mc"><path d="' + lit + '"/></clipPath>' +
+      '<g clip-path="url(#mc)" fill="rgba(160,120,40,.18)">' +
+      '<circle cx="38" cy="36" r="8"/><circle cx="58" cy="58" r="11"/><circle cx="42" cy="66" r="6"/><circle cx="63" cy="30" r="5"/>' +
+      '</g>';
+  }
+  s += '</svg>';
+  return s;
+}
+
+function phaseName(age) {
+  if (age < 1.2 || age >= 28.4) return 'しんげつ';
+  if (age < 5.8) return 'みかづき';
+  if (age < 9.0) return 'じょうげんの つき';
+  if (age < 13.8) return 'まんげつに ちかい つき';
+  if (age < 15.9) return 'まんげつ';
+  if (age < 20.7) return 'かけていく つき';
+  if (age < 23.9) return 'かげんの つき';
+  return 'ほそい つき';
+}
+
+var WD = ['にち', 'げつ', 'か', 'すい', 'もく', 'きん', 'ど'];
+function dateLabel(d) {
+  return (d.getMonth() + 1) + 'がつ' + d.getDate() + 'にち（' + WD[d.getDay()] + '）';
+}
+function agoLabel(days) {
+  var n = Math.ceil(days - 0.001);
+  if (n <= 0) return 'きょう！';
+  if (n === 1) return 'あした';
+  return 'あと ' + n + ' にち';
+}
+
+(function init() {
+  var now = new Date();
+  var age = moonAge(now);
+  document.getElementById('today-line').textContent = dateLabel(now);
+  document.getElementById('moon-big').innerHTML = moonSvg(210, age, true);
+  document.getElementById('phase-name').textContent = phaseName(age);
+  document.getElementById('age-num').textContent = age.toFixed(1);
+  var illum = Math.round((1 - Math.cos(2 * Math.PI * age / SYNODIC)) / 2 * 100);
+  document.getElementById('illum-line').textContent = 'ひかっている わりあい：やく ' + illum + '％';
+
+  var toNew = SYNODIC - age;
+  var toFull = ((SYNODIC / 2 - age) % SYNODIC + SYNODIC) % SYNODIC;
+  var dNew = new Date(now.getTime() + toNew * 86400000);
+  var dFull = new Date(now.getTime() + toFull * 86400000);
+  document.getElementById('next-new').textContent = dateLabel(dNew);
+  document.getElementById('next-new-ago').textContent = agoLabel(toNew);
+  document.getElementById('next-full').textContent = dateLabel(dFull);
+  document.getElementById('next-full-ago').textContent = agoLabel(toFull);
+
+  var row = document.getElementById('week-row');
+  var html = '';
+  for (var i = 0; i < 7; i++) {
+    var d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i, 19, 0);
+    var a = moonAge(d);
+    html += '<div class="day' + (i === 0 ? ' today' : '') + '">' +
+      '<div class="mini-sky">' + moonSvg(40, a, false) + '</div>' +
+      '<div class="d-lab">' + (i === 0 ? 'きょう' : (d.getMonth() + 1) + '/' + d.getDate()) + '<br>' + a.toFixed(0) + 'にち</div></div>';
+  }
+  row.innerHTML = html;
+})();
+</script>
+</body>
+</html>
