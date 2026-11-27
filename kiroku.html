@@ -21,7 +21,7 @@
    version.json をキャッシュなしで確認し、版が違えば URL を変えて読み直す。
    公開のたびに SITE_VERSION と version.json を同じ値に上げること（GATE.md 参照）。 */
 (function () {
-  var SITE_VERSION = "20261127-5";
+  var SITE_VERSION = "20261127-6";
   function alreadyTried() {
     try { return new URLSearchParams(location.search).get("_v") === SITE_VERSION; }
     catch (e) { return false; }
@@ -159,10 +159,36 @@
     html += '<tr class="total"><td class="subj">ぜんぶ</td><td>' + tPlays + '</td><td>' + tQ + '</td><td>' + tC + '</td><td>' + tRate + '</td><td></td><td>' + fmtDur(tSec) + '</td><td></td></tr>';
     html += '</table>';
   });
-  document.getElementById("content").innerHTML = html;
+    document.getElementById("content").innerHTML = html;
+
+  /* ===== あそびの きろく ===== */
+  var plog = {};
+  try { plog = JSON.parse(localStorage.getItem("kidsdrills_playlog_v1") || "{}"); } catch (e) { plog = {}; }
+  var GAMES = [["touch", "ことりタッチ"], ["memory", "しんけいすいじゃく"], ["puzzle", "しゃしんパズル"], ["catch", "えさキャッチ"], ["pop", "ことりポップ"], ["quiz-bird", "鳥クイズ"], ["quiz-keirin", "競輪クイズ"], ["quiz-nfl", "NFLクイズ"], ["quiz-sumo", "大相撲クイズ"]];
+  var phtml = '<h2 style="margin-top:30px;">🎮 あそびの きろく</h2>';
+  PLAYERS.forEach(function (p) {
+    var rec = plog[p[0]] || {};
+    phtml += '<h2 class="' + p[2] + '">' + p[1] + '</h2>';
+    var has = GAMES.some(function (g) { return rec[g[0]] && rec[g[0]].plays > 0; });
+    if (!has) {
+      phtml += '<div class="empty">まだ きろくが ありません</div>';
+      return;
+    }
+    var tSec = 0;
+    phtml += '<table><tr><th>ゲーム</th><th>やった<br>かいすう</th><th>じかん</th><th>ベスト</th><th>かんせい<br>かいすう</th><th>さいごに<br>やった日</th></tr>';
+    GAMES.forEach(function (g) {
+      var r = rec[g[0]];
+      if (!r || !r.plays) return;
+      tSec += (r.sec || 0);
+      phtml += '<tr><td class="subj">' + g[1] + '</td><td>' + r.plays + '</td><td>' + fmtDur(r.sec) + '</td><td>' + (r.best === null || r.best === undefined ? "-" : r.best) + '</td><td>' + (r.done || 0) + '</td><td>' + (r.last || "-") + '</td></tr>';
+    });
+    phtml += '<tr class="total"><td class="subj">ぜんぶ</td><td></td><td>' + fmtDur(tSec) + '</td><td></td><td></td><td></td></tr>';
+    phtml += '</table>';
+  });
+  document.getElementById("content").innerHTML = html + phtml;
 
   /* ================= バックアップ（書き出し／読み込み） ================= */
-  var BACKUP_KEYS = ["kidsdrills_records_v1", "kidsdrills_review_v1", "bird_ledger_v1", "kidsdrills_gacha_v1", "kidsdrills_wallet_v1", "kidsdrills_theme_v1", "kidsdrills_last_player"];
+  var BACKUP_KEYS = ["kidsdrills_records_v1", "kidsdrills_review_v1", "bird_ledger_v1", "kidsdrills_gacha_v1", "kidsdrills_wallet_v1", "kidsdrills_playlog_v1", "kidsdrills_theme_v1", "kidsdrills_last_player"];
   document.getElementById("export-btn").addEventListener("click", function () {
     var payload = { app: "tadaima-backup", version: 1, exportedAt: new Date().toISOString(), data: {} };
     BACKUP_KEYS.forEach(function (k) {
