@@ -19,7 +19,7 @@
    version.json をキャッシュなしで確認し、版が違えば URL を変えて読み直す。
    公開のたびに SITE_VERSION と version.json を同じ値に上げること（GATE.md 参照）。 */
 (function () {
-  var SITE_VERSION = "20261127-5";
+  var SITE_VERSION = "20261127-6";
   function alreadyTried() {
     try { return new URLSearchParams(location.search).get("_v") === SITE_VERSION; }
     catch (e) { return false; }
@@ -163,6 +163,50 @@
   document.getElementById("quiz-title").textContent = meta.title;
   document.title = meta.title + " | あそびコーナー";
 
+  /* ===== あそび記録（だれが・どのゲームを・どれくらい） ===== */
+  var PLAYLOG_KEY = "kidsdrills_playlog_v1";
+  function plLoad() { try { return JSON.parse(localStorage.getItem(PLAYLOG_KEY) || "{}"); } catch (e) { return {}; } }
+  function plSave(d) { try { localStorage.setItem(PLAYLOG_KEY, JSON.stringify(d)); } catch (e) {} }
+  function plToday() { var d = new Date(); function p(n) { return (n < 10 ? "0" : "") + n; } return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()); }
+  function plEntry(game) {
+    var player = "";
+    try { player = localStorage.getItem("kidsdrills_last_player") || ""; } catch (e) {}
+    if (!player) return null;
+    var d = plLoad();
+    if (!d[player]) d[player] = {};
+    if (!d[player][game]) d[player][game] = { sec: 0, plays: 0, best: null, done: 0, last: "" };
+    return { d: d, e: d[player][game] };
+  }
+  function plBest(game, score) {
+    var r = plEntry(game); if (!r) return;
+    if (r.e.best === null || score > r.e.best) r.e.best = score;
+    r.e.last = plToday();
+    plSave(r.d);
+  }
+  function plDone(game) {
+    var r = plEntry(game); if (!r) return;
+    r.e.done += 1;
+    r.e.last = plToday();
+    plSave(r.d);
+  }
+  var plGame = "quiz-" + gameKey;
+  var plStart = Date.now();
+  var plCounted = false;
+  function plTick() {
+    var now = Date.now();
+    var add = Math.round((now - plStart) / 1000);
+    plStart = now;
+    if (add <= 0) return;
+    var r = plEntry(plGame); if (!r) return;
+    r.e.sec += add;
+    if (!plCounted) { r.e.plays += 1; plCounted = true; }
+    r.e.last = plToday();
+    plSave(r.d);
+  }
+  setInterval(plTick, 5000);
+  window.addEventListener("pagehide", plTick);
+  document.addEventListener("visibilitychange", function () { if (document.hidden) plTick(); });
+
   var state = { lv: 0, qs: [], idx: 0, score: 0 };
   function shuffle(arr) {
     var a = arr.slice();
@@ -275,6 +319,8 @@
         state.score >= state.qs.length * 0.4 ? "よく がんばったね！" : "つぎは もっと いけるよ！";
       document.getElementById("result-msg").textContent = msg;
       document.getElementById("result-view").classList.remove("hidden");
+      plBest(plGame, state.score);
+      plDone(plGame);
     } else {
       renderQuestion();
     }
