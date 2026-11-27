@@ -21,7 +21,7 @@
    version.json をキャッシュなしで確認し、版が違えば URL を変えて読み直す。
    公開のたびに SITE_VERSION と version.json を同じ値に上げること（GATE.md 参照）。 */
 (function () {
-  var SITE_VERSION = "20261127-13";
+  var SITE_VERSION = "20261127-14";
   function alreadyTried() {
     try { return new URLSearchParams(location.search).get("_v") === SITE_VERSION; }
     catch (e) { return false; }
@@ -213,6 +213,20 @@
   }
   .review-item .r-q{font-size:18px;font-weight:900;line-height:1.45;}
   .review-item .r-a{font-size:14px;font-weight:700;color:var(--muted);line-height:1.6;margin-top:3px;}
+  .review-item{cursor:pointer;}
+  .review-item .r-more{font-size:12px;font-weight:900;color:var(--muted);margin-top:8px;}
+  .review-item .r-detail{display:none;margin-top:10px;}
+  .review-item.open .r-detail{display:block;}
+  .review-item.open .r-more{display:none;}
+  .r-choices{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  @media (max-width:380px){ .r-choices{grid-template-columns:1fr;} }
+  .r-choice{background:var(--choice-bg);border:2px solid var(--choice-line);border-radius:12px;padding:8px 10px;font-size:15px;font-weight:700;line-height:1.4;}
+  .r-choice .r-sub{display:block;font-size:12px;color:var(--muted);font-weight:700;}
+  .r-choice .r-tag{display:block;font-size:12px;font-weight:900;margin-top:3px;}
+  .r-choice.is-answer{border-color:#2FA84F;}
+  .r-choice.is-answer .r-tag{color:#2FA84F;}
+  .r-choice.is-picked{border-color:var(--wrong);}
+  .r-choice.is-picked .r-tag{color:var(--wrong);}
   .mark-ok{color:var(--green-d);font-weight:900;}
   .mark-ng{color:var(--wrong);font-weight:900;}
   .btn-row{display:grid;gap:12px;margin-top:18px;}
@@ -2289,6 +2303,36 @@ function showResult(){
       "<div class='r-q'>" + (item.correct ? "<span class='mark-ok'>⭕</span>" : "<span class='mark-ng'>❌</span>") +
       " " + (i + 1) + ". " + q.text + "</div>" +
       "<div class='r-a'>こたえ： " + fmtVal(q, q.answer) + (item.correct ? "" : " ／ きみの こたえ： " + fmtVal(q, item.picked)) + "<br>" + q.expl + "</div>";
+    var more = document.createElement("div");
+    more.className = "r-more";
+    more.textContent = "タップで せんたくしを みる ▽";
+    div.appendChild(more);
+    var detail = document.createElement("div");
+    detail.className = "r-detail";
+    var grid = document.createElement("div");
+    grid.className = "r-choices";
+    (q.choices || []).forEach(function(c){
+      var label = fmtVal(q, c);
+      var cell = document.createElement("div");
+      cell.className = "r-choice";
+      var isAns = String(label) === String(fmtVal(q, q.answer));
+      var isPick = String(label) === String(fmtVal(q, item.picked));
+      if (isAns) cell.classList.add("is-answer");
+      if (isPick && !item.correct) cell.classList.add("is-picked");
+      var lt = document.createElement("span");
+      lt.textContent = label;
+      cell.appendChild(lt);
+      if (isAns || isPick){
+        var tg = document.createElement("span");
+        tg.className = "r-tag";
+        tg.textContent = (isAns && isPick) ? "⭕ せいかい（きみの こたえ）" : (isAns ? "⭕ せいかい" : "❌ きみが えらんだ");
+        cell.appendChild(tg);
+      }
+      grid.appendChild(cell);
+    });
+    detail.appendChild(grid);
+    div.appendChild(detail);
+    div.addEventListener("click", function(){ div.classList.toggle("open"); });
     list.appendChild(div);
   });
   showScreen("result");
