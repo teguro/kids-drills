@@ -20,7 +20,7 @@
    version.json をキャッシュなしで確認し、版が違えば URL を変えて読み直す。
    公開のたびに SITE_VERSION と version.json を同じ値に上げること（GATE.md 参照）。 */
 (function () {
-  var SITE_VERSION = "20261127-9";
+  var SITE_VERSION = "20261127-10";
   function alreadyTried() {
     try { return new URLSearchParams(location.search).get("_v") === SITE_VERSION; }
     catch (e) { return false; }
@@ -80,6 +80,7 @@
   .rules { text-align: left; }
   .rules h2 { font-size: 21px; margin: 0 0 10px; text-align: center; }
   .rules ul { margin: 0; padding-left: 24px; font-size: 19px; line-height: 1.8; }
+  .rules ul + ul { margin-top: 14px; }
 </style>
 <script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("kidsdrills_theme_v1")||"sora");}catch(e){}</script>
 <style>
@@ -134,15 +135,27 @@
   </section>
 
   <!-- ============ こまったときの やくそく（PIN不要・固定表示） ============ -->
-  <!-- ★文面はプレースホルダです。家族で話し合って書き換えてください。
-       実在の電話番号・住所などの個人情報は書かないでください（連絡先はサーバー経由で出す設計）。 -->
+  <!-- 文面は2026-11-27に家族で決定した正式版（ママからページの「おるすばんのやくそく」と同一） -->
   <div class="card rules">
     <h2>🤝 こまったときの やくそく</h2>
     <ul>
-      <li>🔥 かじの ときは、すぐに そとに でる。でんわは そとに でてから</li>
-      <li>🌏 じしんの ときは、テーブルの したに かくれる。ゆれが とまったら ドアを あける</li>
-      <li>🤕 けが・きぶんが わるい ときは、ママ・お父さんに でんわする</li>
-      <li>🚪 しらない ひとが きたら、ドアは あけない。ママ・お父さんに でんわする</li>
+      <li>かぎを あけて いえに はいったら、かぎを しめる</li>
+      <li>いえに ついたら、まず「ただいま」ボタンを おして、ママからの メッセージを かくにんする</li>
+      <li>インターホンが なっても、でない</li>
+      <li>おやつは、じゅんびされている ものを たべる</li>
+      <li>ベランダには でない</li>
+    </ul>
+    <ul>
+      <li>とても こまったことが あったら、おとうさんか ママに でんわする</li>
+      <li>じしんの ときは、まず つくえの したに かくれて あたまを まもる</li>
+      <li>ゆれが おさまったら、そとに でて、ときわこうえんの ふんすいひろばに いく（おとうさんか ママが かならず むかえに いくよ）</li>
+    </ul>
+    <ul>
+      <li>かじや じしん いがいで こまったことが あったら、1かいの いりぐちから「呼出」ボタンを おしたあとに「2602」を おして、みほちゃんが いたら たすけて もらう</li>
+      <li>みほちゃんが いなかったら、1かいの いすに すわって ママが かえってくるのを まっててね</li>
+    </ul>
+    <ul>
+      <li>ママが かえる じかんは、だいたい4じ10ふんごろから 5じごろ。5じより かえりが おくれるときは、「ママからのメッセージ」に かならず れんらくするね</li>
     </ul>
   </div>
 

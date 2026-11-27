@@ -21,7 +21,7 @@
    version.json をキャッシュなしで確認し、版が違えば URL を変えて読み直す。
    公開のたびに SITE_VERSION と version.json を同じ値に上げること（GATE.md 参照）。 */
 (function () {
-  var SITE_VERSION = "20261127-9";
+  var SITE_VERSION = "20261127-10";
   function alreadyTried() {
     try { return new URLSearchParams(location.search).get("_v") === SITE_VERSION; }
     catch (e) { return false; }
@@ -91,7 +91,8 @@
   .stamp-btns { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 14px; }
   .stamp-btn { font-family: inherit; font-size: 18px; font-weight: bold; padding: 14px 4px; border: 3px solid #e8dcc0; border-radius: 16px; background: #fdf1dc; color: #333; cursor: pointer; }
   .stamp-btn.sel { border-color: #e4572e; background: #ffe3d3; }
-  .reply-text { font-family: inherit; font-size: 19px; width: 100%; padding: 12px; margin-top: 14px; border: 2px solid #e8dcc0; border-radius: 12px; }
+  .reply-text { font-family: inherit; font-size: 19px; width: 100%; padding: 12px; margin-top: 14px; border: 2px solid #e8dcc0; border-radius: 12px; line-height: 1.6; resize: vertical; box-sizing: border-box; }
+  .reply-count { text-align: right; font-size: 14px; color: #97865f; margin: 6px 2px 0; }
   .reply-send { font-family: inherit; font-size: 21px; font-weight: bold; padding: 14px 28px; border: none; border-radius: 14px; background: #e4572e; color: #fff; box-shadow: 0 3px 0 rgba(0,0,0,.15); cursor: pointer; margin-top: 14px; width: 100%; }
   .reply-send:active { transform: translateY(2px); box-shadow: none; }
 
@@ -99,6 +100,7 @@
   .rules { text-align: left; }
   .rules h2 { font-size: 21px; margin: 0 0 10px; text-align: center; }
   .rules ul { margin: 0; padding-left: 24px; font-size: 18px; line-height: 1.7; }
+  .rules ul + ul { margin-top: 14px; }
 </style>
 <script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("kidsdrills_theme_v1")||"sora");}catch(e){}</script>
 <style>
@@ -171,22 +173,35 @@
         <button class="stamp-btn" type="button" data-stamp="ありがとう">🙏 ありがとう</button>
         <button class="stamp-btn" type="button" data-stamp="たすけて">🆘 たすけて</button>
       </div>
-      <input class="reply-text" id="reply-text" type="text" maxlength="200" placeholder="ひとこと（なくても OK）">
+      <textarea class="reply-text" id="reply-text" rows="4" maxlength="200" placeholder="ひとこと かいてね（なくても OK）"></textarea>
+      <p class="reply-count"><span id="reply-count">0</span> / 200</p>
       <button class="reply-send" type="button" id="reply-send">へんじを おくる</button>
       <p class="tadaima-msg" id="reply-msg"></p>
     </div>
   </section>
 
   <!-- ============ おるすばんのやくそく（PIN不要・固定表示） ============ -->
-  <!-- ★文面はプレースホルダです。家族で話し合って、実際のルールに書き換えてください。
-       実在の電話番号・住所などの個人情報は書かないでください。 -->
+  <!-- 文面は2026-11-27に家族で決定した正式版 -->
   <div class="card rules">
     <h2>🤝 おるすばんの やくそく</h2>
     <ul>
-      <li>インターホンが なっても でない。かぎは あけない</li>
-      <li>こまったことが あったら、おとうさん・おかあさんに でんわする</li>
-      <li>かじや じしんの ときは、そとに でて ちかくの あんぜんな ばしょへ いく</li>
-      <li>おやつは キッチンの きめられた ものだけ たべる</li>
+      <li>かぎを あけて いえに はいったら、かぎを しめる</li>
+      <li>いえに ついたら、まず「ただいま」ボタンを おして、ママからの メッセージを かくにんする</li>
+      <li>インターホンが なっても、でない</li>
+      <li>おやつは、じゅんびされている ものを たべる</li>
+      <li>ベランダには でない</li>
+    </ul>
+    <ul>
+      <li>とても こまったことが あったら、おとうさんか ママに でんわする</li>
+      <li>じしんの ときは、まず つくえの したに かくれて あたまを まもる</li>
+      <li>ゆれが おさまったら、そとに でて、ときわこうえんの ふんすいひろばに いく（おとうさんか ママが かならず むかえに いくよ）</li>
+    </ul>
+    <ul>
+      <li>かじや じしん いがいで こまったことが あったら、1かいの いりぐちから「呼出」ボタンを おしたあとに「2602」を おして、みほちゃんが いたら たすけて もらう</li>
+      <li>みほちゃんが いなかったら、1かいの いすに すわって ママが かえってくるのを まっててね</li>
+    </ul>
+    <ul>
+      <li>ママが かえる じかんは、だいたい4じ10ふんごろから 5じごろ。5じより かえりが おくれるときは、「ママからのメッセージ」に かならず れんらくするね</li>
     </ul>
   </div>
 
@@ -349,6 +364,7 @@ $('reply-send').addEventListener('click', function () {
       if (data && data.ok) {
         msg.textContent = 'おくったよ！ 💌';
         $('reply-text').value = '';
+        updateReplyCount();
       } else {
         msg.textContent = 'つうしんエラー。もういちど おしてね';
       }
@@ -361,6 +377,11 @@ $('reply-send').addEventListener('click', function () {
       $('reply-send').disabled = false;
     });
 });
+
+function updateReplyCount() {
+  $('reply-count').textContent = $('reply-text').value.length;
+}
+$('reply-text').addEventListener('input', updateReplyCount);
 
 updatePinDots();
 </script>
