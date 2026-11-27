@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<script>
+/* ===== ドリルランド PINゲート（そとがわチェック） =====
+   きょう開錠していなければ入口（index.html）へもどす。くわしくは GATE.md。 */
+(function () {
+  function todayStr() {
+    var d = new Date();
+    function p(n) { return (n < 10 ? "0" : "") + n; }
+    return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate());
+  }
+  var ok = false;
+  try { ok = localStorage.getItem("land_unlock_v1") === todayStr(); } catch (e) { ok = false; }
+  if (!ok) location.replace("index.html?next=kansatsu.html");
+})();
+</script>
+<script>
+/* ===== バージョンチェック：新しい版が出ていたら自動で最新を取り直す ===== */
+(function () {
+  var SITE_VERSION = "20261127-16";
+  function alreadyTried() {
+    try { return new URLSearchParams(location.search).get("_v") === SITE_VERSION; }
+    catch (e) { return false; }
+  }
+  if (alreadyTried()) return;
+  fetch("version.json?x=" + Date.now(), { cache: "no-store" })
+    .then(function (r) { return r.json(); })
+    .then(function (j) {
+      if (!j || !j.version || j.version === SITE_VERSION) return;
+      var key = "sitever_try_" + j.version;
+      var n = 0;
+      try {
+        n = parseInt(sessionStorage.getItem(key) || "0", 10) || 0;
+        if (n >= 2) return;
+        sessionStorage.setItem(key, String(n + 1));
+      } catch (e) {}
+      location.replace(location.pathname + "?_v=" + encodeURIComponent(j.version));
+    })
+    .catch(function () {});
+})();
+</script>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>かんさつ記録 | ただいま</title><style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Hiragino Maru Gothic ProN", "Hiragino Sans", sans-serif; background: #fff8e7; color: #333; }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 20px 16px 44px; }
+  h1 { font-size: 29px; text-align: center; margin: 6px 0 4px; }
+  .sub { text-align: center; color: #777; font-size: 15px; margin-bottom: 16px; }
+  .card { background: #fff; border-radius: 18px; box-shadow: 0 2px 6px rgba(0,0,0,.08); padding: 16px; margin-top: 16px; }
+  .card h2 { font-size: 20px; margin: 0 0 12px; }
+  .lab { font-size: 15px; font-weight: bold; color: #555; margin: 14px 0 6px; }
+  .lab:first-of-type { margin-top: 0; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { font-family: inherit; font-size: 16px; font-weight: bold; padding: 9px 14px; border-radius: 999px; border: 2px solid #d8cfb8; background: #fdf6e3; color: #555; cursor: pointer; touch-action: manipulation; }
+  .chip.on { background: #2e7d4f; border-color: #2e7d4f; color: #fff; }
+  .chip.place { font-size: 15px; padding: 8px 12px; }
+  .chip.place .cnt { font-size: 12px; opacity: .75; margin-left: 4px; }
+  input[type="text"], input[type="number"], input[type="date"], input[type="time"] {
+    font-family: inherit; font-size: 17px; padding: 11px 12px; border: 2px solid #d8cfb8; border-radius: 12px; width: 100%; background: #fffdf5; color: #333;
+  }
+  .row2 { display: grid; grid-template-columns: 1.2fr 1fr; gap: 10px; }
+  .cand { margin-top: 8px; border: 2px solid #eee3c8; border-radius: 12px; overflow: hidden; }
+  .cand-item { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 10px; border: none; border-bottom: 1px solid #f3ead3; background: #fff; font-family: inherit; font-size: 17px; font-weight: bold; color: #333; text-align: left; cursor: pointer; }
+  .cand-item:last-child { border-bottom: none; }
+  .cand-item img { width: 52px; height: 40px; object-fit: cover; border-radius: 8px; }
+  .cand-item .cat { font-size: 12.5px; color: #999; font-weight: normal; margin-left: auto; }
+  .sel-bird { display: flex; gap: 12px; align-items: center; background: #eef7ee; border: 2px solid #bfe0bf; border-radius: 14px; padding: 10px; margin-top: 10px; }
+  .sel-bird img { width: 96px; height: 72px; object-fit: cover; border-radius: 10px; }
+  .sel-bird .nm { font-size: 20px; font-weight: bold; }
+  .sel-bird .sc { font-size: 13px; color: #777; font-style: italic; }
+  .send-btn { display: block; width: 100%; margin-top: 18px; padding: 16px; border: none; border-radius: 16px; background: #2e7d4f; color: #fff; font-size: 21px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 0 rgba(0,0,0,.15); touch-action: manipulation; }
+  .send-btn:active { transform: translateY(3px); box-shadow: none; }
+  .send-btn:disabled { background: #aaa; box-shadow: none; }
+  .msg { min-height: 24px; text-align: center; font-size: 16px; font-weight: bold; margin-top: 10px; }
+  .msg.ok { color: #2e7d4f; } .msg.err { color: #d33; }
+  .stats-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 16px; }
+  .stat-box { background: #fff; border-radius: 16px; box-shadow: 0 2px 6px rgba(0,0,0,.08); padding: 12px 6px; text-align: center; }
+  .stat-box .num { font-size: 27px; font-weight: bold; color: #2e7d4f; }
+  .stat-box .cap { font-size: 13px; color: #888; margin-top: 2px; }
+  .rec { display: flex; gap: 11px; padding: 11px 2px; border-bottom: 1px dashed #e5dcc3; }
+  .rec:last-child { border-bottom: none; }
+  .rec img { width: 76px; height: 58px; object-fit: cover; border-radius: 10px; flex: none; }
+  .rec .noimg { width: 76px; height: 58px; border-radius: 10px; background: #eef4ea; display: flex; align-items: center; justify-content: center; font-size: 26px; flex: none; }
+  .rec .nm { font-size: 18px; font-weight: bold; }
+  .rec .meta { font-size: 14px; color: #777; line-height: 1.55; }
+  .badge { display: inline-block; font-size: 12px; font-weight: bold; border-radius: 999px; padding: 2px 8px; margin-left: 6px; vertical-align: 2px; }
+  .badge.seen { background: #e3f2e3; color: #2e7d4f; }
+  .badge.heard { background: #fdeeda; color: #b06f00; }
+  .life-grid { display: flex; flex-wrap: wrap; gap: 7px; }
+  .life-chip { font-size: 14.5px; font-weight: bold; background: #f2f7ee; border: 1.5px solid #cfe3c2; border-radius: 999px; padding: 5px 11px; }
+  .life-chip.heard { background: #fdf3e0; border-color: #ecd9ae; }
+  .kv { font-size: 15.5px; line-height: 1.9; }
+  .kv b { color: #2e7d4f; }
+  /* ---- PIN ---- */
+  .pin-dots { display: flex; justify-content: center; gap: 14px; margin: 16px 0 8px; }
+  .pin-dot { width: 22px; height: 22px; border-radius: 50%; border: 3px solid #bbb; background: transparent; }
+  .pin-dot.on { background: #2e7d4f; border-color: #2e7d4f; }
+  .pin-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 320px; margin: 12px auto 0; }
+  .pin-key { font-family: inherit; font-size: 28px; font-weight: bold; padding: 16px 0; border: none; border-radius: 16px; background: #fdf1dc; color: #333; box-shadow: 0 3px 0 rgba(0,0,0,.12); cursor: pointer; touch-action: manipulation; }
+  .pin-key:active { transform: translateY(2px); box-shadow: none; background: #f7e3c2; }
+  .pin-msg { min-height: 26px; font-size: 17px; font-weight: bold; color: #d33; margin: 10px 0 0; text-align: center; }
+  a.back { display: block; margin: 30px auto 0; max-width: 320px; text-align: center; padding: 16px; border-radius: 16px; background: #555; color: #fff; font-size: 20px; font-weight: bold; text-decoration: none; box-shadow: 0 4px 0 rgba(0,0,0,.15); }
+  .hidden { display: none !important; }
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("kidsdrills_theme_v1")||"sora");}catch(e){}</script>
+<style>
+  html[data-theme="yuyake"] body{background:linear-gradient(180deg,#ff9d76 0%,#ffc98a 45%,#ffe9c9 100%);background-attachment:fixed;}
+  html[data-theme="mori"] body{background:linear-gradient(180deg,#8fd694 0%,#cdf0c0 55%,#f4fae4 100%);background-attachment:fixed;}
+  html[data-theme="umi"] body{background:linear-gradient(180deg,#4fb3d9 0%,#a5e3f5 55%,#eafcfd 100%);background-attachment:fixed;}
+  html[data-theme="sakura"] body{background:linear-gradient(180deg,#ffb7cd 0%,#ffd9e4 55%,#fff2f6 100%);background-attachment:fixed;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🔭 いきもの かんさつ記録</h1>
+  <p class="sub">鳥・けもの・その他の生きものを 家族みんなで ためていこう</p>
+
+  <!-- ============ PIN入力 ============ -->
+  <section id="view-pin">
+    <div class="card">
+      <p style="text-align:center;font-size:17px;font-weight:bold;margin:4px 0 0;">あんしょうばんごうを いれてね</p>
+      <div class="pin-dots" id="pin-dots">
+        <span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span>
+      </div>
+      <p class="pin-msg" id="pin-msg"></p>
+      <div class="pin-pad" id="pin-pad">
+        <button class="pin-key" type="button" data-k="1">1</button>
+        <button class="pin-key" type="button" data-k="2">2</button>
+        <button class="pin-key" type="button" data-k="3">3</button>
+        <button class="pin-key" type="button" data-k="4">4</button>
+        <button class="pin-key" type="button" data-k="5">5</button>
+        <button class="pin-key" type="button" data-k="6">6</button>
+        <button class="pin-key" type="button" data-k="7">7</button>
+        <button class="pin-key" type="button" data-k="8">8</button>
+        <button class="pin-key" type="button" data-k="9">9</button>
+        <button class="pin-key" type="button" data-k="c">けす</button>
+        <button class="pin-key" type="button" data-k="0">0</button>
+        <button class="pin-key" type="button" data-k="b">←</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 本体 ============ -->
+  <section id="view-main" class="hidden">
+    <div class="stats-strip">
+      <div class="stat-box"><div class="num" id="st-total">-</div><div class="cap">きろく</div></div>
+      <div class="stat-box"><div class="num" id="st-seen">-</div><div class="cap">みた しゅるい</div></div>
+      <div class="stat-box"><div class="num" id="st-heard">-</div><div class="cap">こえだけ</div></div>
+    </div>
+
+    <div class="card">
+      <h2>✏️ きろくする</h2>
+
+      <p class="lab">だれが みた？</p>
+      <div class="chips" id="who-chips"></div>
+
+      <p class="lab">いつ？</p>
+      <div class="row2">
+        <input type="date" id="f-date">
+        <input type="time" id="f-time">
+      </div>
+
+      <p class="lab">なにを みた？</p>
+      <div class="chips" id="kind-chips">
+        <button class="chip on" type="button" data-kd="とり">🐦 とり</button>
+        <button class="chip" type="button" data-kd="けもの">🦌 けもの</button>
+        <button class="chip" type="button" data-kd="そのた">🐸 そのた</button>
+      </div>
+
+      <p class="lab" id="bird-lab">なんの 鳥？</p>
+      <input type="text" id="f-bird" placeholder="なまえを いれると 候補が でるよ（例：スズメ）" autocomplete="off">
+      <div class="chips hidden" id="mammal-chips" style="margin-top:8px;"></div>
+      <div class="cand hidden" id="bird-cand"></div>
+      <div class="sel-bird hidden" id="bird-sel"></div>
+
+      <p class="lab">どこで？</p>
+      <div class="chips" id="place-chips"></div>
+      <div style="margin-top:8px;">
+        <input type="text" id="f-place" placeholder="あたらしい場所は ここに かいてね" autocomplete="off">
+      </div>
+
+      <p class="lab">かくにん方法</p>
+      <div class="chips" id="method-chips">
+        <button class="chip on" type="button" data-m="みた">👀 みた</button>
+        <button class="chip" type="button" data-m="こえだけ">🔊 こえだけ</button>
+        <button class="chip" type="button" data-m="みた＋こえ">👀🔊 みた＋こえ</button>
+      </div>
+
+      <p class="lab">かず</p>
+      <div class="row2" style="grid-template-columns:1fr 1.4fr;">
+        <input type="number" id="f-count" min="1" inputmode="numeric" placeholder="かず">
+        <div class="chips" id="count-chips">
+          <button class="chip" type="button" data-c="数羽">数羽</button>
+          <button class="chip" type="button" data-c="数十羽">数十羽</button>
+          <button class="chip" type="button" data-c="数百羽">数百羽</button>
+          <button class="chip" type="button" data-c="数千羽">数千羽</button>
+          <button class="chip" type="button" data-c="かぞえられない">かぞえられない</button>
+        </div>
+      </div>
+
+      <p class="lab">メモ（任意）</p>
+      <input type="text" id="f-memo" placeholder="ようすを かいてね" maxlength="200">
+      <div class="chips" style="margin-top:8px;" id="memo-chips">
+        <button class="chip" type="button" data-t="ねぐら入り">ねぐら入り</button>
+        <button class="chip" type="button" data-t="さえずり">さえずり</button>
+        <button class="chip" type="button" data-t="群れで移動中">群れで移動中</button>
+        <button class="chip" type="button" data-t="子育て中">子育て中</button>
+      </div>
+
+      <button class="send-btn" id="send-btn" type="button">きろくする</button>
+      <p class="msg" id="send-msg"></p>
+    </div>
+
+    <div class="card">
+      <h2>📖 みんなの きろく</h2>
+      <input type="text" id="list-search" placeholder="鳥・場所で さがす" autocomplete="off">
+      <div id="rec-list" style="margin-top:6px;"></div>
+    </div>
+
+    <div class="card">
+      <h2>🏆 家族ライフリスト</h2>
+      <div class="chips" id="life-who-chips" style="margin-bottom:12px;"></div>
+      <div id="life-box"></div>
+      <h2 style="margin-top:20px;">🦌 けもの・そのた</h2>
+      <div id="other-box"></div>
+      <h2 style="margin-top:20px;">📍 場所・記録者</h2>
+      <div class="kv" id="agg-box"></div>
+    </div>
+  </section>
+
+  <a class="back" href="index.html">トップにもどる</a>
+</div>
+
+<script src="kansatsu-species.js"></script>
+<script>
+'use strict';
+var ENDPOINT = 'https://script.google.com/macros/s/AKfycbyurtmUMcRCv2MmyBu96IlMEbBIpReYApm1QwtaI52hEh1JWn_fK4BrMhHgDkhszmZIBg/exec';
+var WHO_LIST = ['お父さん', 'ママ', 'そういちろう', 'つづみ'];
+var KANSATSU_MAMMALS = ['ニホンザル', 'ニホンカモシカ', 'ニホンジカ', 'イノシシ', 'タヌキ', 'キツネ', 'アナグマ', 'ハクビシン', 'ニホンリス', 'ムササビ', 'ノウサギ', 'イタチ', 'テン', 'アライグマ'];
+var SEED_PLACES = ['自宅', '常盤公園', '浅間神社', '日本平', '三保の松原', '安倍川河口', '麻機遊水地', '与一スポーツ広場'];
+
+var currentPin = '';
+var records = [];       // サーバーの全記録（新しい順）
+var serverPlaces = [];  // [{name, count}]
+var selWho = '';
+var selKind = 'とり';   // とり / けもの / そのた
+var selBird = null;     // KANSATSU_SPECIES の要素 or null（自由入力）
+var selPlace = '';
+var selMethod = 'みた';
+var selCount = '';      // 概数のチップ値（数値入力があればそちら優先）
+
+function $(id) { return document.getElementById(id); }
+function esc(s) {
+  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+function speciesByName(name) {
+  for (var i = 0; i < KANSATSU_SPECIES.length; i++) {
+    if (KANSATSU_SPECIES[i].name === name) return KANSATSU_SPECIES[i];
+  }
+  return null;
+}
+function todayStr() {
+  var d = new Date();
+  function p(n) { return (n < 10 ? '0' : '') + n; }
+  return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+}
+function nowTimeStr() {
+  var d = new Date();
+  function p(n) { return (n < 10 ? '0' : '') + n; }
+  return p(d.getHours()) + ':' + p(d.getMinutes());
+}
+
+/* ---------- PINパッド ---------- */
+var pinBuf = '';
+function renderPinDots() {
+  var dots = $('pin-dots').children;
+  for (var i = 0; i < dots.length; i++) {
+    dots[i].className = 'pin-dot' + (i < pinBuf.length ? ' on' : '');
+  }
+}
+$('pin-pad').addEventListener('click', function (ev) {
+  var btn = ev.target.closest('.pin-key');
+  if (!btn) return;
+  var k = btn.getAttribute('data-k');
+  if (k === 'c') pinBuf = '';
+  else if (k === 'b') pinBuf = pinBuf.slice(0, -1);
+  else if (pinBuf.length < 4) pinBuf += k;
+  renderPinDots();
+  if (pinBuf.length === 4) {
+    tryPin(pinBuf);
+  }
+});
+
+function apiUrl(params) {
+  var q = [];
+  for (var k in params) q.push(encodeURIComponent(k) + '=' + encodeURIComponent(params[k]));
+  return ENDPOINT + '?' + q.join('&');
+}
+
+function tryPin(pin) {
+  $('pin-msg').textContent = 'かくにん中…';
+  fetch(apiUrl({ action: 'obslist', pin: pin }))
+    .then(function (r) { return r.json(); })
+    .then(function (j) {
+      if (!j || !j.ok) {
+        $('pin-msg').textContent = 'あんしょうばんごうが ちがうみたい';
+        pinBuf = '';
+        renderPinDots();
+        return;
+      }
+      currentPin = pin;
+      records = j.records || [];
+      serverPlaces = j.places || [];
+      $('view-pin').classList.add('hidden');
+      $('view-main').classList.remove('hidden');
+      initForm();
+      renderAll();
+    })
+    .catch(function () {
+      $('pin-msg').textContent = 'つうしんエラー。もう一度ためしてね';
+      pinBuf = '';
+      renderPinDots();
+    });
+}
+
+/* ---------- フォーム ---------- */
+function initForm() {
+  // だれ
+  var savedWho = '';
+  try { savedWho = localStorage.getItem('kansatsu_who_v1') || ''; } catch (e) {}
+  selWho = WHO_LIST.indexOf(savedWho) >= 0 ? savedWho : 'そういちろう';
+  var wc = $('who-chips');
+  wc.innerHTML = '';
+  WHO_LIST.forEach(function (w) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'chip' + (w === selWho ? ' on' : '');
+    b.textContent = w;
+    b.addEventListener('click', function () {
+      selWho = w;
+      try { localStorage.setItem('kansatsu_who_v1', w); } catch (e) {}
+      var kids = wc.children;
+      for (var i = 0; i < kids.length; i++) kids[i].className = 'chip' + (kids[i].textContent === w ? ' on' : '');
+    });
+    wc.appendChild(b);
+  });
+  // いつ
+  $('f-date').value = todayStr();
+  $('f-time').value = nowTimeStr();
+  renderPlaceChips();
+}
+
+function allPlaces() {
+  var map = {}; // name -> count
+  SEED_PLACES.forEach(function (p) { map[p] = 0; });
+  serverPlaces.forEach(function (p) { map[p.name] = p.count; });
+  var arr = Object.keys(map).map(function (name) { return { name: name, count: map[name] }; });
+  arr.sort(function (a, b) { return b.count - a.count || a.name.localeCompare(b.name, 'ja'); });
+  return arr;
+}
+
+function renderPlaceChips(filter) {
+  var box = $('place-chips');
+  box.innerHTML = '';
+  var arr = allPlaces();
+  var shown = 0;
+  arr.forEach(function (p) {
+    if (filter && p.name.indexOf(filter) < 0) return;
+    shown++;
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'chip place' + (p.name === selPlace ? ' on' : '');
+    b.innerHTML = esc(p.name) + (p.count ? '<span class="cnt">×' + p.count + '</span>' : '');
+    b.addEventListener('click', function () {
+      selPlace = (selPlace === p.name) ? '' : p.name;
+      $('f-place').value = '';
+      renderPlaceChips($('f-place').value.trim());
+    });
+    box.appendChild(b);
+  });
+  if (!shown) {
+    box.innerHTML = '<span style="font-size:14.5px;color:#999;">候補なし（下の欄に書くと新しい場所として登録されるよ）</span>';
+  }
+}
+
+$('f-place').addEventListener('input', function () {
+  if ($('f-place').value.trim()) selPlace = '';
+  renderPlaceChips($('f-place').value.trim());
+});
+
+/* 種類（とり／けもの／そのた） */
+$('kind-chips').addEventListener('click', function (ev) {
+  var b = ev.target.closest('.chip');
+  if (!b) return;
+  selKind = b.getAttribute('data-kd');
+  var kids = $('kind-chips').children;
+  for (var i = 0; i < kids.length; i++) kids[i].className = 'chip' + (kids[i] === b ? ' on' : '');
+  selBird = null;
+  $('bird-sel').classList.add('hidden');
+  $('bird-cand').classList.add('hidden');
+  $('f-bird').value = '';
+  if (selKind === 'とり') {
+    $('bird-lab').textContent = 'なんの 鳥？';
+    $('f-bird').placeholder = 'なまえを いれると 候補が でるよ（例：スズメ）';
+    $('mammal-chips').classList.add('hidden');
+  } else if (selKind === 'けもの') {
+    $('bird-lab').textContent = 'なんの けもの？';
+    $('f-bird').placeholder = '下の候補から えらぶか、じぶんで かいてね';
+    renderMammalChips();
+    $('mammal-chips').classList.remove('hidden');
+  } else {
+    $('bird-lab').textContent = 'なんの 生きもの？';
+    $('f-bird').placeholder = '例：アマガエル、ヘビ、カブトムシ など';
+    $('mammal-chips').classList.add('hidden');
+  }
+});
+
+function renderMammalChips() {
+  var box = $('mammal-chips');
+  box.innerHTML = '';
+  KANSATSU_MAMMALS.forEach(function (m) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'chip' + ($('f-bird').value === m ? ' on' : '');
+    b.textContent = m;
+    b.addEventListener('click', function () {
+      $('f-bird').value = m;
+      renderMammalChips();
+    });
+    box.appendChild(b);
+  });
+}
+
+/* 鳥の候補 */
+$('f-bird').addEventListener('input', function () {
+  var q = $('f-bird').value.trim();
+  selBird = null;
+  $('bird-sel').classList.add('hidden');
+  var box = $('bird-cand');
+  if (!q || selKind !== 'とり') { box.classList.add('hidden'); box.innerHTML = ''; return; }
+  var hits = KANSATSU_SPECIES.filter(function (s) { return s.name.indexOf(q) >= 0; }).slice(0, 8);
+  if (!hits.length) { box.classList.add('hidden'); box.innerHTML = ''; return; }
+  box.innerHTML = '';
+  hits.forEach(function (s) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'cand-item';
+    b.innerHTML = '<img src="' + esc(s.img) + '" alt="">' + esc(s.name) + '<span class="cat">' + esc(s.cat) + '</span>';
+    b.addEventListener('click', function () { selectBird(s); });
+    box.appendChild(b);
+  });
+  box.classList.remove('hidden');
+});
+
+function selectBird(s) {
+  selBird = s;
+  $('f-bird').value = s.name;
+  $('bird-cand').classList.add('hidden');
+  var box = $('bird-sel');
+  box.innerHTML = '<img src="' + esc(s.img) + '" alt="">'
+    + '<div><div class="nm">' + esc(s.name) + '</div>'
+    + '<div class="sc">' + esc(s.sci || '') + '</div>'
+    + '<div style="font-size:13.5px;color:#777;">' + esc(s.cat) + '</div></div>';
+  box.classList.remove('hidden');
+}
+
+/* かくにん方法 */
+$('method-chips').addEventListener('click', function (ev) {
+  var b = ev.target.closest('.chip');
+  if (!b) return;
+  selMethod = b.getAttribute('data-m');
+  var kids = $('method-chips').children;
+  for (var i = 0; i < kids.length; i++) kids[i].className = 'chip' + (kids[i] === b ? ' on' : '');
+});
+
+/* かず（概数チップ） */
+$('count-chips').addEventListener('click', function (ev) {
+  var b = ev.target.closest('.chip');
+  if (!b) return;
+  var v = b.getAttribute('data-c');
+  selCount = (selCount === v) ? '' : v;
+  if (selCount) $('f-count').value = '';
+  var kids = $('count-chips').children;
+  for (var i = 0; i < kids.length; i++) kids[i].className = 'chip' + (kids[i].getAttribute('data-c') === selCount ? ' on' : '');
+});
+$('f-count').addEventListener('input', function () {
+  if ($('f-count').value) {
+    selCount = '';
+    var kids = $('count-chips').children;
+    for (var i = 0; i < kids.length; i++) kids[i].className = 'chip';
+  }
+});
+
+/* メモのチップ */
+$('memo-chips').addEventListener('click', function (ev) {
+  var b = ev.target.closest('.chip');
+  if (!b) return;
+  var t = b.getAttribute('data-t');
+  var cur = $('f-memo').value.trim();
+  $('f-memo').value = cur ? cur + '／' + t : t;
+});
+
+/* ---------- 送信 ---------- */
+var sending = false;
+$('send-btn').addEventListener('click', function () {
+  if (sending) return;
+  var birdName = (selKind === 'とり' && selBird) ? selBird.name : $('f-bird').value.trim();
+  var place = selPlace || $('f-place').value.trim();
+  var count = $('f-count').value ? String(parseInt($('f-count').value, 10) || '') : selCount;
+  var msg = $('send-msg');
+  msg.className = 'msg';
+  if (!birdName) { msg.textContent = '生きものの なまえを いれてね'; msg.classList.add('err'); return; }
+  if (!place) { msg.textContent = '場所を えらぶか、かいてね'; msg.classList.add('err'); return; }
+  if (!count) { msg.textContent = 'かずを いれてね（だいたいでもOK）'; msg.classList.add('err'); return; }
+  var date = $('f-date').value || todayStr();
+  var time = $('f-time').value || nowTimeStr();
+  sending = true;
+  $('send-btn').disabled = true;
+  msg.textContent = 'おくっています…';
+  fetch(apiUrl({
+    action: 'obsadd', pin: currentPin, who: selWho, date: date, time: time, kind: selKind,
+    sp: birdName, place: place, count: count, method: selMethod, memo: $('f-memo').value.trim()
+  }))
+    .then(function (r) { return r.json(); })
+    .then(function (j) {
+      sending = false;
+      $('send-btn').disabled = false;
+      if (!j || !j.ok) { msg.textContent = 'おくれなかった…もう一度ためしてね'; msg.classList.add('err'); return; }
+      // ガチャけんボーナス（子どもが記録者のときだけ、この端末のガチャ台帳へ）
+      var bonus = 0, bonusWhy = [];
+      var playerKey = { 'そういちろう': 'soichiro', 'つづみ': 'tsuzumi' }[selWho] || '';
+      if (playerKey) {
+        var mine = records.filter(function (r) { return r.who === selWho; });
+        var isNew = !mine.some(function (r) { return r.sp === birdName; });
+        if (isNew) { bonus += 1; bonusWhy.push('はじめての しゅるい！'); }
+        if (Math.floor((mine.length + 1) / 10) > Math.floor(mine.length / 10)) { bonus += 1; bonusWhy.push('きろく10けん たっせい！'); }
+        if (bonus > 0) {
+          try {
+            var g = JSON.parse(localStorage.getItem('kidsdrills_gacha_v1') || '{}');
+            if (!g[playerKey] || typeof g[playerKey] !== 'object') g[playerKey] = { spent: 0, birds: {} };
+            if (typeof g[playerKey].obsBonus !== 'number') g[playerKey].obsBonus = 0;
+            g[playerKey].obsBonus += bonus;
+            localStorage.setItem('kidsdrills_gacha_v1', JSON.stringify(g));
+          } catch (e) { bonus = 0; }
+        }
+      }
+      msg.textContent = '✅ きろくしたよ！' + (bonus > 0 ? ' 🎁 ガチャけん +' + bonus + 'まい（' + bonusWhy.join('／') + '）' : '');
+      msg.classList.add('ok');
+      records.unshift({ date: date, time: time, who: selWho, kind: selKind, sp: birdName, place: place, count: count, method: selMethod, memo: $('f-memo').value.trim() });
+      // 場所の実績を更新
+      var found = false;
+      serverPlaces.forEach(function (p) { if (p.name === place) { p.count++; found = true; } });
+      if (!found) serverPlaces.push({ name: place, count: 1 });
+      // フォームの一部だけリセット（だれ・日付・場所は残す）
+      $('f-bird').value = ''; selBird = null;
+      $('bird-sel').classList.add('hidden');
+      $('f-count').value = ''; selCount = '';
+      var kids = $('count-chips').children;
+      for (var i = 0; i < kids.length; i++) kids[i].className = 'chip';
+      $('f-memo').value = '';
+      $('f-time').value = nowTimeStr();
+      renderPlaceChips($('f-place').value.trim());
+      renderAll();
+    })
+    .catch(function () {
+      sending = false;
+      $('send-btn').disabled = false;
+      msg.textContent = 'つうしんエラー。もう一度ためしてね';
+      msg.classList.add('err');
+    });
+});
+
+/* ---------- 一覧・集計 ---------- */
+$('list-search').addEventListener('input', renderList);
+
+function methodBadge(m) {
+  if (m === 'こえだけ') return '<span class="badge heard">🔊 こえだけ</span>';
+  if (m === 'みた＋こえ') return '<span class="badge seen">👀🔊 みた＋こえ</span>';
+  return '<span class="badge seen">👀 みた</span>';
+}
+
+function renderList() {
+  var q = $('list-search').value.trim();
+  var box = $('rec-list');
+  var arr = records.filter(function (r) {
+    return !q || r.sp.indexOf(q) >= 0 || r.place.indexOf(q) >= 0;
+  });
+  if (!arr.length) {
+    box.innerHTML = '<p style="color:#999;font-size:15.5px;">' + (records.length ? 'みつからない…' : 'まだ きろくが ないよ。さいしょの1件を いれよう！') + '</p>';
+    return;
+  }
+  box.innerHTML = arr.slice(0, 60).map(function (r) {
+    var kind = r.kind || 'とり';
+    var sp = (kind === 'とり') ? speciesByName(r.sp) : null;
+    var img = sp ? '<img src="' + esc(sp.img) + '" alt="">'
+      : '<div class="noimg">' + (kind === 'けもの' ? '🦌' : (kind === 'そのた' ? '🐸' : '🐦')) + '</div>';
+    var unit = (kind === 'とり') ? '羽' : (kind === 'けもの' ? '頭' : '');
+    var d = r.date ? r.date.slice(5).replace('-', '/') : '';
+    return '<div class="rec">' + img
+      + '<div><span class="nm">' + esc(r.sp) + '</span>' + methodBadge(r.method)
+      + '<div class="meta">' + esc(d) + ' ' + esc(r.time) + '｜' + esc(r.place) + '｜' + esc(r.count) + unit
+      + '<br>' + esc(r.who) + (r.memo ? '｜' + esc(r.memo) : '') + '</div></div></div>';
+  }).join('');
+}
+
+function birdRecords() { return records.filter(function (r) { return !r.kind || r.kind === 'とり'; }); }
+function otherRecords() { return records.filter(function (r) { return r.kind && r.kind !== 'とり'; }); }
+
+function renderStats() {
+  var seenSet = {}, heardOnlySet = {}, allSet = {};
+  var firstSeen = {}; // sp -> {date, method}
+  birdRecords().forEach(function (r) {
+    allSet[r.sp] = true;
+    var heard = (r.method === 'こえだけ');
+    if (heard) { if (!seenSet[r.sp]) heardOnlySet[r.sp] = true; }
+    else { seenSet[r.sp] = true; delete heardOnlySet[r.sp]; }
+    if (!firstSeen[r.sp] || r.date < firstSeen[r.sp].date) {
+      firstSeen[r.sp] = { date: r.date, method: r.method };
+    }
+  });
+  $('st-total').textContent = records.length;
+  $('st-seen').textContent = Object.keys(seenSet).length;
+  $('st-heard').textContent = Object.keys(heardOnlySet).length;
+
+  // ライフリスト（家族全員ぶん＋人べつ切り替え）
+  renderLifeChips();
+  renderLife();
+
+  // 場所TOP・記録者別
+  var placeCount = {}, whoCount = {};
+  records.forEach(function (r) {
+    placeCount[r.place] = (placeCount[r.place] || 0) + 1;
+    whoCount[r.who] = (whoCount[r.who] || 0) + 1;
+  });
+  var places = Object.keys(placeCount).map(function (k) { return [k, placeCount[k]]; })
+    .sort(function (a, b) { return b[1] - a[1]; }).slice(0, 5);
+  var whos = Object.keys(whoCount).map(function (k) { return [k, whoCount[k]]; })
+    .sort(function (a, b) { return b[1] - a[1]; });
+  var lines = [];
+  if (places.length) lines.push('場所：' + places.map(function (x) { return esc(x[0]) + ' <b>' + x[1] + '件</b>'; }).join('／'));
+  if (whos.length) lines.push('記録者：' + whos.map(function (x) {
+    var lw = computeLife(birdRecords().filter(function (r) { return r.who === x[0]; }));
+    var seenN = lw.filter(function (y) { return !y.heard; }).length;
+    var heardN = lw.length - seenN;
+    return esc(x[0]) + ' <b>' + x[1] + '件</b>・みた<b>' + seenN + '種</b>' + (heardN ? '・こえだけ<b>' + heardN + '種</b>' : '');
+  }).join('／'));
+  // 最近の新顔（初記録日が直近の種 上位3）
+  var lifeAll = computeLife(birdRecords());
+  if (lifeAll.length) {
+    lines.push('最近の新顔：' + lifeAll.slice(0, 3).map(function (x) {
+      return esc(x.sp) + '（' + esc(x.date.slice(5).replace('-', '/')) + '〜）';
+    }).join('／'));
+  }
+  $('agg-box').innerHTML = lines.length ? lines.join('<br>') : '<span style="color:#999;">まだ ないよ</span>';
+
+  // けもの・そのた（種ごとのチップ）
+  var others = otherRecords();
+  var oSet = {};
+  others.forEach(function (r) { oSet[r.sp] = r.kind; });
+  var oNames = Object.keys(oSet).sort();
+  $('other-box').innerHTML = oNames.length
+    ? '<div class="life-grid">' + oNames.map(function (nm) {
+        return '<span class="life-chip">' + (oSet[nm] === 'けもの' ? '🦌 ' : '🐸 ') + esc(nm) + '</span>';
+      }).join('') + '</div>'
+    : '<p style="color:#999;font-size:15.5px;margin:0;">まだ ないよ（山で会えたら きろくしてね）</p>';
+}
+
+function renderAll() {
+  renderList();
+  renderStats();
+}
+
+/* ---------- ライフリスト（人べつ） ---------- */
+var lifeFilter = ''; // '' = 家族ぜんいん
+
+function computeLife(recs) {
+  var seen = {}, heardOnly = {}, first = {};
+  recs.forEach(function (r) {
+    var heard = (r.method === 'こえだけ');
+    if (heard) { if (!seen[r.sp]) heardOnly[r.sp] = true; }
+    else { seen[r.sp] = true; delete heardOnly[r.sp]; }
+    if (!first[r.sp] || r.date < first[r.sp]) first[r.sp] = r.date;
+  });
+  var list = Object.keys(first).map(function (sp) {
+    return { sp: sp, date: first[sp], heard: !!heardOnly[sp] };
+  });
+  list.sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+  return list;
+}
+
+function renderLifeChips() {
+  var box = $('life-who-chips');
+  box.innerHTML = '';
+  var names = [''].concat(WHO_LIST);
+  names.forEach(function (w) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'chip' + (lifeFilter === w ? ' on' : '');
+    b.textContent = w === '' ? '家族ぜんいん' : w;
+    b.addEventListener('click', function () {
+      lifeFilter = w;
+      renderLifeChips();
+      renderLife();
+    });
+    box.appendChild(b);
+  });
+}
+
+function renderLife() {
+  var recs = birdRecords().filter(function (r) { return !lifeFilter || r.who === lifeFilter; });
+  var list = computeLife(recs);
+  $('life-box').innerHTML = list.length
+    ? '<div class="life-grid">' + list.map(function (x) {
+        return '<span class="life-chip' + (x.heard ? ' heard' : '') + '">' + (x.heard ? '🔊 ' : '') + esc(x.sp) + '</span>';
+      }).join('') + '</div>'
+      + '<p style="font-size:13.5px;color:#999;margin:10px 0 0;">🔊 = こえだけの 種（まだ すがたは 見ていない）</p>'
+    : '<p style="color:#999;font-size:15.5px;margin:0;">まだ ないよ</p>';
+}
+</script>
+</body>
+</html>

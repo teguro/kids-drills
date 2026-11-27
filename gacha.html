@@ -20,7 +20,7 @@
    version.json をキャッシュなしで確認し、版が違えば URL を変えて読み直す。
    公開のたびに SITE_VERSION と version.json を同じ値に上げること（GATE.md 参照）。 */
 (function () {
-  var SITE_VERSION = "20261127-15";
+  var SITE_VERSION = "20261127-16";
   function alreadyTried() {
     try { return new URLSearchParams(location.search).get("_v") === SITE_VERSION; }
     catch (e) { return false; }
@@ -97,7 +97,7 @@
 <body>
 <div class="wrap">
   <h1>🐦 とりガチャ</h1>
-  <div class="sub">ドリルを がんばると ガチャけんが たまるよ。<br>とりの コレクションを あつめよう！</div>
+  <div class="sub">ドリルを がんばると ガチャけんが たまるよ。<br>かんさつ記録でも たまるよ（はじめての種・10件ごと）。とりの コレクションを あつめよう！</div>
 
   <div class="player-row">
     <button class="player-btn" id="player-soichiro" type="button">そういちろう</button>
@@ -175,6 +175,7 @@
     var g = loadGacha();
     if (!g[currentPlayer] || typeof g[currentPlayer] !== "object") g[currentPlayer] = { spent: 0, birds: {} };
     if (typeof g[currentPlayer].spent !== "number") g[currentPlayer].spent = 0;
+    if (typeof g[currentPlayer].obsBonus !== "number") g[currentPlayer].obsBonus = 0;
     if (!g[currentPlayer].birds || typeof g[currentPlayer].birds !== "object") g[currentPlayer].birds = {};
     return g;
   }
@@ -191,7 +192,8 @@
   }
   function earned() {
     var t = totals();
-    return Math.floor(t.plays / 5) + Math.floor(t.seconds / 1800);
+    var g = myGacha();
+    return Math.floor(t.plays / 5) + Math.floor(t.seconds / 1800) + (g[currentPlayer].obsBonus || 0);
   }
   function render() {
     document.getElementById("player-soichiro").className = "player-btn" + (currentPlayer === "soichiro" ? " sel-soichiro" : "");
@@ -201,9 +203,11 @@
     if (left < 0) left = 0;
     document.getElementById("ticket-num").textContent = left;
     var t = totals();
+    var obsB = g[currentPlayer].obsBonus || 0;
     document.getElementById("ticket-detail").textContent =
       "ドリル " + t.plays + "かい ／ じかん " + Math.floor(t.seconds / 60) + "ふん がんばったよ。"
-      + "（5かいで 1まい、30ふんで 1まい たまるよ）";
+      + "（5かいで 1まい、30ふんで 1まい たまるよ）"
+      + (obsB ? " ＋ かんさつ記録のボーナス " + obsB + "まい" : "");
     document.getElementById("gacha-btn").disabled = left <= 0;
     var grid = document.getElementById("grid");
     grid.innerHTML = "";
