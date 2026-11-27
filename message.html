@@ -21,7 +21,7 @@
    version.json をキャッシュなしで確認し、版が違えば URL を変えて読み直す。
    公開のたびに SITE_VERSION と version.json を同じ値に上げること（GATE.md 参照）。 */
 (function () {
-  var SITE_VERSION = "20261127-12";
+  var SITE_VERSION = "20261127-13";
   function alreadyTried() {
     try { return new URLSearchParams(location.search).get("_v") === SITE_VERSION; }
     catch (e) { return false; }
@@ -93,6 +93,17 @@
   .stamp-btn.sel { border-color: #e4572e; background: #ffe3d3; }
   .reply-text { font-family: inherit; font-size: 19px; width: 100%; padding: 12px; margin-top: 14px; border: 2px solid #e8dcc0; border-radius: 12px; line-height: 1.6; resize: vertical; box-sizing: border-box; }
   .reply-count { text-align: right; font-size: 14px; color: #97865f; margin: 6px 2px 0; }
+  .onegai-toggle { font-family: inherit; font-size: 17px; font-weight: bold; width: 100%; margin-top: 14px; padding: 12px; border: 2px dashed #d9a441; border-radius: 12px; background: #fff8e8; color: #8a6d1f; cursor: pointer; }
+  .onegai-toggle.on { background: #f5a623; border-style: solid; color: #fff; }
+  .onegai-hint { font-size: 15px; color: #b3541e; margin: 8px 2px 0; line-height: 1.5; }
+  .onegai-item { border-radius: 12px; padding: 12px 14px; margin-top: 10px; text-align: left; }
+  .onegai-item .st { font-weight: bold; font-size: 18px; }
+  .onegai-item .tx { font-size: 16.5px; line-height: 1.55; margin-top: 2px; }
+  .onegai-item .nt { font-size: 16.5px; line-height: 1.55; margin-top: 4px; }
+  .onegai-pending { background: #fdf3d8; }
+  .onegai-ok { background: #e2f4e5; }
+  .onegai-ng { background: #fbe3e0; }
+  .onegai-refresh { font-family: inherit; font-size: 17px; font-weight: bold; width: 100%; margin-top: 14px; padding: 12px; border: none; border-radius: 12px; background: #2e7de4; color: #fff; cursor: pointer; }
   .reply-send { font-family: inherit; font-size: 21px; font-weight: bold; padding: 14px 28px; border: none; border-radius: 14px; background: #e4572e; color: #fff; box-shadow: 0 3px 0 rgba(0,0,0,.15); cursor: pointer; margin-top: 14px; width: 100%; }
   .reply-send:active { transform: translateY(2px); box-shadow: none; }
 
@@ -188,10 +199,20 @@
         <button class="stamp-btn" type="button" data-stamp="ありがとう">🙏 ありがとう</button>
         <button class="stamp-btn" type="button" data-stamp="たすけて">🆘 たすけて</button>
       </div>
+      <button class="onegai-toggle" type="button" id="onegai-toggle">🙏 これは「よていがいの おねがい」</button>
+      <p class="onegai-hint hidden" id="onegai-hint">おとうさんか ママの OKが くるまで まっててね。OKが こないと できないよ</p>
       <textarea class="reply-text" id="reply-text" rows="4" maxlength="200" placeholder="ひとこと かいてね（なくても OK）"></textarea>
       <p class="reply-count"><span id="reply-count">0</span> / 200</p>
       <button class="reply-send" type="button" id="reply-send">へんじを おくる</button>
       <p class="tadaima-msg" id="reply-msg"></p>
+    </div>
+
+    <!-- ============ おねがいの へんじ ============ -->
+    <div class="card hidden" id="onegai-card">
+      <p class="tadaima-title">🙏 おねがいの へんじ</p>
+      <div id="onegai-list"></div>
+      <button class="onegai-refresh" type="button" id="onegai-refresh">🔄 あたらしい おへんじを みる</button>
+      <p class="tadaima-msg" id="onegai-msg"></p>
     </div>
   </section>
 
@@ -299,6 +320,7 @@ function submitPin(pin) {
 
 function showMessages(data) {
   showView('message');
+  renderRequests(data);
   var today = Array.isArray(data.today) ? data.today : [];
   if (today.length === 0 && !data.latest) {
     showOnlyCard('empty-card');
@@ -370,24 +392,44 @@ function buildReplyUrl() {
     + '&pin=' + encodeURIComponent(currentPin);
 }
 
+function buildRequestUrl() {
+  return ENDPOINT + '?action=request&who=' + encodeURIComponent(replyWho)
+    + '&text=' + encodeURIComponent($('reply-text').value.trim())
+    + '&pin=' + encodeURIComponent(currentPin);
+}
+
 var replySending = false;
 $('reply-send').addEventListener('click', function () {
   if (replySending) return;
   var msg = $('reply-msg');
-  if (!replyWho || !replyStamp) {
+  if (onegaiMode) {
+    if (!replyWho) {
+      msg.textContent = 'なまえを えらんでね';
+      return;
+    }
+    if (!$('reply-text').value.trim()) {
+      msg.textContent = 'なにを したいか かいてね';
+      return;
+    }
+  } else if (!replyWho || !replyStamp) {
     msg.textContent = 'なまえと スタンプを えらんでね';
     return;
   }
   replySending = true;
   $('reply-send').disabled = true;
   msg.textContent = 'おくってるよ…';
-  fetch(buildReplyUrl(), { method: 'GET' })
+  fetch(onegaiMode ? buildRequestUrl() : buildReplyUrl(), { method: 'GET' })
     .then(function (res) { return res.json(); })
     .then(function (data) {
       if (data && data.ok) {
-        msg.textContent = 'おくったよ！ 💌';
         $('reply-text').value = '';
         updateReplyCount();
+        if (onegaiMode) {
+          msg.textContent = 'おねがいを おくったよ！ おへんじを まっててね 🙏';
+          refreshBoard();
+        } else {
+          msg.textContent = 'おくったよ！ 💌';
+        }
       } else {
         msg.textContent = 'つうしんエラー。もういちど おしてね';
       }
@@ -399,6 +441,76 @@ $('reply-send').addEventListener('click', function () {
       replySending = false;
       $('reply-send').disabled = false;
     });
+});
+
+/* ---------- おねがい（予定外の承認フロー） ---------- */
+var onegaiMode = false;
+$('onegai-toggle').addEventListener('click', function () {
+  onegaiMode = !onegaiMode;
+  $('onegai-toggle').classList.toggle('on', onegaiMode);
+  $('onegai-hint').classList.toggle('hidden', !onegaiMode);
+  $('reply-text').placeholder = onegaiMode
+    ? 'なにを したいか かいてね（例：◯◯ちゃんと こうえんで あそびたい）'
+    : 'ひとこと かいてね（なくても OK）';
+  $('reply-send').textContent = onegaiMode ? 'おねがいを おくる' : 'へんじを おくる';
+  $('reply-msg').textContent = '';
+});
+
+function renderRequests(data) {
+  var reqs = (data && Array.isArray(data.requests)) ? data.requests : [];
+  var card = $('onegai-card');
+  if (!reqs.length) {
+    card.classList.add('hidden');
+    return;
+  }
+  card.classList.remove('hidden');
+  var list = $('onegai-list');
+  list.innerHTML = '';
+  reqs.forEach(function (r) {
+    var div = document.createElement('div');
+    var head = document.createElement('div');
+    head.className = 'st';
+    var body = document.createElement('div');
+    body.className = 'tx';
+    body.textContent = (r.who || '') + '：' + (r.text || '');
+    if (r.status === 'ok') {
+      div.className = 'onegai-item onegai-ok';
+      head.textContent = '⭕ OKだよ！';
+    } else if (r.status === 'ng') {
+      div.className = 'onegai-item onegai-ng';
+      head.textContent = '❌ だめだよ';
+    } else {
+      div.className = 'onegai-item onegai-pending';
+      head.textContent = '⏳ おへんじ まち… まだ できないよ';
+    }
+    div.appendChild(head);
+    div.appendChild(body);
+    if (r.note) {
+      var nt = document.createElement('div');
+      nt.className = 'nt';
+      nt.textContent = 'ママ・おとうさんから：' + r.note;
+      div.appendChild(nt);
+    }
+    list.appendChild(div);
+  });
+}
+
+function refreshBoard() {
+  if (!currentPin) return;
+  fetch(buildReadUrl(currentPin), { method: 'GET' })
+    .then(function (res) { return res.json(); })
+    .then(function (data) {
+      if (data && data.ok) {
+        showMessages(data);
+        $('onegai-msg').textContent = 'あたらしく なったよ';
+      }
+    })
+    .catch(function () { /* 失敗しても静かに */ });
+}
+
+$('onegai-refresh').addEventListener('click', function () {
+  $('onegai-msg').textContent = 'よみこみちゅう…';
+  refreshBoard();
 });
 
 function updateReplyCount() {
