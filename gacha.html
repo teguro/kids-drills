@@ -20,7 +20,7 @@
    version.json をキャッシュなしで確認し、版が違えば URL を変えて読み直す。
    公開のたびに SITE_VERSION と version.json を同じ値に上げること（GATE.md 参照）。 */
 (function () {
-  var SITE_VERSION = "20261127-3";
+  var SITE_VERSION = "20261127-4";
   function alreadyTried() {
     try { return new URLSearchParams(location.search).get("_v") === SITE_VERSION; }
     catch (e) { return false; }
@@ -75,7 +75,9 @@
   h2 { font-size: 21px; margin: 22px 0 10px; }
   .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
   .card { background: #fff; border-radius: 14px; box-shadow: 0 2px 5px rgba(0,0,0,.07); padding: 10px 6px 12px; text-align: center; position: relative; }
-  .card .c-name { font-size: 16px; font-weight: bold; margin-top: 2px; }
+  .card .c-name { font-size: 16px; font-weight: bold; margin-top: 6px; }
+  .card .c-photo { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 10px; display: block; }
+  .reveal .r-photo { width: min(300px, 100%); aspect-ratio: 4 / 3; object-fit: cover; border-radius: 14px; margin-top: 8px; }
   .card .c-size { font-size: 11px; color: #999; }
   .card.locked { opacity: .45; filter: grayscale(1); }
   .card .cnt { position: absolute; top: 6px; right: 6px; background: #2e7de4; color: #fff; font-size: 12px; font-weight: bold; border-radius: 999px; padding: 1px 8px; }
@@ -112,24 +114,45 @@
 
   <div class="reveal hidden" id="reveal"></div>
 
-  <h2>とり コレクション（<span id="col-count">0</span> / 9）</h2>
+  <h2>とり コレクション（<span id="col-count">0</span> / 30）</h2>
   <div class="grid" id="grid"></div>
-  <div class="complete hidden" id="complete">🎉 コンプリート！ 9しゅるい 全部 あつまったよ！</div>
+  <div class="complete hidden" id="complete">🎉 コンプリート！ 30しゅるい 全部 あつまったよ！</div>
 
   <a class="back" href="drills.html">ドリルランドにもどる</a>
 </div>
 
 <script>
   var BIRDS = [
-    { name: "スズメ", size: "約14cm", rarity: 1, w: 24, body: "#b08954", wing: "#8a6844", belly: "#f3e6cf", fact: "ほっぺの 黒い もようが めじるし。いちばん 身近な とり。" },
-    { name: "シジュウカラ", size: "約15cm", rarity: 1, w: 22, body: "#7fae4c", wing: "#5d8a38", belly: "#fdf6d8", fact: "胸の 黒い ネクタイもようが おしゃれ。ことばを つかう 研究でも 有名。" },
-    { name: "モズ", size: "約20cm", rarity: 1, w: 20, body: "#a9805a", wing: "#7d5c3e", belly: "#f7ead2", fact: "つかまえた 虫を 枝に さす「はやにえ」で 有名な ハンター。" },
-    { name: "ツミ", size: "約27cm", rarity: 2, w: 12, body: "#7d8ca3", wing: "#5b6a82", belly: "#f2ede2", fact: "日本で いちばん 小さい タカの なかま。オスは もっと 小さいよ。" },
-    { name: "ハイタカ", size: "約35cm", rarity: 2, w: 9, body: "#6d7f99", wing: "#4c5d75", belly: "#f5efe0", fact: "森の 中を すばやく 飛んで、小鳥を つかまえる。" },
-    { name: "オオタカ", size: "約55cm", rarity: 2, w: 6, body: "#5d6d84", wing: "#41506a", belly: "#f7f3e8", fact: "速くて 賢い ハンター。白い まゆげ もようが りりしい。" },
-    { name: "クマタカ", size: "約75cm", rarity: 3, w: 4, body: "#6b543c", wing: "#4e3b28", belly: "#efe3cc", fact: "森の 大きな 猛禽。頭の 後ろの 冠羽（かんう）が かっこいい。" },
-    { name: "イヌワシ", size: "約85cm", rarity: 3, w: 2, body: "#5f4630", wing: "#42301f", belly: "#e9dcc2", fact: "空の 王さま。大きな 翼で ゆうゆうと 飛ぶ。" },
-    { name: "オオワシ", size: "約95cm", rarity: 3, w: 1, body: "#4a3a30", wing: "#2f2a33", belly: "#f4f1ea", fact: "日本で 見られる いちばん 大きな ワシ。冬に 北海道へ やってくる。" }
+    { name: "スズメ", size: "約14cm", rarity: 1, w: 24, img: "sparrow.jpg", fact: "ほっぺの 黒い もようが めじるし。いちばん 身近な とり。" },
+    { name: "シジュウカラ", size: "約15cm", rarity: 1, w: 22, img: "shijukara.jpg", fact: "胸の 黒い ネクタイもようが おしゃれ。ことばを つかう 研究でも 有名。" },
+    { name: "モズ", size: "約20cm", rarity: 1, w: 20, img: "mozu.jpg", fact: "つかまえた 虫を 枝に さす「はやにえ」で 有名な ハンター。" },
+    { name: "メジロ", size: "約12cm", rarity: 1, w: 20, img: "mejiro.jpg", fact: "目の まわりの 白い わっかが めじるし。花の みつが 大好き。" },
+    { name: "ヒヨドリ", size: "約28cm", rarity: 1, w: 20, img: "hiyodori.jpg", fact: "ピーヨ！と 大きな 声で 鳴く。少し 茶色い ほっぺが あるよ。" },
+    { name: "ツバメ", size: "約17cm", rarity: 1, w: 20, img: "tsubame.jpg", fact: "尾が 二つに わかれた 燕尾服（えんびふく）スタイル。春に やってくる。" },
+    { name: "エナガ", size: "約14cm", rarity: 1, w: 19, img: "enaga.jpg", fact: "尾が 長くて 体は まんまる。白くて ふわふわの 小さな とり。" },
+    { name: "ハクセキレイ", size: "約21cm", rarity: 1, w: 18, img: "hakusekirei.jpg", fact: "尾を 上下に ふりながら 地面を 歩く。白と 黒の もよう。" },
+    { name: "コゲラ", size: "約15cm", rarity: 1, w: 18, img: "kogera.jpg", fact: "日本で いちばん 小さい キツツキ。木を コツコツ つつく。" },
+    { name: "ウミネコ", size: "約44cm", rarity: 1, w: 18, img: "umineko.jpg", fact: "ニャーと 猫みたいに 鳴く カモメの なかま。海辺に 多い。" },
+    { name: "コアジサシ", size: "約24cm", rarity: 1, w: 17, img: "koajisashi.jpg", fact: "海の 上から まっすぐ 水に 飛びこんで 魚を とる。" },
+    { name: "ハマシギ", size: "約21cm", rarity: 1, w: 17, img: "hamashigi.jpg", fact: "干潟（ひがた）で むれを 作る。小さい シギの なかま。" },
+    { name: "メダイチドリ", size: "約19cm", rarity: 1, w: 17, img: "medaichidori.jpg", fact: "目が 大きい チドリ。浜辺を ちょこちょこ 走る。" },
+    { name: "ムナグロ", size: "約24cm", rarity: 1, w: 17, img: "munaguro.jpg", fact: "胸が 黒くて 背中は 金色っぽい。旅鳥（たびどり）として やってくる。" },
+    { name: "ツミ", size: "約27cm", rarity: 2, w: 12, img: "tsumi.jpg", fact: "日本で いちばん 小さい タカの なかま。オスは もっと 小さいよ。" },
+    { name: "カワセミ", size: "約17cm", rarity: 2, w: 10, img: "kawasemi.jpg", fact: "水辺の 宝石。青い 背中と オレンジの お腹で、ダイビングして 魚を とる。" },
+    { name: "ノスリ", size: "約55cm", rarity: 2, w: 10, img: "nosuri.jpg", fact: "空を ゆっくり 輪を 描いて 飛ぶ タカ。ピイーと 鳴く。" },
+    { name: "ハイタカ", size: "約35cm", rarity: 2, w: 9, img: "haitaka.jpg", fact: "森の 中を すばやく 飛んで、小鳥を つかまえる。" },
+    { name: "サシバ", size: "約50cm", rarity: 2, w: 8, img: "sashiba.jpg", fact: "春と 秋に むれで 渡りを する タカ。ピックイーと 鳴く。" },
+    { name: "チョウゲンボウ", size: "約35cm", rarity: 2, w: 8, img: "chougenbou.jpg", fact: "空に 静止（ホバリング）して ねずみを ねらう、小さな ハヤブサの なかま。" },
+    { name: "フクロウ", size: "約50cm", rarity: 2, w: 8, img: "fukurou.jpg", fact: "ゴロスケホーホーと 鳴く 夜の ハンター。首が ぐるりと 回る。" },
+    { name: "アオバズク", size: "約29cm", rarity: 2, w: 7, img: "aobazuku.jpg", fact: "ホッホーと 鳴く 夏の フクロウ。黄色い 目が 大きい。" },
+    { name: "オオタカ", size: "約55cm", rarity: 2, w: 6, img: "ootaka.jpg", fact: "速くて 賢い ハンター。白い まゆげ もようが りりしい。" },
+    { name: "ウミスズメ", size: "約26cm", rarity: 2, w: 6, img: "umisuzume.jpg", fact: "海で 泳いで 魚を とる 小さな とり。数が へって 心配されている。" },
+    { name: "クマタカ", size: "約75cm", rarity: 3, w: 4, img: "kumataka.jpg", fact: "森の 大きな 猛禽。頭の 後ろの 冠羽（かんう）が かっこいい。" },
+    { name: "ハヤブサ", size: "約45cm", rarity: 3, w: 3, img: "hayabusa.jpg", fact: "世界で いちばん 速い とり。急降下は 時速300キロを こえる！" },
+    { name: "イヌワシ", size: "約85cm", rarity: 3, w: 2, img: "inuwashi.jpg", fact: "空の 王さま。大きな 翼で ゆうゆうと 飛ぶ。" },
+    { name: "チゴハヤブサ", size: "約31cm", rarity: 3, w: 2, img: "chigohayabusa.jpg", fact: "空を 高速で 飛んで、ツバメや 虫を つかまえる 小さな ハヤブサ。" },
+    { name: "トラフズク", size: "約38cm", rarity: 3, w: 2, img: "torafuzuku.jpg", fact: "長い 耳羽（みみばね）と オレンジの 目。冬に むれで 木に とまる。" },
+    { name: "オオワシ", size: "約95cm", rarity: 3, w: 1, img: "oowashi.jpg", fact: "日本で 見られる いちばん 大きな ワシ。冬に 北海道へ やってくる。" }
   ];
   var GACHA_KEY = "kidsdrills_gacha_v1";
   var currentPlayer = null;
@@ -139,17 +162,8 @@
   } catch (e) {}
   if (!currentPlayer) currentPlayer = "soichiro";
 
-  function birdSVG(b, px) {
-    return '<svg width="' + px + '" height="' + px + '" viewBox="0 0 120 120" aria-hidden="true">'
-      + '<ellipse cx="58" cy="72" rx="34" ry="24" fill="' + b.body + '"/>'
-      + '<path d="M30 66 Q10 60 6 44 Q24 50 34 58 Z" fill="' + b.wing + '"/>'
-      + '<ellipse cx="66" cy="78" rx="20" ry="15" fill="' + b.belly + '"/>'
-      + '<path d="M44 62 Q62 52 76 62 Q62 70 46 70 Z" fill="' + b.wing + '"/>'
-      + '<circle cx="86" cy="46" r="17" fill="' + b.body + '"/>'
-      + '<path d="M101 42 L116 48 L101 53 Z" fill="#f2a03d"/>'
-      + '<circle cx="90" cy="43" r="3.2" fill="#222"/>'
-      + '<path d="M52 94 L50 106 M66 94 L66 106" stroke="#888" stroke-width="3" stroke-linecap="round"/>'
-      + '</svg>';
+  function birdPhoto(b, cls) {
+    return '<img class="' + cls + '" src="bird-assets/' + b.img + '" alt="' + b.name + '">';
   }
   function loadGacha() {
     try {
@@ -200,7 +214,7 @@
       var div = document.createElement("div");
       div.className = "card" + (cnt > 0 ? "" : " locked");
       div.innerHTML = (cnt > 1 ? '<span class="cnt">×' + cnt + '</span>' : "")
-        + birdSVG(b, 64)
+        + birdPhoto(b, "c-photo")
         + '<div class="c-name">' + (cnt > 0 ? b.name : "？？？") + '</div>'
         + '<div class="c-size">' + (cnt > 0 ? b.size : "まだ みつけてない") + '</div>';
       grid.appendChild(div);
@@ -239,7 +253,7 @@
       var stars = b.rarity === 3 ? "★★★ スーパーレア！" : (b.rarity === 2 ? "★★ レア" : "★ ノーマル");
       reveal.innerHTML = (isNew ? '<span class="new">あたらしい！</span>' : "")
         + '<div class="rarity">' + stars + '</div>'
-        + birdSVG(b, 120)
+        + birdPhoto(b, "r-photo")
         + '<div class="bird-name">' + b.name + '</div>'
         + '<div class="bird-fact">大きさ： ' + b.size + '<br>' + b.fact + '</div>';
       reveal.classList.remove("hidden");
