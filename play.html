@@ -19,7 +19,7 @@
    version.json をキャッシュなしで確認し、版が違えば URL を変えて読み直す。
    公開のたびに SITE_VERSION と version.json を同じ値に上げること（GATE.md 参照）。 */
 (function () {
-  var SITE_VERSION = "20261127-4";
+  var SITE_VERSION = "20261127-5";
   function alreadyTried() {
     try { return new URLSearchParams(location.search).get("_v") === SITE_VERSION; }
     catch (e) { return false; }
@@ -109,6 +109,9 @@
   <h2>🕹️ ゲーム</h2>
   <a class="play-btn" href="game.html?g=touch"><span class="p-emoji">🐥</span><span><span class="p-name">ことりタッチ</span><br><span class="p-desc">出てきた 鳥を すばやく タッチ！</span></span></a>
   <a class="play-btn" href="game.html?g=memory"><span class="p-emoji">🃏</span><span><span class="p-name">しんけいすいじゃく</span><br><span class="p-desc">鳥カードの ペアを あてよう</span></span></a>
+  <a class="play-btn" href="game.html?g=puzzle"><span class="p-emoji">🧩</span><span><span class="p-name">しゃしんパズル</span><br><span class="p-desc">鳥の しゃしんを かんせいさせよう</span></span></a>
+  <a class="play-btn" href="game.html?g=catch"><span class="p-emoji">🍒</span><span><span class="p-name">えさキャッチ</span><br><span class="p-desc">おちてくる 木の実を キャッチ！</span></span></a>
+  <a class="play-btn" href="game.html?g=pop"><span class="p-emoji">🦅</span><span><span class="p-name">ことりポップ</span><br><span class="p-desc">小鳥だけ タッチ！ 猛禽は ダメだよ</span></span></a>
 
   <a class="back" href="index.html">トップにもどる</a>
 </div>
