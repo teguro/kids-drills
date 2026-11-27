@@ -20,7 +20,7 @@
    version.json をキャッシュなしで確認し、版が違えば URL を変えて読み直す。
    公開のたびに SITE_VERSION と version.json を同じ値に上げること（GATE.md 参照）。 */
 (function () {
-  var SITE_VERSION = "20261127-16";
+  var SITE_VERSION = "20261127-17";
   function alreadyTried() {
     try { return new URLSearchParams(location.search).get("_v") === SITE_VERSION; }
     catch (e) { return false; }
@@ -79,7 +79,10 @@
   .card .c-photo { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 10px; display: block; }
   .reveal .r-photo { width: min(300px, 100%); aspect-ratio: 4 / 3; object-fit: cover; border-radius: 14px; margin-top: 8px; }
   .card .c-size { font-size: 11px; color: #999; }
-  .card.locked { opacity: .45; filter: grayscale(1); }
+  .card.locked { opacity: .65; }
+  .card.locked .c-photo { filter: grayscale(1) contrast(2.4) brightness(1.08); }
+  .card img { -webkit-touch-callout: none; -webkit-user-drag: none; user-select: none; -webkit-user-select: none; }
+  .card .shield { position: absolute; inset: 0; border-radius: 14px; z-index: 2; }
   .card .cnt { position: absolute; top: 6px; right: 6px; background: #2e7de4; color: #fff; font-size: 12px; font-weight: bold; border-radius: 999px; padding: 1px 8px; }
   .complete { background: #fff3c9; border: 2px solid #f0b90b; border-radius: 14px; text-align: center; font-size: 19px; font-weight: bold; padding: 14px; margin-top: 14px; }
   a.back { display: block; margin: 30px auto 0; max-width: 320px; text-align: center; padding: 16px; border-radius: 16px; background: #2e9e5b; color: #fff; font-size: 20px; font-weight: bold; text-decoration: none; box-shadow: 0 4px 0 rgba(0,0,0,.15); }
@@ -114,9 +117,9 @@
 
   <div class="reveal hidden" id="reveal"></div>
 
-  <h2>とり コレクション（<span id="col-count">0</span> / 30）</h2>
+  <h2>とり コレクション（<span id="col-count">0</span> / <span id="col-total">123</span>）</h2>
   <div class="grid" id="grid"></div>
-  <div class="complete hidden" id="complete">🎉 コンプリート！ 30しゅるい 全部 あつまったよ！</div>
+  <div class="complete hidden" id="complete">🎉 コンプリート！ <span id="comp-total">123</span>しゅるい 全部 あつまったよ！</div>
 
   <a class="back" href="drills.html">ドリルランドにもどる</a>
 </div>
@@ -152,7 +155,100 @@
     { name: "イヌワシ", size: "約85cm", rarity: 3, w: 2, img: "inuwashi.jpg", fact: "空の 王さま。大きな 翼で ゆうゆうと 飛ぶ。" },
     { name: "チゴハヤブサ", size: "約31cm", rarity: 3, w: 2, img: "chigohayabusa.jpg", fact: "空を 高速で 飛んで、ツバメや 虫を つかまえる 小さな ハヤブサ。" },
     { name: "トラフズク", size: "約38cm", rarity: 3, w: 2, img: "torafuzuku.jpg", fact: "長い 耳羽（みみばね）と オレンジの 目。冬に むれで 木に とまる。" },
-    { name: "オオワシ", size: "約95cm", rarity: 3, w: 1, img: "oowashi.jpg", fact: "日本で 見られる いちばん 大きな ワシ。冬に 北海道へ やってくる。" }
+    { name: "オオワシ", size: "約95cm", rarity: 3, w: 1, img: "oowashi.jpg", fact: "日本で 見られる いちばん 大きな ワシ。冬に 北海道へ やってくる。" },
+    { name: "ダイシャクシギ", cat: "シギ／チドリ類", rarity: 3, w: 3, img: "daishakushigi.jpg", fact: "日本最大級のシギ。嘴は長く下に曲がり、頭に目立つ縞模様がないのがチュウシャクシギとの最大の違い。" },
+    { name: "チュウシャクシギ", cat: "シギ／チドリ類", rarity: 2, w: 6, img: "chuushakushigi.jpg", fact: "頭央線と眉斑による頭の縞模様が明瞭で、嘴はダイシャクシギより短い。ダイシャク・ホウロクは頭がほぼ無地。" },
+    { name: "ホウロクシギ", cat: "シギ／チドリ類", rarity: 3, w: 2, img: "hourokushigi.jpg", fact: "ダイシャクシギに似るがさらに大きく、嘴は体の大きさの割に極端に長い。頭の縞はなく、下面の斑も少ない。" },
+    { name: "オオソリハシシギ", cat: "シギ／チドリ類", rarity: 3, w: 3, img: "oosorihashishigi.jpg", fact: "嘴はまっすぐ〜やや上に反り、基部がピンク色。オグロシギは嘴の先端まで黒っぽく直線的で、飛ぶと白い翼帯が目立つ。" },
+    { name: "コオバシギ", cat: "シギ／チドリ類", rarity: 2, w: 6, img: "koobashigi.jpg", fact: "繁殖羽は顔から腹まで赤褐色。オバシギより小さく嘴が短くて太い。冬羽は灰色で、緑色っぽい足と短い嘴が手がかり。" },
+    { name: "オバシギ", cat: "シギ／チドリ類", rarity: 2, w: 6, img: "oobashigi.jpg", fact: "コオバシギより大きく嘴が長い。繁殖羽は胸の黒斑が密で、肩羽に赤褐色が混じる。足は暗緑色。" },
+    { name: "サルハマシギ", cat: "シギ／チドリ類", rarity: 2, w: 6, img: "saruwashigi.jpg", fact: "嘴はハマシギより長く、先端がはっきり下に曲がる。飛ぶと白い腰が目立つのが決め手。" },
+    { name: "トウネン", cat: "シギ／チドリ類", rarity: 2, w: 6, img: "tounen.jpg", fact: "繁殖羽は顔から胸が赤橙色で、喉が白い。ヨーロッパトウネンは喉まで赤く、背のV字斑が明瞭。" },
+    { name: "ヒバリシギ", cat: "シギ／チドリ類", rarity: 2, w: 6, img: "hibarishigi.jpg", fact: "足が黄緑色で趾が長い（写真でも趾の長さが目立つ）。上面は暗く縦斑が濃い。トウネン類は足が黒いので区別できる。" },
+    { name: "ウズラシギ", cat: "シギ／チドリ類", rarity: 2, w: 6, img: "uzurashigi.jpg", fact: "頭頂が赤褐色で、胸の縦斑は腹へなだらかに続く。アメリカウズラシギは胸と腹の境がはっきり分かれる。" },
+    { name: "アメリカウズラシギ", cat: "シギ／チドリ類", rarity: 2, w: 6, img: "amerikauzurashigi.jpg", fact: "胸の密な縦斑と白い腹の境目が一直線にはっきり分かれるの が最大の特徴。ウズラシギは境がなだらか。" },
+    { name: "エリマキシギ", cat: "シギ／チドリ類", rarity: 2, w: 6, img: "erimakishigi.jpg", fact: "写真はメス（リーブ）。背の鱗模様、短めの嘴、小さな頭と長い首が特徴。オスの繁殖羽は襟飾りで有名だが日本ではこの地味な姿が普通。" },
+    { name: "ツルシギ", cat: "シギ／チドリ類", rarity: 2, w: 6, img: "tsurushigi.jpg", fact: "冬羽は全体に淡く、白い眉斑が明瞭。足は赤く、アカアシシギより嘴が長くて先が細くわずかに下がる。" },
+    { name: "アカアシシギ", cat: "シギ／チドリ類", rarity: 2, w: 6, img: "akaashishigi.jpg", fact: "繁殖羽は上面に黒斑が多く、嘴はツルシギより短く太い。足は鮮やかな赤。飛ぶと次列風切の白が大きく目立つ。" },
+    { name: "アオアシシギ", cat: "シギ／チドリ類", rarity: 2, w: 6, img: "aoashishigi.jpg", fact: "大型で、嘴は太くやや上に反る。足は緑色みがある。コアオアシシギは小型で嘴が針のように細い。" },
+    { name: "キアシシギ", cat: "シギ／チドリ類", rarity: 2, w: 6, img: "kiashishigi.jpg", fact: "足が黄色く、上面は一様な灰色。イソシギは褐色みが強く、肩に白い食い込みがある。鼻溝が長いのも特徴。" },
+    { name: "ソリハシシギ", cat: "シギ／チドリ類", rarity: 2, w: 6, img: "sorihashishigi.jpg", fact: "嘴が上に反るのが唯一無二の特徴。足は橙色で短め。体は灰色みが強い。" },
+    { name: "イソシギ", cat: "シギ／チドリ類", rarity: 2, w: 6, img: "isoshigi.jpg", fact: "肩の前に白い食い込み（三日月）がある。上面は褐色、足は黄緑色。よく尾羽を上下に振る。" },
+    { name: "タカブシギ", cat: "シギ／チドリ類", rarity: 2, w: 6, img: "takabushigi.jpg", fact: "白い眉斑が明瞭で、背に白斑が散る。クサシギは上面が濃くほぼ無斑で、眉斑は目の前だけ。" },
+    { name: "クサシギ", cat: "シギ／チドリ類", rarity: 2, w: 6, img: "kusashigi.jpg", fact: "上面は濃い緑黒色で斑が少なく、白い眉斑は目の前だけ。飛ぶと白い腰と黒い翼下面のコントラストが強い。" },
+    { name: "ダイゼン", cat: "シギ／チドリ類", rarity: 2, w: 6, img: "daizen.jpg", fact: "繁殖羽は顔から腹が真っ黒で、頭頂から背は白黒の斑。ムナグロより大きく嘴が太い。冬羽でも脇の付け根（腋羽）が黒いのが決め手。" },
+    { name: "シロチドリ", cat: "シギ／チドリ類", rarity: 2, w: 6, img: "shirochidori.jpg", fact: "胸の帯は両側だけに分かれて途切れる（写真はオス）。メダイチドリは帯が1本につながり、足が長い。" },
+    { name: "コチドリ", cat: "シギ／チドリ類", rarity: 2, w: 6, img: "kochidori.jpg", fact: "黄色いアイリングが明瞭。イカルチドリはアイリングが目立たず嘴が長い。胸の黒帯は1本。" },
+    { name: "イカルチドリ", cat: "シギ／チドリ類", rarity: 2, w: 6, img: "ikaruchidori.jpg", fact: "コチドリに似るが嘴が長く、黄色いアイリングは不明瞭。主に河川の中流で見られ、海岸には出ない。" },
+    { name: "セイタカシギ", cat: "シギ／チドリ類", rarity: 2, w: 6, img: "seitakashigi.jpg", fact: "ピンク色の極端に長い足と、針のように細くまっすぐな黒い嘴。白黒の体との組み合わせは他にない。" },
+    { name: "ソリハシセイタカシギ", cat: "シギ／チドリ類", rarity: 2, w: 6, img: "sorihashiseitakashigi.jpg", fact: "細い嘴がはっきり上に反る。白い体に黒い帽子と背の黒模様。足は青灰色で長い。" },
+    { name: "タマシギ", cat: "シギ／チドリ類", rarity: 3, w: 3, img: "tamashigi.jpg", fact: "写真はメス：目の周りの白い模様と、栗色の頭・胸、白い肩帯が目立つ。タマシギはメスの方が派手（一妻多夫）。" },
+    { name: "セグロカモメ", cat: "海鳥", rarity: 2, w: 6, img: "segurokamome.jpg", fact: "背の灰色はオオセグロカモメより明らかに淡い。足はピンク。初列風切の黒に白斑がある。" },
+    { name: "オオセグロカモメ", cat: "海鳥", rarity: 2, w: 6, img: "oosegurokamome.jpg", fact: "背が濃いスレート色なのがセグロカモメとの最大の違い。大型で嘴が太く、足はピンク。" },
+    { name: "カモメ", cat: "海鳥", rarity: 2, w: 6, img: "kamome.jpg", fact: "小型で顔つきが穏やか。嘴は黄色で斑がない。足は黄色。ユリカモメは嘴が赤〜黒で細く、耳の後ろに黒斑（冬羽）がある。" },
+    { name: "シロカモメ", cat: "海鳥", rarity: 3, w: 2, img: "shirokamome.jpg", fact: "初列風切まで白く、全体に非常に淡い。大型で嘴が太い。アイスランドカモメは小型で嘴が短い。" },
+    { name: "ミツユビカモメ", cat: "海鳥", rarity: 2, w: 6, img: "mitsuyubikamome.jpg", fact: "足が黒いのが最大の特徴。翼の先端は白斑なく真っ黒。嘴は黄色で短め。崖で集団繁殖する。" },
+    { name: "ユリカモメ", cat: "海鳥", rarity: 1, w: 16, img: "yurikamome.jpg", fact: "冬羽は白い頭に耳の後ろの黒斑。嘴と足は赤い。繁殖羽は頭がチョコレート色で目の三日月はない。" },
+    { name: "ズグロカモメ", cat: "海鳥", rarity: 2, w: 6, img: "zugurokamome.jpg", fact: "繁殖羽は頭が真っ黒で、目の上下に白い三日月模様。嘴は黒く短い。ユリカモメの繁殖羽は頭が茶色く嘴は赤い。" },
+    { name: "カンムリウミスズメ", cat: "海鳥", rarity: 3, w: 2, img: "kanmuriumisuzume.jpg", fact: "繁殖羽は頭の白黒模様が派手で、後頭に冠羽がある。ウミスズメより頭の白が多い。天然記念物。" },
+    { name: "ケイマフリ", cat: "海鳥", rarity: 3, w: 2, img: "keimafuri.jpg", fact: "全身黒く、目の周りの白いパッチと赤い足が目立つ。翼下面は暗色。ウミバト（近縁種）は翼下面が白い。" },
+    { name: "ウミガラス", cat: "海鳥", rarity: 3, w: 2, img: "umigarasu.jpg", fact: "頭から背が黒褐色で腹は白く、嘴は細く尖る（写真は繁殖コロニー）。オオハシウミガラスは嘴が太く白い線がある。" },
+    { name: "アジサシ", cat: "海鳥", rarity: 2, w: 6, img: "ajisashi.jpg", fact: "嘴は赤く先端が黒い。コアジサシは嘴が黄色で額が白い。尾は深く切れ込む。" },
+    { name: "オオアジサシ", cat: "海鳥", rarity: 2, w: 6, img: "ooajisashi.jpg", fact: "大型で、嘴は太い黄色。後頭の冠羽がぼさぼさしている。アジサシ類で嘴が黄色いのは本種とベニアジサシ（嘴は橙赤）。" },
+    { name: "アオサギ", cat: "サギ類", rarity: 1, w: 16, img: "aosagi.jpg", fact: "日本最大のサギ。全体が灰色で、黒い眉斑と肩の黒斑、黄色い嘴が特徴。" },
+    { name: "ダイサギ", cat: "サギ類", rarity: 1, w: 16, img: "daisagi.jpg", fact: "白いサギで最大。口角の切れ込みが目の後ろまで達するのがチュウサギとの決め手。首は深くS字に曲がる。" },
+    { name: "チュウサギ", cat: "サギ類", rarity: 2, w: 6, img: "chuusagi.jpg", fact: "口角の切れ込みは目の下で止まる。ダイサギより小さく、首の曲がりはなだらか。嘴は黄色（繁殖期は黒くなる）。" },
+    { name: "コサギ", cat: "サギ類", rarity: 1, w: 16, img: "kosagi.jpg", fact: "嘴は黒く長く、足は黒くて趾だけ黄色。繁殖期は後頭に2本の長い冠羽と背の蓑羽が出る。" },
+    { name: "カラシラサギ", cat: "サギ類", rarity: 2, w: 6, img: "karashirasagi.jpg", fact: "コサギに似るが嘴が太く短めで、繁殖期は嘴が橙黄色になり冠羽が出る（写真は飛翔）。" },
+    { name: "アマサギ", cat: "サギ類", rarity: 2, w: 6, img: "amasagi.jpg", fact: "繁殖羽は頭から背が橙色。非繁殖羽は真っ白で、嘴が短く黄色い。首が太く短い印象。牛のそばにいることが多い。" },
+    { name: "ゴイサギ", cat: "サギ類", rarity: 2, w: 6, img: "goisagi.jpg", fact: "成鳥は頭と背が黒く、翼は灰色、目が赤い。後頭に白い冠羽が2〜3本。夜行性。幼鳥は全体に褐色で白斑が散る。" },
+    { name: "ササゴイ", cat: "サギ類", rarity: 2, w: 6, img: "sasagoi.jpg", fact: "頭頂が黒く、背は青緑色、首は栗色で白い縦線。小型でずんぐり。水辺の枝から狙う。" },
+    { name: "ミゾゴイ", cat: "サギ類", rarity: 3, w: 2, img: "mizogoi.jpg", fact: "全体が茶褐色で、雨覆に白斑が並ぶ。目が大きく黄色い。夜行性で、森林の沢に住む。絶滅危惧種。" },
+    { name: "ヨシゴイ", cat: "サギ類", rarity: 3, w: 3, img: "yoshigoi.jpg", fact: "日本最小のサギ。淡い黄褐色で、頭頂と風切が黒い（オス）。目が黄色く嘴が長い。ヨシ原に住む。" },
+    { name: "アカガシラサギ", cat: "サギ類", rarity: 3, w: 3, img: "akagashirasagi.jpg", fact: "繁殖羽は頭から胸が濃い栗色、背は藍色、翼は白い。非繁殖羽は地味な褐色で別種のよう。" },
+    { name: "マガン", cat: "ガンカモ類", rarity: 2, w: 6, img: "magan.jpg", fact: "嘴の基部を囲む白い部分と、腹の不規則な黒い横斑が決め手。嘴はピンク色。ヒシクイは額が白くなく、嘴は黒く橙色の帯がある。" },
+    { name: "ヒシクイ", cat: "ガンカモ類", rarity: 2, w: 6, img: "hishikui.jpg", fact: "額は白くならず、嘴は黒くて先端近くに橙色の帯がある。亜種ヒシクイは嘴が短く、オオヒシクイは嘴が長い。" },
+    { name: "トモエガモ", cat: "ガンカモ類", rarity: 2, w: 6, img: "tomoegamo.jpg", fact: "オスの顔は巴模様：緑・黄土色・黒の曲線模様は他にない。小型のカモ。" },
+    { name: "ヨシガモ", cat: "ガンカモ類", rarity: 2, w: 6, img: "yoshigamo.jpg", fact: "オスは頭が緑色で、三列風切が鎌状に長く垂れる。尻の両側に白斑。オカヨシガモは全体が地味な灰色。" },
+    { name: "オカヨシガモ", cat: "ガンカモ類", rarity: 2, w: 6, img: "okayoshigamo.jpg", fact: "オスは全身が細かい模様の灰色で、尻が黒く、翼鏡の白が目立つ。派手な色がないのが特徴。" },
+    { name: "アメリカヒドリ", cat: "ガンカモ類", rarity: 2, w: 6, img: "amerikahidori.jpg", fact: "オスは額から頭頂が白く、目の後ろに緑色の帯。体はピンク褐色。ヒドリガモは頭が栗色で額がクリーム色。" },
+    { name: "シノリガモ", cat: "ガンカモ類", rarity: 3, w: 3, img: "shinorigamo.jpg", fact: "オスは藍色の体に白い斑点と栗色の脇。顔の白斑の配置が独特。岩礁海岸に住む。" },
+    { name: "クロガモ", cat: "ガンカモ類", rarity: 2, w: 6, img: "kurogamo.jpg", fact: "オスは全身真っ黒で、嘴の基部に黄色いコブがある。ビロードキンクロは目の後ろに白斑があり、飛ぶと翼に白斑が出る。" },
+    { name: "ビロードキンクロ", cat: "ガンカモ類", rarity: 2, w: 6, img: "birodokinkuro.jpg", fact: "オスは全身黒く、目の後ろに小さな白斑、嘴は橙黄色で基部が膨らむ。飛ぶと次列風切の白が目立つ。" },
+    { name: "スズガモ", cat: "ガンカモ類", rarity: 2, w: 6, img: "suzugamo.jpg", fact: "オスは頭が黒く緑色光沢、背は灰色の細かい波模様、脇は白い。頭に冠羽はない。キンクロハジロは背が黒く冠羽がある。" },
+    { name: "キンクロハジロ", cat: "ガンカモ類", rarity: 2, w: 6, img: "kinkurohajiro.jpg", fact: "オスは後頭から垂れる冠羽が目立つ。頭は黒く紫色光沢、背も黒い。スズガモは背が灰色で冠羽がない。" },
+    { name: "ホシハジロ", cat: "ガンカモ類", rarity: 2, w: 6, img: "hoshihajiro.jpg", fact: "オスは頭が赤茶色、胸は黒く、背と脇は淡灰色。嘴は黒く中央に青灰色の帯。アカハジロ（メスに似る別種）とは目の色でも区別。" },
+    { name: "ミサゴ", cat: "ワシタカ類", rarity: 3, w: 2, img: "misago.jpg", fact: "白い頭に黒い過眼線、白い下面と暗褐色の上面。翼は長く、飛ぶとM字に曲げる。魚だけを狙う。" },
+    { name: "ハチクマ", cat: "ワシタカ類", rarity: 3, w: 3, img: "hachikuma.jpg", fact: "頭が小さくハトのような顔つき。目の周りは鱗状の羽毛。オスは虹彩が暗色、メスは黄色。" },
+    { name: "ケアシノスリ", cat: "ワシタカ類", rarity: 3, w: 2, img: "keashinosuri.jpg", fact: "足の指まで羽毛がある（毛足）。写真は若鳥：頭が白っぽく腹の黒帯が太い。尾の基部は白い。" },
+    { name: "オジロワシ", cat: "ワシタカ類", rarity: 3, w: 2, img: "ojirowashi.jpg", fact: "成鳥は頭が淡褐色、尾は白いくさび形、嘴は黄色でオオワシほど巨大ではない。体は一様な褐色。" },
+    { name: "コチョウゲンボウ", cat: "ワシタカ類", rarity: 3, w: 2, img: "kochougenbou.jpg", fact: "小型でずんぐり。オスは上面が青灰色で無斑、下面は橙色みの縦斑。尾は短め。チョウゲンボウは背に斑があり尾が長い。" },
+    { name: "アオゲラ", cat: "キツツキ類", rarity: 2, w: 6, img: "aogera.jpg", fact: "日本の固有種。背は黄緑色で、頭頂が赤い（写真はオス：額まで赤い。メスは後頭だけ）。" },
+    { name: "ヤマゲラ", cat: "キツツキ類", rarity: 2, w: 6, img: "yamager.jpg", fact: "頭が灰色で背は緑色。オスは額だけ小さく赤い。アオゲラは頭頂全体が赤く、日本では本州以南の留鳥なのに対し、本種は対馬・五島の留鳥。" },
+    { name: "アカゲラ", cat: "キツツキ類", rarity: 2, w: 6, img: "akagera.jpg", fact: "肩の白斑が大きく、下尾筒が赤い。オスは後頭が赤い。オオアカゲラは腹に縦斑があり、下尾筒は淡いピンクで白斑が細い。" },
+    { name: "オオアカゲラ", cat: "キツツキ類", rarity: 2, w: 6, img: "ooakagera.jpg", fact: "背から腰が白く、腹には縦斑がある。下尾筒は淡紅色。アカゲラは腹が無斑で下尾筒が濃い赤。" },
+    { name: "クマゲラ", cat: "キツツキ類", rarity: 3, w: 2, img: "kumagera.jpg", fact: "日本最大のキツツキ。全身真っ黒で頭頂が赤い（写真はオス：頬にも赤）。カラス大で、ドラミングが大きい。" },
+    { name: "アリスイ", cat: "キツツキ類", rarity: 2, w: 6, img: "arisui.jpg", fact: "キツツキの仲間だが木に登らず、地上でアリを食べる。全身が樹皮のような虫食い模様で、頭頂から背に黒い帯。" },
+    { name: "ツグミ", cat: "ツグミ類", rarity: 1, w: 15, img: "tsugumi.jpg", fact: "白い眉斑が太く明瞭で、腹の鱗斑が濃い。翼に赤褐色が出る。アカハラは眉斑がなく腹が橙色。" },
+    { name: "アカハラ", cat: "ツグミ類", rarity: 2, w: 6, img: "akahara.jpg", fact: "頭から胸は暗い茶色、腹の脇が濃い橙色。眉斑はない。ツグミは眉斑と鱗斑が目立つ。" },
+    { name: "シロハラ", cat: "ツグミ類", rarity: 2, w: 6, img: "shirohara.jpg", fact: "頭は灰褐色、腹は淡いクリーム色で斑が薄くまばら。アカハラは腹の橙色が濃い。全体に色が薄いのが特徴。" },
+    { name: "クロツグミ", cat: "ツグミ類", rarity: 2, w: 6, img: "kurotsugumi.jpg", fact: "オスは頭から胸が黒灰色、白い腹に黒い斑点が並ぶ。嘴は黄色。メスは褐色で別種のよう。" },
+    { name: "マミチャジナイ", cat: "ツグミ類", rarity: 2, w: 6, img: "mamichajinai.jpg", fact: "白い眉斑が明瞭で、頭は灰色み、胸から脇は淡い橙色。ツグミほど腹の斑が濃くない。旅鳥。" },
+    { name: "トラツグミ", cat: "ツグミ類", rarity: 2, w: 6, img: "toratsugumi.jpg", fact: "ツグミ類で最大。全身に大きな黒い鱗模様が密にある。夜に「ヒョー」と鳴く「ヌエ」の正体。" },
+    { name: "ホオジロ", cat: "ホオジロ類", rarity: 1, w: 16, img: "hoojiro.jpg", fact: "オスは白と黒の顔模様に、胸から腹が橙褐色。ホオアカは頬が栗色で腹が白い。" },
+    { name: "ホオアカ", cat: "ホオジロ類", rarity: 2, w: 6, img: "hooaka.jpg", fact: "オスは頬が栗色（ホオアカの名の通り）、喉と腹は白く、胸に黒と栗色の帯。ホオジロは腹が橙色。" },
+    { name: "カシラダカ", cat: "ホオジロ類", rarity: 2, w: 6, img: "kashiradaka.jpg", fact: "オスは頭が黒く白い眉斑、短い冠羽を立て、背は栗色。冬鳥。ホオジロは顔の白黒模様が違う。" },
+    { name: "アオジ", cat: "ホオジロ類", rarity: 2, w: 6, img: "aoji.jpg", fact: "オスは頭が灰緑色で目の周りが黒く、喉から腹は黄色。クロジは全体が黒灰色で腹も暗い。" },
+    { name: "ミヤマホオジロ", cat: "ホオジロ類", rarity: 2, w: 6, img: "miyamahoojiro.jpg", fact: "オスは黄色い喉と眉斑、立派な冠羽、顔の黒い模様が目立つ。冬に西日本で多い。" },
+    { name: "オオジュリン", cat: "ホオジロ類", rarity: 2, w: 6, img: "oojurin.jpg", fact: "オス繁殖羽は頭が真っ黒で、白い襟と口ひげ模様。後頸は白っぽい。コジュリンは後頸まで暗色で全体に小さい。" },
+    { name: "コジュリン", cat: "ホオジロ類", rarity: 2, w: 6, img: "kojurin.jpg", fact: "オス繁殖羽は頭が黒く、オオジュリンに似るが後頸も暗色で白い襟が目立たず、体が小さい。" },
+    { name: "シマフクロウ", cat: "フクロウ類", rarity: 3, w: 1, img: "shimafukurou.jpg", fact: "日本最大のフクロウ。大きな羽角、黄色い目、太い縦斑。北海道の河川林に住み魚を獲る。" },
+    { name: "コミミズク", cat: "フクロウ類", rarity: 3, w: 3, img: "komimizuku.jpg", fact: "羽角はほとんど目立たず、黄色い目の周りの黒が濃い。昼間も草地や干潟を飛び回る。トラフズクは羽角が長く目が橙色。" },
+    { name: "セグロセキレイ", cat: "その他の陸鳥", rarity: 1, w: 16, img: "segurosekirei.jpg", fact: "背から頭まで黒く、白い眉斑と顎線だけが白い。ハクセキレイは顔が白く背は灰色（黒い個体もいるが顔の白が多い）。" },
+    { name: "キセキレイ", cat: "その他の陸鳥", rarity: 1, w: 16, img: "kisekirei.jpg", fact: "下面が黄色く、特に下尾筒が濃い黄色。背は灰色。渓流に住む。ツメナガセキレイは背が黄緑色で草原に住む。" },
+    { name: "ヒバリ", cat: "その他の陸鳥", rarity: 1, w: 16, img: "hibari.jpg", fact: "短い冠羽、太めの嘴、後爪が長い。タヒバリは嘴が細くスマート。空高くで囀る。" },
+    { name: "ハシブトガラス", cat: "その他の陸鳥", rarity: 1, w: 18, img: "hashibutogarasu.jpg", fact: "嘴が太く、額がドーム状に張り出す。ハシボソガラスは嘴が細く額がなだらか。声は澄んだ「カー」。" },
+    { name: "ハシボソガラス", cat: "その他の陸鳥", rarity: 1, w: 18, img: "hashibosogarasu.jpg", fact: "嘴が細くまっすぐで、額はなだらか。ハシブトガラスより小型で、声は濁った「ガーガー」。" }
   ];
   var GACHA_KEY = "kidsdrills_gacha_v1";
   var currentPlayer = null;
@@ -163,7 +259,7 @@
   if (!currentPlayer) currentPlayer = "soichiro";
 
   function birdPhoto(b, cls) {
-    return '<img class="' + cls + '" src="bird-assets/' + b.img + '" alt="' + b.name + '">';
+    return '<img class="' + cls + '" src="kansatsu-assets/' + b.img + '" alt="' + b.name + '" draggable="false">';
   }
   function loadGacha() {
     try {
@@ -220,10 +316,13 @@
       div.innerHTML = (cnt > 1 ? '<span class="cnt">×' + cnt + '</span>' : "")
         + birdPhoto(b, "c-photo")
         + '<div class="c-name">' + (cnt > 0 ? b.name : "？？？") + '</div>'
-        + '<div class="c-size">' + (cnt > 0 ? b.size : "まだ みつけてない") + '</div>';
+        + '<div class="c-size">' + (cnt > 0 ? (b.size || b.cat || "") : "まだ みつけてない") + '</div>'
+        + (cnt > 0 ? "" : '<span class="shield"></span>');
       grid.appendChild(div);
     });
     document.getElementById("col-count").textContent = owned;
+    document.getElementById("col-total").textContent = BIRDS.length;
+    document.getElementById("comp-total").textContent = BIRDS.length;
     document.getElementById("complete").classList.toggle("hidden", owned < BIRDS.length);
   }
   function draw() {
@@ -259,7 +358,7 @@
         + '<div class="rarity">' + stars + '</div>'
         + birdPhoto(b, "r-photo")
         + '<div class="bird-name">' + b.name + '</div>'
-        + '<div class="bird-fact">大きさ： ' + b.size + '<br>' + b.fact + '</div>';
+        + '<div class="bird-fact">' + (b.size ? '大きさ： ' + b.size + '<br>' : (b.cat ? b.cat + '<br>' : '')) + b.fact + '</div>';
       reveal.classList.remove("hidden");
       render();
     }, 900);
@@ -273,6 +372,7 @@
       render();
     });
   });
+  document.getElementById("grid").addEventListener("contextmenu", function (e) { e.preventDefault(); });
   render();
 </script>
 </body>
