@@ -21,7 +21,7 @@
    version.json をキャッシュなしで確認し、版が違えば URL を変えて読み直す。
    公開のたびに SITE_VERSION と version.json を同じ値に上げること（GATE.md 参照）。 */
 (function () {
-  var SITE_VERSION = "20261127-17";
+  var SITE_VERSION = "20261128-1";
   function alreadyTried() {
     try { return new URLSearchParams(location.search).get("_v") === SITE_VERSION; }
     catch (e) { return false; }
@@ -92,5 +92,6 @@
   <a href="kiroku.html" style="display:block;margin-top:18px;padding:18px;border-radius:18px;background:#555;color:#fff;text-decoration:none;font-size:22px;font-weight:bold;box-shadow:0 4px 0 rgba(0,0,0,.15);">きろくを みる<span style="display:block;font-size:14px;font-weight:normal;margin-top:4px;opacity:.9;">そういちろう・つづみの がんばり</span></a>
   <a href="gacha.html" style="display:block;margin-top:14px;padding:18px;border-radius:18px;background:linear-gradient(180deg,#ff9d2e,#f07d1a);color:#fff;text-decoration:none;font-size:22px;font-weight:bold;box-shadow:0 4px 0 rgba(0,0,0,.15);">🐦 とりガチャ<span style="display:block;font-size:14px;font-weight:normal;margin-top:4px;opacity:.92;">がんばると ガチャけんが たまるよ</span></a>
 </div>
+<a id="float-back" href="index.html" style="position:fixed;right:14px;bottom:14px;z-index:500;background:#ffffff;border:2px solid #8a8a8a;color:#333333;padding:10px 18px;border-radius:999px;font-size:16px;font-weight:bold;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,0.25);opacity:0.96;">← もどる</a>
 </body>
 </html>

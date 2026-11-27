@@ -20,7 +20,7 @@
    version.json をキャッシュなしで確認し、版が違えば URL を変えて読み直す。
    公開のたびに SITE_VERSION と version.json を同じ値に上げること（GATE.md 参照）。 */
 (function () {
-  var SITE_VERSION = "20261127-17";
+  var SITE_VERSION = "20261128-1";
   function alreadyTried() {
     try { return new URLSearchParams(location.search).get("_v") === SITE_VERSION; }
     catch (e) { return false; }
@@ -279,5 +279,6 @@ $('retry-btn').addEventListener('click', function () {
 
 updatePinDots();
 </script>
+<a id="float-back" href="index.html" style="position:fixed;right:14px;bottom:14px;z-index:500;background:#ffffff;border:2px solid #8a8a8a;color:#333333;padding:10px 18px;border-radius:999px;font-size:16px;font-weight:bold;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,0.25);opacity:0.96;">← もどる</a>
 </body>
 </html>
