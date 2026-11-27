@@ -34,6 +34,24 @@
   tr.total td { background: #f5efe0; font-weight: bold; }
   .empty { text-align: center; color: #888; padding: 18px; background: #fff; border-radius: 12px; }
   a.back { display: block; margin: 30px auto 0; max-width: 320px; text-align: center; padding: 16px; border-radius: 16px; background: #2e9e5b; color: #fff; font-size: 20px; font-weight: bold; text-decoration: none; box-shadow: 0 4px 0 rgba(0,0,0,.15); }
+  .backup-box { margin: 36px auto 0; max-width: 480px; background: #fff; border: 2px dashed #cbbfa5; border-radius: 14px; padding: 16px; }
+  .backup-title { font-size: 17px; font-weight: bold; margin-bottom: 6px; }
+  .backup-note { font-size: 13px; color: #666; line-height: 1.6; margin: 0 0 12px; }
+  .backup-btn { display: block; width: 100%; margin-top: 8px; padding: 13px; border: none; border-radius: 12px; background: #5a4632; color: #fff; font-size: 16px; font-weight: bold; text-align: center; cursor: pointer; font-family: inherit; box-sizing: border-box; }
+  .backup-msg { font-size: 13px; color: #2e7d32; margin-top: 10px; min-height: 18px; text-align: center; }
+  .backup-server { border-top: 1px dashed #e0d5ba; margin-top: 16px; padding-top: 14px; }
+  .dev-row { display: flex; gap: 8px; margin-bottom: 10px; }
+  .dev-chip { flex: 1; border: 2px solid #ddd; background: #fff; border-radius: 999px; font-family: inherit; font-size: 13px; font-weight: bold; padding: 9px 2px; cursor: pointer; }
+  .dev-chip.sel { border-color: #5a4632; background: #fdf1dc; }
+  .pin-input { width: 100%; font-family: inherit; font-size: 18px; padding: 11px; border: 2px solid #e8dcc2; border-radius: 12px; margin-bottom: 4px; text-align: center; letter-spacing: 6px; box-sizing: border-box; }
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("kidsdrills_theme_v1")||"sora");}catch(e){}</script>
+<style>
+  /* はいけい テーマ（トップで えらぶ・この端末に 保存される） */
+  html[data-theme="yuyake"] body{background:linear-gradient(180deg,#ff9d76 0%,#ffc98a 45%,#ffe9c9 100%);background-attachment:fixed;}
+  html[data-theme="mori"] body{background:linear-gradient(180deg,#8fd694 0%,#cdf0c0 55%,#f4fae4 100%);background-attachment:fixed;}
+  html[data-theme="umi"] body{background:linear-gradient(180deg,#4fb3d9 0%,#a5e3f5 55%,#eafcfd 100%);background-attachment:fixed;}
+  html[data-theme="sakura"] body{background:linear-gradient(180deg,#ffb7cd 0%,#ffd9e4 55%,#fff2f6 100%);background-attachment:fixed;}
 </style>
 </head>
 <body>
@@ -41,6 +59,25 @@
   <h1>きろく</h1>
   <div id="content"></div>
   <a class="back" href="drills.html">ドリルランドにもどる</a>
+  <div class="backup-box">
+    <div class="backup-title">💾 バックアップ（おうちの人用）</div>
+    <p class="backup-note">きろく・ふくしゅうリスト・バードの台帳・はいけいの設定を、まとめてファイルに保存できます。データはこのiPadの中にだけあるので、時々ほぞんしておくと安心です。消えてしまったときは「ファイルから もどす」で復元できます。</p>
+    <button class="backup-btn" id="export-btn" type="button">ファイルに ほぞん</button>
+    <label class="backup-btn">ファイルから もどす<input type="file" id="import-file" accept="application/json,.json" hidden></label>
+    <div class="backup-msg" id="backup-msg"></div>
+    <div class="backup-server">
+      <div class="backup-title" style="font-size:15px;">☁️ サーバー（自動バックアップ）</div>
+      <p class="backup-note">トップを開くと、データが家族のスプレッドシートへ自動で送られます。このiPadの名前を選んでおくと、復元のときに使います。復元には PIN が必要です。</p>
+      <div class="dev-row">
+        <button class="dev-chip" type="button" data-dev="soichiro">そういちろうの iPad</button>
+        <button class="dev-chip" type="button" data-dev="tsuzumi">つづみの iPad</button>
+        <button class="dev-chip" type="button" data-dev="ipad">その他</button>
+      </div>
+      <input class="pin-input" id="restore-pin" type="password" inputmode="numeric" maxlength="4" placeholder="PIN（4けた）">
+      <button class="backup-btn" id="restore-btn" type="button">サーバーから もどす</button>
+      <div class="backup-msg" id="restore-msg"></div>
+    </div>
+  </div>
 </div>
 <script>
   var SUBJECTS = [
@@ -62,6 +99,14 @@
     data = {};
   }
   var html = "";
+  function fmtDur(sec) {
+    sec = Math.round(sec || 0);
+    if (sec <= 0) return "-";
+    var h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+    if (h > 0) return h + "じかん " + m + "ふん";
+    if (m > 0) return m + "ふん";
+    return s + "びょう";
+  }
   PLAYERS.forEach(function (p) {
     var rec = data[p[0]] || {};
     html += '<h2 class="' + p[2] + '">' + p[1] + '</h2>';
@@ -70,23 +115,113 @@
       html += '<div class="empty">まだ きろくが ありません</div>';
       return;
     }
-    var tPlays = 0, tQ = 0, tC = 0;
-    html += '<table><tr><th>きょうか</th><th>やった<br>かいすう</th><th>もんだい<br>すう</th><th>せいかい<br>すう</th><th>せいかい<br>りつ</th><th>さいこう<br>ランク</th><th>さいごに<br>やった日</th></tr>';
+    var tPlays = 0, tQ = 0, tC = 0, tSec = 0;
+    html += '<table><tr><th>きょうか</th><th>やった<br>かいすう</th><th>もんだい<br>すう</th><th>せいかい<br>すう</th><th>せいかい<br>りつ</th><th>さいこう<br>ランク</th><th>じかん</th><th>さいごに<br>やった日</th></tr>';
     SUBJECTS.forEach(function (s) {
       var r = rec[s[0]];
       if (!r || !r.plays) {
-        html += '<tr><td class="subj">' + s[1] + '</td><td>0</td><td>0</td><td>0</td><td>-</td><td>-</td><td>-</td></tr>';
+        html += '<tr><td class="subj">' + s[1] + '</td><td>0</td><td>0</td><td>0</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>';
         return;
       }
-      tPlays += r.plays; tQ += r.questions; tC += r.correct;
+      tPlays += r.plays; tQ += r.questions; tC += r.correct; tSec += (r.seconds || 0);
       var rate = r.questions ? Math.round(r.correct / r.questions * 100) + "%" : "-";
-      html += '<tr><td class="subj">' + s[1] + '</td><td>' + r.plays + '</td><td>' + r.questions + '</td><td>' + r.correct + '</td><td>' + rate + '</td><td>' + (r.bestRank || "-") + '</td><td>' + (r.lastPlayed || "-") + '</td></tr>';
+      html += '<tr><td class="subj">' + s[1] + '</td><td>' + r.plays + '</td><td>' + r.questions + '</td><td>' + r.correct + '</td><td>' + rate + '</td><td>' + (r.bestRank || "-") + '</td><td>' + fmtDur(r.seconds) + '</td><td>' + (r.lastPlayed || "-") + '</td></tr>';
     });
     var tRate = tQ ? Math.round(tC / tQ * 100) + "%" : "-";
-    html += '<tr class="total"><td class="subj">ぜんぶ</td><td>' + tPlays + '</td><td>' + tQ + '</td><td>' + tC + '</td><td>' + tRate + '</td><td></td><td></td></tr>';
+    html += '<tr class="total"><td class="subj">ぜんぶ</td><td>' + tPlays + '</td><td>' + tQ + '</td><td>' + tC + '</td><td>' + tRate + '</td><td></td><td>' + fmtDur(tSec) + '</td><td></td></tr>';
     html += '</table>';
   });
   document.getElementById("content").innerHTML = html;
+
+  /* ================= バックアップ（書き出し／読み込み） ================= */
+  var BACKUP_KEYS = ["kidsdrills_records_v1", "kidsdrills_review_v1", "bird_ledger_v1", "kidsdrills_gacha_v1", "kidsdrills_wallet_v1", "kidsdrills_theme_v1", "kidsdrills_last_player"];
+  document.getElementById("export-btn").addEventListener("click", function () {
+    var payload = { app: "tadaima-backup", version: 1, exportedAt: new Date().toISOString(), data: {} };
+    BACKUP_KEYS.forEach(function (k) {
+      var v = null;
+      try { v = localStorage.getItem(k); } catch (e) {}
+      if (v !== null) payload.data[k] = v;
+    });
+    var blob = new Blob([JSON.stringify(payload)], { type: "application/json" });
+    var d = new Date();
+    var mm = ("0" + (d.getMonth() + 1)).slice(-2), dd = ("0" + d.getDate()).slice(-2);
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "tadaima-backup-" + d.getFullYear() + mm + dd + ".json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+    document.getElementById("backup-msg").textContent = "ほぞんしました。「ファイル」アプリのダウンロードに入っています。";
+  });
+  document.getElementById("import-file").addEventListener("change", function (ev) {
+    var file = ev.target.files && ev.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function () {
+      var msg = document.getElementById("backup-msg");
+      try {
+        var payload = JSON.parse(reader.result);
+        if (!payload || payload.app !== "tadaima-backup" || !payload.data) throw new Error("bad file");
+        var n = 0;
+        BACKUP_KEYS.forEach(function (k) {
+          if (typeof payload.data[k] === "string") { localStorage.setItem(k, payload.data[k]); n++; }
+        });
+        if (!n) throw new Error("empty");
+        msg.textContent = "もどしました。ページを ひらきなおします。";
+        setTimeout(function () { location.reload(); }, 900);
+      } catch (e) {
+        msg.textContent = "このファイルでは もどせませんでした。";
+      }
+    };
+    reader.readAsText(file);
+    ev.target.value = "";
+  });
+
+  /* ================= サーバー復元（自動バックアップから） ================= */
+  var ENDPOINT = "https://script.google.com/macros/s/AKfycbyurtmUMcRCv2MmyBu96IlMEbBIpReYApm1QwtaI52hEh1JWn_fK4BrMhHgDkhszmZIBg/exec";
+  function resolvedDevice() {
+    var d = null;
+    try { d = localStorage.getItem("kidsdrills_device_v1"); } catch (e) {}
+    if (d) return d;
+    var p = null;
+    try { p = localStorage.getItem("kidsdrills_last_player"); } catch (e) {}
+    return (p === "soichiro" || p === "tsuzumi") ? p : "ipad";
+  }
+  function paintDevChips() {
+    var d = resolvedDevice();
+    document.querySelectorAll(".dev-chip").forEach(function (c) {
+      c.classList.toggle("sel", c.getAttribute("data-dev") === d);
+    });
+  }
+  document.querySelectorAll(".dev-chip").forEach(function (c) {
+    c.addEventListener("click", function () {
+      try { localStorage.setItem("kidsdrills_device_v1", c.getAttribute("data-dev")); } catch (e) {}
+      paintDevChips();
+    });
+  });
+  paintDevChips();
+  document.getElementById("restore-btn").addEventListener("click", function () {
+    var pin = document.getElementById("restore-pin").value.replace(/\s+/g, "");
+    var msg = document.getElementById("restore-msg");
+    if (!pin) { msg.textContent = "PINを 入れてね。"; return; }
+    msg.textContent = "サーバーに きいています…";
+    fetch(ENDPOINT + "?action=restore&device=" + encodeURIComponent(resolvedDevice()) + "&pin=" + encodeURIComponent(pin))
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (!j || !j.ok || !j.payload) { msg.textContent = "もどせませんでした（PINか、バックアップの有無を確認してね）。"; return; }
+        var payload = JSON.parse(j.payload);
+        if (!payload || !payload.data) { msg.textContent = "もどせませんでした。"; return; }
+        var n = 0;
+        BACKUP_KEYS.forEach(function (k) {
+          if (typeof payload.data[k] === "string") { localStorage.setItem(k, payload.data[k]); n++; }
+        });
+        if (!n) { msg.textContent = "もどすデータが ありませんでした。"; return; }
+        msg.textContent = "もどしました（" + (j.updatedAt || "") + " のバックアップ）。ページを ひらきなおします。";
+        setTimeout(function () { location.reload(); }, 1200);
+      })
+      .catch(function () { msg.textContent = "つうしんに 失敗しました。"; });
+  });
 </script>
 </body>
 </html>

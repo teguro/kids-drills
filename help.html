@@ -34,7 +34,7 @@
   .pin-dot { width: 22px; height: 22px; border-radius: 50%; border: 3px solid #bbb; background: transparent; }
   .pin-dot.on { background: #d92b2b; border-color: #d92b2b; }
   .pin-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 320px; margin: 12px auto 0; }
-  .pin-key { font-family: inherit; font-size: 28px; font-weight: bold; padding: 16px 0; border: none; border-radius: 16px; background: #fde8e0; color: #333; box-shadow: 0 3px 0 rgba(0,0,0,.12); cursor: pointer; }
+  .pin-key { font-family: inherit; font-size: 28px; font-weight: bold; padding: 16px 0; border: none; border-radius: 16px; background: #fde8e0; color: #333; box-shadow: 0 3px 0 rgba(0,0,0,.12); cursor: pointer; touch-action: manipulation; }
   .pin-key:active { transform: translateY(2px); box-shadow: none; background: #f9d5c8; }
   .pin-msg { min-height: 26px; font-size: 17px; font-weight: bold; color: #d33; margin: 10px 0 0; }
 
@@ -52,6 +52,14 @@
   .rules { text-align: left; }
   .rules h2 { font-size: 21px; margin: 0 0 10px; text-align: center; }
   .rules ul { margin: 0; padding-left: 24px; font-size: 19px; line-height: 1.8; }
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("kidsdrills_theme_v1")||"sora");}catch(e){}</script>
+<style>
+  /* はいけい テーマ（トップで えらぶ・この端末に 保存される） */
+  html[data-theme="yuyake"] body{background:linear-gradient(180deg,#ff9d76 0%,#ffc98a 45%,#ffe9c9 100%);background-attachment:fixed;}
+  html[data-theme="mori"] body{background:linear-gradient(180deg,#8fd694 0%,#cdf0c0 55%,#f4fae4 100%);background-attachment:fixed;}
+  html[data-theme="umi"] body{background:linear-gradient(180deg,#4fb3d9 0%,#a5e3f5 55%,#eafcfd 100%);background-attachment:fixed;}
+  html[data-theme="sakura"] body{background:linear-gradient(180deg,#ffb7cd 0%,#ffd9e4 55%,#fff2f6 100%);background-attachment:fixed;}
 </style>
 </head>
 <body>

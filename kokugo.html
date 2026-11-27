@@ -82,6 +82,12 @@
     box-shadow:0 3px 0 rgba(90,58,0,.28);
   }
   .mode-btn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(90,58,0,.28);}
+  .review-btn{
+    display:block;width:100%;border:none;border-radius:14px;background:#FF8A2A;color:#fff;
+    font-size:19px;font-weight:900;padding:14px 4px;min-height:52px;
+    box-shadow:0 3px 0 rgba(90,58,0,.28);cursor:pointer;margin:14px 0 4px;font-family:inherit;
+  }
+  .review-btn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(90,58,0,.28);}
   .topbar{display:flex;align-items:center;gap:10px;margin:4px 0 12px;flex-wrap:wrap;}
   .quit-btn{
     border:2px solid var(--line);background:var(--card);color:var(--muted);
@@ -192,6 +198,14 @@
 
   @media (prefers-reduced-motion: reduce){ *{transition:none !important;} }
 </style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("kidsdrills_theme_v1")||"sora");}catch(e){}</script>
+<style>
+  /* はいけい テーマ（トップで えらぶ・この端末に 保存される） */
+  html[data-theme="yuyake"] body{background:linear-gradient(180deg,#ff9d76 0%,#ffc98a 45%,#ffe9c9 100%);background-attachment:fixed;}
+  html[data-theme="mori"] body{background:linear-gradient(180deg,#8fd694 0%,#cdf0c0 55%,#f4fae4 100%);background-attachment:fixed;}
+  html[data-theme="umi"] body{background:linear-gradient(180deg,#4fb3d9 0%,#a5e3f5 55%,#eafcfd 100%);background-attachment:fixed;}
+  html[data-theme="sakura"] body{background:linear-gradient(180deg,#ffb7cd 0%,#ffd9e4 55%,#fff2f6 100%);background-attachment:fixed;}
+</style>
 </head>
 <body>
 <div class="wrap">
@@ -230,6 +244,7 @@
         <button class="player-btn" data-player="tsuzumi">つづみ</button>
       </div>
     </div>
+    <button class="review-btn hidden" id="review-btn" type="button">🔁 まちがい ふくしゅう</button>
 
     <div class="grade-title">1ねんせい むけ<small>ひらがな・カタカナと やさしい ことば</small></div>
 
@@ -939,7 +954,7 @@ var LEVEL_LABEL = {g1:"1ねんせい・にゅうもん", g1c:"1ねんせい・�
 var KIND_CLASS = {};
 function shuffle(arr){ var a = arr.slice(); for (var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
 
-var state = { level:"g1", questions:[], idx:0, score:0, startTime:0, log:[], locked:false };
+var state = { level:"g1", questions:[], idx:0, score:0, startTime:0, log:[], locked:false, mode:"normal" };
 var best = {g1:null, g1c:null, l1:null, l2:null, l3:null, chal:null};
 var lastPicked = {g1:[], g1c:[], l1:[], l2:[], l3:[], chal:[]};
 var catClassMap = {};
@@ -969,6 +984,7 @@ function showScreen(name){
   window.scrollTo(0, 0);
 }
 function startGame(level){
+  state.mode = "normal";
   state.level = level;
   state.questions = pickQuestions(level);
   state.idx = 0; state.score = 0; state.log = [];
@@ -980,8 +996,8 @@ function isG1(){ return state.level === "g1" || state.level === "g1c"; }
 function renderQuestion(){
   var q = state.questions[state.idx];
   state.locked = false;
-  document.getElementById("progress-bar").style.width = (state.idx / 20 * 100) + "%";
-  document.getElementById("qcount").textContent = (state.idx + 1) + " / 20";
+  document.getElementById("progress-bar").style.width = (state.idx / state.questions.length * 100) + "%";
+  document.getElementById("qcount").textContent = (state.idx + 1) + " / " + state.questions.length;
   document.getElementById("score-chip").textContent = "⭐ " + state.score;
   var kindEl = document.getElementById("q-kind");
   kindEl.textContent = q.cat;
@@ -1078,8 +1094,8 @@ function answer(btn, val){
   next.textContent = isLast ? (isG1() ? "けっかを みる →" : "結果を見る →") : (isG1() ? "つぎの もんだい →" : "次の問題 →");
   next.addEventListener("click", function(){
     state.idx++;
-    document.getElementById("progress-bar").style.width = (state.idx / 20 * 100) + "%";
-    if (state.idx >= 20) showResult();
+    document.getElementById("progress-bar").style.width = (state.idx / state.questions.length * 100) + "%";
+    if (state.idx >= state.questions.length) showResult();
     else renderQuestion();
   });
   var zone = document.getElementById("feedback-zone");
@@ -1128,7 +1144,9 @@ function fmtTime(ms){
 }
 function showResult(){
   var elapsed = Date.now() - state.startTime;
-  var rank = rankOf(state.score);
+  var rankScore = (state.mode === "review" && state.questions.length > 0)
+    ? Math.round(state.score / state.questions.length * 20) : state.score;
+  var rank = rankOf(rankScore);
   document.getElementById("rank-bird").innerHTML = BIRD_SVG[rank.key];
   var photo = document.getElementById("rank-photo");
   var photoSrc = BIRD_PHOTO[rank.name];
@@ -1142,11 +1160,11 @@ function showResult(){
   }
   document.getElementById("rank-name").textContent = rank.name + "（大きさ：" + rank.size + "）";
   var stars = "";
-  for (var i = 0; i < 20; i++) stars += (i < state.score ? "★" : "☆");
+  for (var i = 0; i < state.questions.length; i++) stars += (i < state.score ? "★" : "☆");
   document.getElementById("rank-stars").textContent = stars;
-  document.getElementById("rank-score").textContent = "20もん中 " + state.score + "もん せいかい！";
+  document.getElementById("rank-score").textContent = state.questions.length + "もん中 " + state.score + "もん せいかい！";
   document.getElementById("rank-meta").innerHTML = "";
-  document.getElementById("rank-meta").textContent = LEVEL_LABEL[state.level] + " ／ かかった じかん： " + fmtTime(elapsed);
+  document.getElementById("rank-meta").textContent = (state.mode === "review" ? "まちがい ふくしゅう" : LEVEL_LABEL[state.level]) + " ／ かかった じかん： " + fmtTime(elapsed);
   var metaMsg = document.createElement("div");
   metaMsg.textContent = rank.msg;
   document.getElementById("rank-meta").appendChild(metaMsg);
@@ -1157,7 +1175,7 @@ function showResult(){
     ? "<span class='newbest'>🎉 ベストスコア こうしん！</span>"
     : (prevBest === null ? "<span class='newbest'>はじめての きろく！</span>" : "");
   updateBestLabels();
-  saveRecord(rank.name);
+  saveRecord(rank.name, elapsed);
   var list = document.getElementById("review-list");
   list.innerHTML = "";
   state.log.forEach(function(item, i){
@@ -1191,6 +1209,7 @@ function refreshPlayerUI(){
   document.querySelectorAll(".player-btn").forEach(function(b){
     b.classList.toggle("sel", b.getAttribute("data-player") === currentPlayer);
   });
+  renderReviewBtn();
 }
 document.querySelectorAll(".player-btn").forEach(function(b){
   b.addEventListener("click", function(){
@@ -1200,7 +1219,7 @@ document.querySelectorAll(".player-btn").forEach(function(b){
   });
 });
 refreshPlayerUI();
-function saveRecord(rankName){
+function saveRecord(rankName, elapsedMs){
   if (!currentPlayer) return;
   try {
     var raw = localStorage.getItem("kidsdrills_records_v1");
@@ -1208,8 +1227,9 @@ function saveRecord(rankName){
     if (!all[currentPlayer]) all[currentPlayer] = {};
     var rec = all[currentPlayer]["kokugo"] || {plays:0, questions:0, correct:0, bestRank:"たまご", lastPlayed:""};
     rec.plays += 1;
-    rec.questions += 20;
+    rec.questions += state.log.length;
     rec.correct += state.score;
+    rec.seconds = (rec.seconds || 0) + Math.round((elapsedMs || 0) / 1000);
     var curIdx = RANK_ORDER.indexOf(rec.bestRank);
     var newIdx = RANK_ORDER.indexOf(rankName);
     if (newIdx > curIdx) rec.bestRank = rankName;
@@ -1219,12 +1239,71 @@ function saveRecord(rankName){
     all[currentPlayer]["kokugo"] = rec;
     localStorage.setItem("kidsdrills_records_v1", JSON.stringify(all));
   } catch(e) {}
+  updateReviewStore();
+  renderReviewBtn();
+}
+
+/* ================= まちがい ふくしゅう（間違えた問題だけを貯めて出し直す） ================= */
+var REVIEW_KEY = "kidsdrills_review_v1";
+var DRILL_KEY = "kokugo";
+function loadReviewStore(){
+  try {
+    var r = JSON.parse(localStorage.getItem(REVIEW_KEY) || "{}");
+    return (r && typeof r === "object") ? r : {};
+  } catch(e){ return {}; }
+}
+function reviewList(player){
+  var s = loadReviewStore();
+  var mine = (s[player] || {})[DRILL_KEY];
+  return Array.isArray(mine) ? mine : [];
+}
+function saveReviewList(player, list){
+  var s = loadReviewStore();
+  if (!s[player]) s[player] = {};
+  s[player][DRILL_KEY] = list.slice(0, 60);
+  try { localStorage.setItem(REVIEW_KEY, JSON.stringify(s)); } catch(e) {}
+}
+function qKey(q){ return String(q.text) + "|" + String(q.answer); }
+function updateReviewStore(){
+  if (!currentPlayer) return;
+  var map = {};
+  reviewList(currentPlayer).forEach(function(item){ map[qKey(item.q)] = item; });
+  state.log.forEach(function(item){
+    var k = qKey(item.q);
+    if (item.correct){
+      if (state.mode === "review" && map[k]) delete map[k];
+    } else {
+      if (map[k]) map[k].misses = (map[k].misses || 1) + 1;
+      else map[k] = {q: item.q, misses: 1};
+    }
+  });
+  var out = Object.keys(map).map(function(k){ return map[k]; });
+  out.sort(function(a, b){ return (b.misses || 1) - (a.misses || 1); });
+  saveReviewList(currentPlayer, out);
+}
+function renderReviewBtn(){
+  var btn = document.getElementById("review-btn");
+  if (!btn) return;
+  var n = currentPlayer ? reviewList(currentPlayer).length : 0;
+  btn.classList.toggle("hidden", n === 0);
+  btn.textContent = "🔁 まちがい ふくしゅう（" + n + "もん）";
+}
+function startReview(){
+  var list = currentPlayer ? reviewList(currentPlayer) : [];
+  if (list.length === 0) return;
+  state.mode = "review";
+  state.questions = shuffle(list.map(function(item){ return item.q; })).slice(0, 20);
+  state.idx = 0; state.score = 0; state.log = [];
+  state.startTime = Date.now();
+  showScreen("game");
+  renderQuestion();
 }
 document.querySelectorAll(".mode-btn").forEach(function(btn){
   btn.addEventListener("click", function(){ startGame(btn.getAttribute("data-level")); });
 });
 document.getElementById("quit-btn").addEventListener("click", function(){ showScreen("start"); });
-document.getElementById("again-btn").addEventListener("click", function(){ startGame(state.level); });
+document.getElementById("again-btn").addEventListener("click", function(){ if (state.mode === "review") startReview(); else startGame(state.level); });
+document.getElementById("review-btn").addEventListener("click", function(){ startReview(); });
 document.getElementById("home-btn").addEventListener("click", function(){ showScreen("start"); });
 </script>
 </body>

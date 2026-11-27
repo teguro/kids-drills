@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<script>
+/* ===== ドリルランド PINゲート（そとがわチェック） ===== */
+(function () {
+  function todayStr() {
+    var d = new Date();
+    function p(n) { return (n < 10 ? "0" : "") + n; }
+    return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate());
+  }
+  var ok = false;
+  try { ok = localStorage.getItem("land_unlock_v1") === todayStr(); } catch (e) { ok = false; }
+  if (!ok) location.replace("index.html?next=play.html");
+})();
+</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ゲーム | あそびコーナー</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Hiragino Maru Gothic ProN", "Hiragino Sans", sans-serif; background: #fdf6ff; color: #333; }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 20px 16px 44px; }
+  h1 { font-size: 28px; text-align: center; margin: 6px 0 8px; }
+  .status { text-align: center; font-size: 19px; font-weight: bold; margin-bottom: 12px; }
+  .big-btn { display: block; width: 100%; border: none; border-radius: 16px; background: #8e44ad; color: #fff; font-family: inherit; font-size: 21px; font-weight: bold; padding: 15px; cursor: pointer; box-shadow: 0 4px 0 rgba(0,0,0,.15); margin-bottom: 14px; }
+  .big-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,.15); }
+  .holes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .hole { aspect-ratio: 1; border: none; border-radius: 50%; background: radial-gradient(circle at 50% 65%, #a1887f 0%, #8d6e63 55%, #795548 100%); font-size: 52px; cursor: pointer; display: flex; align-items: center; justify-content: center; touch-action: manipulation; padding: 0; }
+  .hole .bird { visibility: hidden; transform: translateY(8px); transition: transform .12s; }
+  .hole.up .bird { visibility: visible; transform: translateY(-6px); }
+  .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .card { aspect-ratio: .78; border: none; border-radius: 14px; background: #8e44ad; color: #fff; font-size: 36px; cursor: pointer; display: flex; align-items: center; justify-content: center; touch-action: manipulation; padding: 0; box-shadow: 0 3px 0 rgba(0,0,0,.15); }
+  .card.open { background: #fff; box-shadow: inset 0 0 0 3px #d9c7ec; }
+  .card.done { background: #e2f5e8; box-shadow: inset 0 0 0 3px #2e9e5b; }
+  a.back { display: block; margin: 26px auto 0; max-width: 320px; text-align: center; padding: 15px; border-radius: 16px; background: #555; color: #fff; font-size: 19px; font-weight: bold; text-decoration: none; box-shadow: 0 4px 0 rgba(0,0,0,.15); }
+  .hidden { display: none !important; }
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("kidsdrills_theme_v1")||"sora");}catch(e){}</script>
+<style>
+  html[data-theme="yuyake"] body{background:linear-gradient(180deg,#ff9d76 0%,#ffc98a 45%,#ffe9c9 100%);background-attachment:fixed;}
+  html[data-theme="mori"] body{background:linear-gradient(180deg,#8fd694 0%,#cdf0c0 55%,#f4fae4 100%);background-attachment:fixed;}
+  html[data-theme="umi"] body{background:linear-gradient(180deg,#4fb3d9 0%,#a5e3f5 55%,#eafcfd 100%);background-attachment:fixed;}
+  html[data-theme="sakura"] body{background:linear-gradient(180deg,#ffb7cd 0%,#ffd9e4 55%,#fff2f6 100%);background-attachment:fixed;}
+</style>
+</head>
+<body>
+<div id="timer-bar" style="display:none; position:fixed; top:0; left:0; right:0; z-index:60; background:rgba(90,70,50,.92); color:#fff; text-align:center; font-weight:bold; font-size:18px; padding:9px 4px;">⏰ のこり <span id="timer-bar-time">--:--</span></div>
+<div id="time-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:70; background:rgba(0,0,0,.55); align-items:center; justify-content:center; padding:20px;">
+  <div style="background:#fff; border-radius:20px; padding:28px 22px; text-align:center; max-width:340px; width:100%;">
+    <div style="font-size:52px;">⏰</div>
+    <div id="overlay-text" style="font-size:22px; font-weight:bold; margin:10px 0 18px;">じかん おわり！</div>
+    <a href="play.html" style="display:block; background:#8e44ad; color:#fff; border-radius:14px; padding:14px; font-size:19px; font-weight:bold; text-decoration:none;">あそびコーナーへ</a>
+  </div>
+</div>
+
+<div class="wrap">
+  <!-- ことりタッチ -->
+  <div id="touch-game" class="hidden">
+    <h1>🐥 ことりタッチ</h1>
+    <div class="status" id="touch-status">30びょうで 何羽 タッチできるかな？</div>
+    <button class="big-btn" id="touch-start" type="button">スタート！</button>
+    <div class="holes" id="holes"></div>
+  </div>
+
+  <!-- しんけいすいじゃく -->
+  <div id="memory-game" class="hidden">
+    <h1>🃏 しんけいすいじゃく</h1>
+    <div class="status" id="memory-status">カードを 2まい めくって ペアを あててね</div>
+    <button class="big-btn" id="memory-start" type="button">はじめから</button>
+    <div class="cards" id="cards"></div>
+  </div>
+
+  <a class="back" href="play.html">あそびコーナーへ</a>
+</div>
+
+<script>
+  /* ===== 共通タイマー（あそびコーナー） ===== */
+  function playEndsAt() {
+    try {
+      var t = JSON.parse(localStorage.getItem("kidsdrills_playtimer_v1") || "null");
+      return (t && t.endsAt) ? t.endsAt : 0;
+    } catch (e) { return 0; }
+  }
+  function fmtRemain(ms) {
+    var s = Math.max(0, Math.ceil(ms / 1000));
+    return Math.floor(s / 60) + ":" + ((s % 60) < 10 ? "0" : "") + (s % 60);
+  }
+  function tickTimer() {
+    var e = playEndsAt(), now = Date.now();
+    var bar = document.getElementById("timer-bar");
+    var ov = document.getElementById("time-overlay");
+    if (e && e > now) {
+      ov.style.display = "none";
+      bar.style.display = "";
+      document.getElementById("timer-bar-time").textContent = fmtRemain(e - now);
+      document.body.style.paddingTop = "48px";
+    } else {
+      bar.style.display = "none";
+      document.body.style.paddingTop = "";
+      ov.style.display = "flex";
+      document.getElementById("overlay-text").textContent = e ? "じかん おわり！" : "まず タイマーを セットしてね";
+    }
+  }
+  tickTimer();
+  setInterval(tickTimer, 500);
+
+  var gameKey = "touch";
+  try {
+    var g = new URLSearchParams(location.search).get("g");
+    if (g === "memory") gameKey = "memory";
+  } catch (e) {}
+
+  function shuffle(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  /* ===== ことりタッチ ===== */
+  if (gameKey === "touch") {
+    document.getElementById("touch-game").classList.remove("hidden");
+    document.title = "ことりタッチ | あそびコーナー";
+    var BIRDS = ["🐦", "🦆", "🦉", "🐧", "🦅", "🕊️", "🦢", "🐥"];
+    var holesEl = document.getElementById("holes");
+    var holeBtns = [];
+    for (var i = 0; i < 9; i++) {
+      (function () {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "hole";
+        var s = document.createElement("span");
+        s.className = "bird";
+        s.textContent = "🐦";
+        b.appendChild(s);
+        b.addEventListener("click", function () {
+          if (touch.up === b) {
+            touch.score++;
+            b.classList.remove("up");
+            touch.up = null;
+            paintTouchStatus();
+          }
+        });
+        holesEl.appendChild(b);
+        holeBtns.push(b);
+      })();
+    }
+    var touch = { playing: false, score: 0, up: null, endAt: 0, popTimer: null, tickInt: null };
+    function paintTouchStatus() {
+      var left = Math.max(0, Math.ceil((touch.endAt - Date.now()) / 1000));
+      document.getElementById("touch-status").textContent = touch.playing
+        ? "のこり " + left + "びょう　⭐ " + touch.score + "羽"
+        : "⭐ " + touch.score + "羽 タッチできた！";
+    }
+    function popBird() {
+      if (!touch.playing) return;
+      holeBtns.forEach(function (h) { h.classList.remove("up"); });
+      var b = holeBtns[Math.floor(Math.random() * holeBtns.length)];
+      b.querySelector(".bird").textContent = BIRDS[Math.floor(Math.random() * BIRDS.length)];
+      b.classList.add("up");
+      touch.up = b;
+      touch.popTimer = setTimeout(popBird, 620 + Math.random() * 350);
+    }
+    document.getElementById("touch-start").addEventListener("click", function () {
+      if (touch.popTimer) clearTimeout(touch.popTimer);
+      if (touch.tickInt) clearInterval(touch.tickInt);
+      touch.playing = true;
+      touch.score = 0;
+      touch.endAt = Date.now() + 30 * 1000;
+      document.getElementById("touch-start").textContent = "もういちど";
+      paintTouchStatus();
+      popBird();
+      touch.tickInt = setInterval(function () {
+        if (Date.now() >= touch.endAt) {
+          touch.playing = false;
+          clearInterval(touch.tickInt);
+          if (touch.popTimer) clearTimeout(touch.popTimer);
+          holeBtns.forEach(function (h) { h.classList.remove("up"); });
+          touch.up = null;
+          document.getElementById("touch-status").textContent = "おわり！ ⭐ " + touch.score + "羽 タッチできた！";
+        } else {
+          paintTouchStatus();
+        }
+      }, 250);
+    });
+  }
+
+  /* ===== しんけいすいじゃく ===== */
+  if (gameKey === "memory") {
+    document.getElementById("memory-game").classList.remove("hidden");
+    document.title = "しんけいすいじゃく | あそびコーナー";
+    var FACES = ["🐦", "🦉", "🦆", "🐧", "🦅", "🕊️"];
+    var mem = { open: [], matched: 0, moves: 0, lock: false };
+    function buildMemory() {
+      mem = { open: [], matched: 0, moves: 0, lock: false };
+      document.getElementById("memory-status").textContent = "カードを 2まい めくって ペアを あててね";
+      var deck = shuffle(FACES.concat(FACES));
+      var box = document.getElementById("cards");
+      box.innerHTML = "";
+      deck.forEach(function (face) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "card";
+        b.textContent = "？";
+        b.setAttribute("data-face", face);
+        b.addEventListener("click", function () { flipCard(b); });
+        box.appendChild(b);
+      });
+    }
+    function flipCard(b) {
+      if (mem.lock || b.classList.contains("open") || b.classList.contains("done")) return;
+      b.classList.add("open");
+      b.textContent = b.getAttribute("data-face");
+      mem.open.push(b);
+      if (mem.open.length < 2) return;
+      mem.moves++;
+      var x = mem.open[0], y = mem.open[1];
+      if (x.getAttribute("data-face") === y.getAttribute("data-face")) {
+        x.classList.add("done");
+        y.classList.add("done");
+        mem.open = [];
+        mem.matched++;
+        if (mem.matched >= FACES.length) {
+          document.getElementById("memory-status").textContent = "🎉 できた！ " + mem.moves + "回で そろったよ！";
+        } else {
+          document.getElementById("memory-status").textContent = "ペア " + mem.matched + " / " + FACES.length + "（" + mem.moves + "回 めくった）";
+        }
+      } else {
+        mem.lock = true;
+        document.getElementById("memory-status").textContent = "ペア " + mem.matched + " / " + FACES.length + "（" + mem.moves + "回 めくった）";
+        setTimeout(function () {
+          x.classList.remove("open");
+          y.classList.remove("open");
+          x.textContent = "？";
+          y.textContent = "？";
+          mem.open = [];
+          mem.lock = false;
+        }, 800);
+      }
+    }
+    document.getElementById("memory-start").addEventListener("click", buildMemory);
+    buildMemory();
+  }
+</script>
+</body>
+</html>

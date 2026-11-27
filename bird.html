@@ -231,6 +231,7 @@
         min-height:64px; font-size:26px; font-weight:800;
         background:var(--card); color:var(--ink);
         border:2px solid var(--card-border); border-radius:18px; box-shadow:var(--shadow);
+        touch-action:manipulation;
       }
       .pin-key:active{ background:var(--chip); }
       .pin-msg{ min-height:24px; font-weight:800; color:var(--bad-dark); }
@@ -321,7 +322,15 @@
       #toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
       .bird-illo{ display:block; margin:0 auto 4px; }
     </style>
-  </head>
+  <script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("kidsdrills_theme_v1")||"sora");}catch(e){}</script>
+<style>
+  /* はいけい テーマ（トップで えらぶ・この端末に 保存される） */
+  html[data-theme="yuyake"] body{background:linear-gradient(180deg,#ff9d76 0%,#ffc98a 45%,#ffe9c9 100%);background-attachment:fixed;}
+  html[data-theme="mori"] body{background:linear-gradient(180deg,#8fd694 0%,#cdf0c0 55%,#f4fae4 100%);background-attachment:fixed;}
+  html[data-theme="umi"] body{background:linear-gradient(180deg,#4fb3d9 0%,#a5e3f5 55%,#eafcfd 100%);background-attachment:fixed;}
+  html[data-theme="sakura"] body{background:linear-gradient(180deg,#ffb7cd 0%,#ffd9e4 55%,#fff2f6 100%);background-attachment:fixed;}
+</style>
+</head>
   <body>
     <div class="wrap">
       <nav class="topnav">

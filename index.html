@@ -44,7 +44,19 @@
   a.menu-btn.m-message { background: linear-gradient(180deg, #93c94e, #6da544); }              /* メジロ */
   a.menu-btn.m-drills { background: linear-gradient(180deg, #25a7dd, #1273ad); border-bottom: 7px solid #f07d1a; } /* カワセミ（背の青＋お腹の橙） */
   a.menu-btn.m-bird { background: linear-gradient(180deg, #bd8a52, #96682f); }                /* スズメ */
+  a.menu-btn.m-wallet { background: linear-gradient(180deg, #f7b733, #dd9410); }              /* おさいふ（金色） */
+  a.menu-btn.m-play { background: linear-gradient(180deg, #a55eea, #8e44ad); }                /* あそびコーナー（紫） */
   a.menu-btn.m-help { background: linear-gradient(180deg, #e05252, #c22e2e); border: 3px solid #f5d67b; }          /* アカショウビン＋金枠 */
+  .theme-box { margin-top: 22px; background: rgba(255,255,255,.75); border-radius: 18px; padding: 14px 14px 16px; }
+  .theme-title { font-size: 16px; font-weight: bold; color: #5a4632; margin-bottom: 10px; }
+  .theme-row { display: flex; gap: 8px; }
+  .theme-btn { flex: 1; border: 3px solid rgba(0,0,0,.08); border-radius: 14px; padding: 10px 2px; font-family: inherit; font-size: 14px; font-weight: bold; color: #333; cursor: pointer; min-height: 52px; touch-action: manipulation; }
+  .theme-btn.sel { border-color: #ff8a2a; }
+  .theme-btn[data-t="sora"] { background: linear-gradient(180deg, #8ec9e8, #cdeffd); }
+  .theme-btn[data-t="yuyake"] { background: linear-gradient(180deg, #ff9d76, #ffe9c9); }
+  .theme-btn[data-t="mori"] { background: linear-gradient(180deg, #8fd694, #f4fae4); }
+  .theme-btn[data-t="umi"] { background: linear-gradient(180deg, #4fb3d9, #eafcfd); }
+  .theme-btn[data-t="sakura"] { background: linear-gradient(180deg, #ffb7cd, #fff2f6); }
 
   .sky-footer { margin-top: 22px; font-size: 13px; color: #4a6b4a; }
 
@@ -54,9 +66,17 @@
   .pin-dot { width: 22px; height: 22px; border-radius: 50%; border: 3px solid #bbb; background: transparent; }
   .pin-dot.on { background: #e4572e; border-color: #e4572e; }
   .pin-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 320px; margin: 12px auto 0; }
-  .pin-key { font-family: inherit; font-size: 28px; font-weight: bold; padding: 16px 0; border: none; border-radius: 16px; background: #fdf1dc; color: #333; box-shadow: 0 3px 0 rgba(0,0,0,.12); cursor: pointer; }
+  .pin-key { font-family: inherit; font-size: 28px; font-weight: bold; padding: 16px 0; border: none; border-radius: 16px; background: #fdf1dc; color: #333; box-shadow: 0 3px 0 rgba(0,0,0,.12); cursor: pointer; touch-action: manipulation; }
   .pin-key:active { transform: translateY(2px); box-shadow: none; background: #f7e3c2; }
   .pin-msg { min-height: 26px; font-size: 17px; font-weight: bold; color: #d33; margin: 10px 0 0; }
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("kidsdrills_theme_v1")||"sora");}catch(e){}</script>
+<style>
+  /* はいけい テーマ（トップで えらぶ・この端末に 保存される） */
+  html[data-theme="yuyake"] body{background:linear-gradient(180deg,#ff9d76 0%,#ffc98a 45%,#ffe9c9 100%);background-attachment:fixed;}
+  html[data-theme="mori"] body{background:linear-gradient(180deg,#8fd694 0%,#cdf0c0 55%,#f4fae4 100%);background-attachment:fixed;}
+  html[data-theme="umi"] body{background:linear-gradient(180deg,#4fb3d9 0%,#a5e3f5 55%,#eafcfd 100%);background-attachment:fixed;}
+  html[data-theme="sakura"] body{background:linear-gradient(180deg,#ffb7cd 0%,#ffd9e4 55%,#fff2f6 100%);background-attachment:fixed;}
 </style>
 </head>
 <body>
@@ -145,8 +165,21 @@
 
     <a class="menu-btn m-message" href="message.html">✉️ ママから<span class="small">ママからの メッセージ</span></a>
     <a class="menu-btn m-drills" href="drills.html">ドリルランド<span class="small">かんじ・こくご・さんすう・しゃかい・りか・えいご</span></a>
+    <a class="menu-btn m-play" href="play.html">🎮 あそびコーナー<span class="small">クイズと ゲーム（タイマーつき）</span></a>
     <a class="menu-btn m-bird" href="bird.html">🐦 バード<span class="small">おうち つうか の かんり</span></a>
+    <a class="menu-btn m-wallet" href="wallet.html">👛 おさいふ<span class="small">おこづかい（げんきん）の きろく</span></a>
     <a class="menu-btn m-help" href="help.html">🆘 こまったとき<span class="small">ママ・お父さんに でんわする</span></a>
+
+    <div class="theme-box">
+      <div class="theme-title">🎨 はいけいを えらぶ</div>
+      <div class="theme-row">
+        <button class="theme-btn" type="button" data-t="sora">そら</button>
+        <button class="theme-btn" type="button" data-t="yuyake">ゆうやけ</button>
+        <button class="theme-btn" type="button" data-t="mori">もり</button>
+        <button class="theme-btn" type="button" data-t="umi">うみ</button>
+        <button class="theme-btn" type="button" data-t="sakura">さくら</button>
+      </div>
+    </div>
 
     <p class="sky-footer">🌿 ことりたちも おかえりを まってるよ 🌼</p>
   </div>
@@ -192,6 +225,47 @@ function landGetNext() {
 function showView(name) {
   $('gate-view').classList.toggle('hidden', name !== 'gate');
   $('menu-view').classList.toggle('hidden', name !== 'menu');
+  if (name === 'menu') maybeBackup();
+}
+
+/* ---------- 自動バックアップ（開錠してメニューが出たときだけ・変化があったときだけ） ---------- */
+function backupDevice() {
+  try {
+    var d = localStorage.getItem('kidsdrills_device_v1');
+    if (d) return d;
+    var p = localStorage.getItem('kidsdrills_last_player');
+    if (p === 'soichiro' || p === 'tsuzumi') return p;
+  } catch (e) {}
+  return 'ipad';
+}
+function maybeBackup() {
+  try {
+    var keys = ['kidsdrills_records_v1', 'kidsdrills_review_v1', 'bird_ledger_v1', 'kidsdrills_gacha_v1', 'kidsdrills_wallet_v1', 'kidsdrills_theme_v1', 'kidsdrills_last_player'];
+    var data = {}, any = false;
+    keys.forEach(function (k) {
+      var v = localStorage.getItem(k);
+      if (v !== null) {
+        data[k] = v;
+        if (k !== 'kidsdrills_theme_v1' && k !== 'kidsdrills_last_player') any = true;
+      }
+    });
+    if (!any) return;
+    var dataStr = JSON.stringify(data);
+    var h = 0;
+    for (var i = 0; i < dataStr.length; i++) { h = ((h << 5) - h + dataStr.charCodeAt(i)) | 0; }
+    var st = {};
+    try { st = JSON.parse(localStorage.getItem('kidsdrills_backup_state_v1') || '{}'); } catch (e) {}
+    var now = Date.now();
+    if (st.hash === h) return;                    // 変化なし
+    if (st.at && now - st.at < 10 * 60 * 1000) return; // 10分以内の連投防止
+    var payload = JSON.stringify({ app: 'tadaima-backup', version: 1, exportedAt: new Date().toISOString(), data: data });
+    fetch(ENDPOINT, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'backup', pin: LAND_PIN, device: backupDevice(), payload: payload })
+    });
+    try { localStorage.setItem('kidsdrills_backup_state_v1', JSON.stringify({ at: now, hash: h })); } catch (e) {}
+  } catch (e) {}
 }
 
 /* ---------- PINパッド ---------- */
@@ -320,6 +394,25 @@ function sendTadaima(pin) {
     showView('gate');
   }
   updatePinDots();
+})();
+</script>
+<script>
+/* はいけい テーマの えらびなおし（この端末の localStorage に保存） */
+(function(){
+  function cur(){ try { return localStorage.getItem("kidsdrills_theme_v1") || "sora"; } catch(e){ return "sora"; } }
+  function paint(){
+    var t = cur();
+    document.querySelectorAll(".theme-btn").forEach(function(b){ b.classList.toggle("sel", b.getAttribute("data-t") === t); });
+  }
+  document.querySelectorAll(".theme-btn").forEach(function(b){
+    b.addEventListener("click", function(){
+      var t = b.getAttribute("data-t");
+      try { localStorage.setItem("kidsdrills_theme_v1", t); } catch(e){}
+      document.documentElement.setAttribute("data-theme", t);
+      paint();
+    });
+  });
+  paint();
 })();
 </script>
 </body>

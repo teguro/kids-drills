@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<script>
+/* ===== ドリルランド PINゲート（そとがわチェック） =====
+   きょう開錠していなければ入口（index.html）へもどす。くわしくは GATE.md。 */
+(function () {
+  function todayStr() {
+    var d = new Date();
+    function p(n) { return (n < 10 ? "0" : "") + n; }
+    return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate());
+  }
+  var ok = false;
+  try { ok = localStorage.getItem("land_unlock_v1") === todayStr(); } catch (e) { ok = false; }
+  if (!ok) location.replace("index.html?next=gacha.html");
+})();
+</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>とりガチャ | ドリルランド</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Hiragino Maru Gothic ProN", "Hiragino Sans", sans-serif; background: #fff8e7; color: #333; }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 20px 16px 44px; }
+  h1 { font-size: 30px; text-align: center; margin: 6px 0 4px; }
+  .sub { text-align: center; color: #777; font-size: 14px; margin-bottom: 16px; }
+  .player-row { display: flex; gap: 10px; margin-bottom: 16px; }
+  .player-btn { flex: 1; border: 3px solid #ddd; background: #fff; border-radius: 16px; font-family: inherit; font-size: 19px; font-weight: bold; padding: 12px 4px; cursor: pointer; }
+  .player-btn.sel-soichiro { border-color: #2e7de4; background: #e3efff; }
+  .player-btn.sel-tsuzumi { border-color: #e4572e; background: #ffe9e1; }
+  .ticket-box { background: #fff; border-radius: 18px; box-shadow: 0 2px 6px rgba(0,0,0,.08); padding: 16px; text-align: center; margin-bottom: 16px; }
+  .ticket-num { font-size: 26px; font-weight: bold; }
+  .ticket-num b { font-size: 40px; color: #e4572e; }
+  .ticket-detail { font-size: 13px; color: #888; margin-top: 4px; line-height: 1.6; }
+  .gacha-btn { display: block; width: 100%; border: none; border-radius: 20px; background: linear-gradient(180deg, #ff9d2e, #f07d1a); color: #fff; font-family: inherit; font-size: 26px; font-weight: bold; padding: 20px; cursor: pointer; box-shadow: 0 5px 0 rgba(0,0,0,.18); }
+  .gacha-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 rgba(0,0,0,.18); }
+  .gacha-btn:disabled { background: #ccc; box-shadow: 0 5px 0 rgba(0,0,0,.1); cursor: default; }
+  .gacha-btn:disabled:active { transform: none; }
+  .capsule { text-align: center; font-size: 84px; line-height: 1.2; min-height: 110px; }
+  .capsule.spin { animation: shake .12s infinite; }
+  @keyframes shake { 0% { transform: rotate(-6deg); } 50% { transform: rotate(6deg) translateY(-6px); } 100% { transform: rotate(-6deg); } }
+  .reveal { background: #fff; border-radius: 18px; box-shadow: 0 2px 8px rgba(0,0,0,.12); padding: 18px; text-align: center; margin: 6px 0 18px; }
+  .reveal .new { display: inline-block; background: #e4572e; color: #fff; font-weight: bold; font-size: 14px; border-radius: 999px; padding: 3px 12px; margin-bottom: 6px; }
+  .reveal .bird-name { font-size: 30px; font-weight: bold; margin: 4px 0 2px; }
+  .reveal .bird-fact { font-size: 14px; color: #666; line-height: 1.6; }
+  .rarity { font-size: 15px; letter-spacing: 2px; }
+  h2 { font-size: 21px; margin: 22px 0 10px; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .card { background: #fff; border-radius: 14px; box-shadow: 0 2px 5px rgba(0,0,0,.07); padding: 10px 6px 12px; text-align: center; position: relative; }
+  .card .c-name { font-size: 16px; font-weight: bold; margin-top: 2px; }
+  .card .c-size { font-size: 11px; color: #999; }
+  .card.locked { opacity: .45; filter: grayscale(1); }
+  .card .cnt { position: absolute; top: 6px; right: 6px; background: #2e7de4; color: #fff; font-size: 12px; font-weight: bold; border-radius: 999px; padding: 1px 8px; }
+  .complete { background: #fff3c9; border: 2px solid #f0b90b; border-radius: 14px; text-align: center; font-size: 19px; font-weight: bold; padding: 14px; margin-top: 14px; }
+  a.back { display: block; margin: 30px auto 0; max-width: 320px; text-align: center; padding: 16px; border-radius: 16px; background: #2e9e5b; color: #fff; font-size: 20px; font-weight: bold; text-decoration: none; box-shadow: 0 4px 0 rgba(0,0,0,.15); }
+  .hidden { display: none !important; }
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("kidsdrills_theme_v1")||"sora");}catch(e){}</script>
+<style>
+  /* はいけい テーマ（トップで えらぶ・この端末に 保存される） */
+  html[data-theme="yuyake"] body{background:linear-gradient(180deg,#ff9d76 0%,#ffc98a 45%,#ffe9c9 100%);background-attachment:fixed;}
+  html[data-theme="mori"] body{background:linear-gradient(180deg,#8fd694 0%,#cdf0c0 55%,#f4fae4 100%);background-attachment:fixed;}
+  html[data-theme="umi"] body{background:linear-gradient(180deg,#4fb3d9 0%,#a5e3f5 55%,#eafcfd 100%);background-attachment:fixed;}
+  html[data-theme="sakura"] body{background:linear-gradient(180deg,#ffb7cd 0%,#ffd9e4 55%,#fff2f6 100%);background-attachment:fixed;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🐦 とりガチャ</h1>
+  <div class="sub">ドリルを がんばると ガチャけんが たまるよ。<br>とりの コレクションを あつめよう！</div>
+
+  <div class="player-row">
+    <button class="player-btn" id="player-soichiro" type="button">そういちろう</button>
+    <button class="player-btn" id="player-tsuzumi" type="button">つづみ</button>
+  </div>
+
+  <div class="ticket-box">
+    <div class="ticket-num">🎟️ ガチャけん あと <b id="ticket-num">0</b> まい</div>
+    <div class="ticket-detail" id="ticket-detail"></div>
+  </div>
+
+  <div class="capsule" id="capsule">🪺</div>
+  <button class="gacha-btn" id="gacha-btn" type="button">ガチャを まわす</button>
+
+  <div class="reveal hidden" id="reveal"></div>
+
+  <h2>とり コレクション（<span id="col-count">0</span> / 9）</h2>
+  <div class="grid" id="grid"></div>
+  <div class="complete hidden" id="complete">🎉 コンプリート！ 9しゅるい 全部 あつまったよ！</div>
+
+  <a class="back" href="drills.html">ドリルランドにもどる</a>
+</div>
+
+<script>
+  var BIRDS = [
+    { name: "スズメ", size: "約14cm", rarity: 1, w: 24, body: "#b08954", wing: "#8a6844", belly: "#f3e6cf", fact: "ほっぺの 黒い もようが めじるし。いちばん 身近な とり。" },
+    { name: "シジュウカラ", size: "約15cm", rarity: 1, w: 22, body: "#7fae4c", wing: "#5d8a38", belly: "#fdf6d8", fact: "胸の 黒い ネクタイもようが おしゃれ。ことばを つかう 研究でも 有名。" },
+    { name: "モズ", size: "約20cm", rarity: 1, w: 20, body: "#a9805a", wing: "#7d5c3e", belly: "#f7ead2", fact: "つかまえた 虫を 枝に さす「はやにえ」で 有名な ハンター。" },
+    { name: "ツミ", size: "約27cm", rarity: 2, w: 12, body: "#7d8ca3", wing: "#5b6a82", belly: "#f2ede2", fact: "日本で いちばん 小さい タカの なかま。オスは もっと 小さいよ。" },
+    { name: "ハイタカ", size: "約35cm", rarity: 2, w: 9, body: "#6d7f99", wing: "#4c5d75", belly: "#f5efe0", fact: "森の 中を すばやく 飛んで、小鳥を つかまえる。" },
+    { name: "オオタカ", size: "約55cm", rarity: 2, w: 6, body: "#5d6d84", wing: "#41506a", belly: "#f7f3e8", fact: "速くて 賢い ハンター。白い まゆげ もようが りりしい。" },
+    { name: "クマタカ", size: "約75cm", rarity: 3, w: 4, body: "#6b543c", wing: "#4e3b28", belly: "#efe3cc", fact: "森の 大きな 猛禽。頭の 後ろの 冠羽（かんう）が かっこいい。" },
+    { name: "イヌワシ", size: "約85cm", rarity: 3, w: 2, body: "#5f4630", wing: "#42301f", belly: "#e9dcc2", fact: "空の 王さま。大きな 翼で ゆうゆうと 飛ぶ。" },
+    { name: "オオワシ", size: "約95cm", rarity: 3, w: 1, body: "#4a3a30", wing: "#2f2a33", belly: "#f4f1ea", fact: "日本で 見られる いちばん 大きな ワシ。冬に 北海道へ やってくる。" }
+  ];
+  var GACHA_KEY = "kidsdrills_gacha_v1";
+  var currentPlayer = null;
+  try {
+    var lp = localStorage.getItem("kidsdrills_last_player");
+    if (lp === "soichiro" || lp === "tsuzumi") currentPlayer = lp;
+  } catch (e) {}
+  if (!currentPlayer) currentPlayer = "soichiro";
+
+  function birdSVG(b, px) {
+    return '<svg width="' + px + '" height="' + px + '" viewBox="0 0 120 120" aria-hidden="true">'
+      + '<ellipse cx="58" cy="72" rx="34" ry="24" fill="' + b.body + '"/>'
+      + '<path d="M30 66 Q10 60 6 44 Q24 50 34 58 Z" fill="' + b.wing + '"/>'
+      + '<ellipse cx="66" cy="78" rx="20" ry="15" fill="' + b.belly + '"/>'
+      + '<path d="M44 62 Q62 52 76 62 Q62 70 46 70 Z" fill="' + b.wing + '"/>'
+      + '<circle cx="86" cy="46" r="17" fill="' + b.body + '"/>'
+      + '<path d="M101 42 L116 48 L101 53 Z" fill="#f2a03d"/>'
+      + '<circle cx="90" cy="43" r="3.2" fill="#222"/>'
+      + '<path d="M52 94 L50 106 M66 94 L66 106" stroke="#888" stroke-width="3" stroke-linecap="round"/>'
+      + '</svg>';
+  }
+  function loadGacha() {
+    try {
+      var g = JSON.parse(localStorage.getItem(GACHA_KEY) || "{}");
+      return (g && typeof g === "object") ? g : {};
+    } catch (e) { return {}; }
+  }
+  function myGacha() {
+    var g = loadGacha();
+    if (!g[currentPlayer] || typeof g[currentPlayer] !== "object") g[currentPlayer] = { spent: 0, birds: {} };
+    if (typeof g[currentPlayer].spent !== "number") g[currentPlayer].spent = 0;
+    if (!g[currentPlayer].birds || typeof g[currentPlayer].birds !== "object") g[currentPlayer].birds = {};
+    return g;
+  }
+  function totals() {
+    var rec = {};
+    try { rec = JSON.parse(localStorage.getItem("kidsdrills_records_v1") || "{}"); } catch (e) {}
+    var mine = rec[currentPlayer] || {};
+    var plays = 0, seconds = 0;
+    ["kanji", "kokugo", "sansuu", "shakai", "rika", "eigo"].forEach(function (k) {
+      var r = mine[k];
+      if (r) { plays += (r.plays || 0); seconds += (r.seconds || 0); }
+    });
+    return { plays: plays, seconds: seconds };
+  }
+  function earned() {
+    var t = totals();
+    return Math.floor(t.plays / 5) + Math.floor(t.seconds / 1800);
+  }
+  function render() {
+    document.getElementById("player-soichiro").className = "player-btn" + (currentPlayer === "soichiro" ? " sel-soichiro" : "");
+    document.getElementById("player-tsuzumi").className = "player-btn" + (currentPlayer === "tsuzumi" ? " sel-tsuzumi" : "");
+    var g = myGacha();
+    var left = earned() - g[currentPlayer].spent;
+    if (left < 0) left = 0;
+    document.getElementById("ticket-num").textContent = left;
+    var t = totals();
+    document.getElementById("ticket-detail").textContent =
+      "ドリル " + t.plays + "かい ／ じかん " + Math.floor(t.seconds / 60) + "ふん がんばったよ。"
+      + "（5かいで 1まい、30ふんで 1まい たまるよ）";
+    document.getElementById("gacha-btn").disabled = left <= 0;
+    var grid = document.getElementById("grid");
+    grid.innerHTML = "";
+    var owned = 0;
+    BIRDS.forEach(function (b) {
+      var cnt = g[currentPlayer].birds[b.name] || 0;
+      if (cnt > 0) owned++;
+      var div = document.createElement("div");
+      div.className = "card" + (cnt > 0 ? "" : " locked");
+      div.innerHTML = (cnt > 1 ? '<span class="cnt">×' + cnt + '</span>' : "")
+        + birdSVG(b, 64)
+        + '<div class="c-name">' + (cnt > 0 ? b.name : "？？？") + '</div>'
+        + '<div class="c-size">' + (cnt > 0 ? b.size : "まだ みつけてない") + '</div>';
+      grid.appendChild(div);
+    });
+    document.getElementById("col-count").textContent = owned;
+    document.getElementById("complete").classList.toggle("hidden", owned < BIRDS.length);
+  }
+  function draw() {
+    var totalW = 0;
+    BIRDS.forEach(function (b) { totalW += b.w; });
+    var r = Math.random() * totalW;
+    for (var i = 0; i < BIRDS.length; i++) {
+      r -= BIRDS[i].w;
+      if (r <= 0) return BIRDS[i];
+    }
+    return BIRDS[0];
+  }
+  document.getElementById("gacha-btn").addEventListener("click", function () {
+    var g = myGacha();
+    if (earned() - g[currentPlayer].spent <= 0) return;
+    var btn = document.getElementById("gacha-btn");
+    var cap = document.getElementById("capsule");
+    var reveal = document.getElementById("reveal");
+    btn.disabled = true;
+    reveal.classList.add("hidden");
+    cap.textContent = "🎁";
+    cap.classList.add("spin");
+    setTimeout(function () {
+      cap.classList.remove("spin");
+      cap.textContent = "🐣";
+      var b = draw();
+      var isNew = !g[currentPlayer].birds[b.name];
+      g[currentPlayer].birds[b.name] = (g[currentPlayer].birds[b.name] || 0) + 1;
+      g[currentPlayer].spent += 1;
+      try { localStorage.setItem(GACHA_KEY, JSON.stringify(g)); } catch (e) {}
+      var stars = b.rarity === 3 ? "★★★ スーパーレア！" : (b.rarity === 2 ? "★★ レア" : "★ ノーマル");
+      reveal.innerHTML = (isNew ? '<span class="new">あたらしい！</span>' : "")
+        + '<div class="rarity">' + stars + '</div>'
+        + birdSVG(b, 120)
+        + '<div class="bird-name">' + b.name + '</div>'
+        + '<div class="bird-fact">大きさ： ' + b.size + '<br>' + b.fact + '</div>';
+      reveal.classList.remove("hidden");
+      render();
+    }, 900);
+  });
+  ["soichiro", "tsuzumi"].forEach(function (p) {
+    document.getElementById("player-" + p).addEventListener("click", function () {
+      currentPlayer = p;
+      try { localStorage.setItem("kidsdrills_last_player", p); } catch (e) {}
+      document.getElementById("reveal").classList.add("hidden");
+      document.getElementById("capsule").textContent = "🪺";
+      render();
+    });
+  });
+  render();
+</script>
+</body>
+</html>
