@@ -16,6 +16,34 @@
   if (!ok) location.replace("index.html?next=sansuu.html");
 })();
 </script>
+<script>
+/* ===== バージョンチェック：新しい版が出ていたら自動で最新を取り直す =====
+   version.json をキャッシュなしで確認し、版が違えば URL を変えて読み直す。
+   公開のたびに SITE_VERSION と version.json を同じ値に上げること（GATE.md 参照）。 */
+(function () {
+  var SITE_VERSION = "20261127-2";
+  function alreadyTried() {
+    try { return new URLSearchParams(location.search).get("_v") === SITE_VERSION; }
+    catch (e) { return false; }
+  }
+  if (alreadyTried()) return;
+  fetch("version.json?x=" + Date.now(), { cache: "no-store" })
+    .then(function (r) { return r.json(); })
+    .then(function (j) {
+      if (!j || !j.version || j.version === SITE_VERSION) return;
+      var key = "sitever_try_" + j.version;
+      var n = 0;
+      try {
+        n = parseInt(sessionStorage.getItem(key) || "0", 10) || 0;
+        if (n >= 2) return;
+        sessionStorage.setItem(key, String(n + 1));
+      } catch (e) {}
+      location.replace(location.pathname + "?_v=" + encodeURIComponent(j.version));
+    })
+    .catch(function () {});
+})();
+</script>
+
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="color-scheme" content="light dark" />
