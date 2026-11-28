@@ -18,7 +18,7 @@
 <script>
 /* ===== バージョンチェック：新しい版が出ていたら自動で最新を取り直す ===== */
 (function () {
-  var SITE_VERSION = "20261128-5";
+  var SITE_VERSION = "20261128-6";
   function alreadyTried() {
     try { return new URLSearchParams(location.search).get("_v") === SITE_VERSION; }
     catch (e) { return false; }
@@ -120,9 +120,8 @@
       <h2>▶️ きく</h2>
       <div class="ep-title" id="ep-title">よみこみ中…</div>
       <div class="ep-onair" id="ep-onair"></div>
-      <iframe id="player-frame" title="NHK らじる★らじる プレーヤー" style="width:100%;height:210px;border:2px solid #e8dcc0;border-radius:14px;margin-top:12px;background:#111;" allow="autoplay; encrypted-media" loading="lazy"></iframe>
-      <p class="play-note">下の ボタンを おすと ここで はじまるよ（ニュースは 5分くらい）</p>
-      <p style="text-align:center;margin:6px 0 0;"><a id="player-open" href="#" target="_blank" rel="noopener" style="font-size:15px;color:#2e7de4;font-weight:bold;">▶ おおきな画面で ひらく</a></p>
+      <audio id="player" controls preload="none" playsinline></audio>
+      <p class="play-note">▶ ボタンを おすと はじまるよ（5分くらい）</p>
       <div id="ep-list"></div>
       <p class="msg err" id="play-msg"></p>
     </div>
@@ -233,18 +232,12 @@ function playEpisode(ep, btn, play) {
   $('ep-title').textContent = ep.title || 'やさしいことばニュース';
   $('ep-onair').textContent = ep.onair || '';
   $('play-msg').textContent = '';
-  var frame = $('player-frame');
-  var open = $('player-open');
-  if (ep.player) {
-    if (frame.getAttribute('src') !== ep.player) frame.src = ep.player;
-    open.href = ep.player;
-    open.style.display = '';
-  } else {
-    open.style.display = 'none';
-    $('play-msg').textContent = 'この回は 下の「らじる★らじるの ページで きく」から きいてみてね';
-  }
+  var player = $('player');
+  player.src = ep.stream;
   if (play) {
-    frame.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    player.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    var p = player.play();
+    if (p && p.catch) p.catch(function () {});
   }
 }
 
@@ -284,6 +277,12 @@ function renderTaiso() {
     list.appendChild(b);
   });
 }
+
+$('player').addEventListener('error', function () {
+  if (episodes.length || taiso.length) {
+    $('play-msg').textContent = 'うまく 再生できなかった…下の「らじる★らじるの ページで きく」から きいてみてね';
+  }
+}, true);
 
 /* ---------- 要約 ---------- */
 function renderSummary(summary) {
