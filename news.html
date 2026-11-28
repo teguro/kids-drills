@@ -18,7 +18,7 @@
 <script>
 /* ===== バージョンチェック：新しい版が出ていたら自動で最新を取り直す ===== */
 (function () {
-  var SITE_VERSION = "20261128-8";
+  var SITE_VERSION = "20261128-9";
   function alreadyTried() {
     try { return new URLSearchParams(location.search).get("_v") === SITE_VERSION; }
     catch (e) { return false; }
@@ -87,7 +87,7 @@
 <body>
 <div class="wrap">
   <h1>📻 ラジオ</h1>
-  <p class="sub">NHK「やさしいことばニュース」と「ラジオ体操」を きく ページ。<br>ニュースは 月よう日〜金よう日、よる7時30分からの 5分間だよ。</p>
+  <p class="sub">NHKの ラジオを きく ページ。<br>やさしいことばニュース・ラジオ体操・子ども科学電話相談だよ。</p>
 
   <!-- ============ PIN入力 ============ -->
   <section id="view-pin">
@@ -132,6 +132,12 @@
       <div id="taiso-list"></div>
     </div>
 
+    <div class="card">
+      <h2>📞 子ども科学電話相談</h2>
+      <p style="font-size:15px;color:#777;margin:0 0 4px;line-height:1.6;">まいしゅう 日よう日 あさ10時から。子どもたちの しつもんに 先生が 答えるよ。<br>10時台と 11時台（それぞれ 55分くらい）。きけるのは 1週間だけ！</p>
+      <div id="kodomo-list"></div>
+    </div>
+
     <div class="card hidden" id="summary-card">
       <h2>📰 きょうのニュース（まとめ）</h2>
       <div class="summary-text" id="summary-text"></div>
@@ -142,6 +148,7 @@
       <h2>うまく きけないときは</h2>
       <a class="fallback-btn" href="https://www.nhk.or.jp/radio/ondemand/detail.html?p=34PY344RPJ_01" target="_blank" rel="noopener">らじる★らじるの ページで きく</a>
       <a class="fallback-btn" style="margin-top:10px;background:#2e7d4f;" href="https://www.nhk.or.jp/radio/ondemand/detail.html?p=N9N4P87RLP_01" target="_blank" rel="noopener">ラジオ体操の ページで きく</a>
+      <a class="fallback-btn" style="margin-top:10px;background:#7a4fa3;" href="https://www.nhk.or.jp/radio/ondemand/detail.html?p=P3X5LNZ17X_00" target="_blank" rel="noopener">子ども科学電話相談の ページで きく</a>
     </div>
   </section>
 
@@ -154,6 +161,7 @@ var ENDPOINT = 'https://script.google.com/macros/s/AKfycbyurtmUMcRCv2MmyBu96IlME
 var currentPin = '';
 var episodes = [];
 var taiso = [];
+var kodomo = [];
 
 function $(id) { return document.getElementById(id); }
 function esc(s) {
@@ -202,10 +210,12 @@ function tryPin(pin) {
       currentPin = pin;
       episodes = j.episodes || [];
       taiso = j.taiso || [];
+      kodomo = j.kodomo || [];
       $('view-pin').classList.add('hidden');
       $('view-main').classList.remove('hidden');
       renderEpisodes();
       renderTaiso();
+      renderKodomo();
       renderSummary(j.summary);
     })
     .catch(function () {
@@ -217,7 +227,7 @@ function tryPin(pin) {
 
 /* ---------- プレーヤー（ニュースと体操で共有） ---------- */
 function clearBtnStates() {
-  ['ep-list', 'taiso-list'].forEach(function (id) {
+  ['ep-list', 'taiso-list', 'kodomo-list'].forEach(function (id) {
     var btns = $(id).children;
     for (var k = 0; k < btns.length; k++) {
       btns[k].className = btns[k].className.replace(' on', '');
@@ -278,8 +288,27 @@ function renderTaiso() {
   });
 }
 
+function renderKodomo() {
+  var list = $('kodomo-list');
+  list.innerHTML = '';
+  if (!kodomo.length) {
+    list.innerHTML = '<p style="font-size:15px;color:#999;">いまは きける 回が ないみたい（日よう日の あとに あたらしくなるよ）</p>';
+    return;
+  }
+  kodomo.forEach(function (ep) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'ep-btn';
+    var theme = (ep.title || '').replace(/^子ども科学電話相談\s*/, '');
+    b.innerHTML = esc(theme || ep.title) +
+      '<span style="display:block;font-size:13px;color:#999;font-weight:normal;">' + esc(ep.onair || '') + '</span>';
+    b.addEventListener('click', function () { playEpisode(ep, b, true); });
+    list.appendChild(b);
+  });
+}
+
 $('player').addEventListener('error', function () {
-  if (episodes.length || taiso.length) {
+  if (episodes.length || taiso.length || kodomo.length) {
     $('play-msg').textContent = 'うまく 再生できなかった…下の「らじる★らじるの ページで きく」から きいてみてね';
   }
 }, true);

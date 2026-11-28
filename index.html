@@ -80,7 +80,7 @@
    version.json をキャッシュなしで確認し、版が違えば URL を変えて読み直す。
    公開のたびに SITE_VERSION と version.json を同じ値に上げること（GATE.md 参照）。 */
 (function () {
-  var SITE_VERSION = "20261128-8";
+  var SITE_VERSION = "20261128-9";
   function alreadyTried() {
     try { return new URLSearchParams(location.search).get("_v") === SITE_VERSION; }
     catch (e) { return false; }
@@ -203,7 +203,7 @@
     <a class="menu-btn m-moon" href="tsuki.html">🌙 つき<span class="small">きょうの げつれい・つぎの まんげつ</span></a>
     <a class="menu-btn m-kansatsu" href="kansatsu.html">🔭 かんさつ記録<span class="small">いきものの きろく（家族みんな）</span></a>
     <a class="menu-btn m-news" href="news.html">📻 ラジオ<span class="small">やさしいニュース・ラジオ体操を きく</span></a>
-    <a class="menu-btn m-kotori" href="kotori.html">🐦 朝の小鳥<span class="small">とりの こえ（文化放送・ランダム再生）</span></a>
+    <a class="menu-btn m-kotori" href="kotori.html">🎧 ポッドキャスト<span class="small">朝の小鳥・とりぴけの野鳥ラジオ</span></a>
     <a class="menu-btn m-help" href="help.html">🆘 こまったとき<span class="small">ママ・お父さんに でんわする</span></a>
 
     <div class="theme-box">

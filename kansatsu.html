@@ -18,7 +18,7 @@
 <script>
 /* ===== バージョンチェック：新しい版が出ていたら自動で最新を取り直す ===== */
 (function () {
-  var SITE_VERSION = "20261128-8";
+  var SITE_VERSION = "20261128-9";
   function alreadyTried() {
     try { return new URLSearchParams(location.search).get("_v") === SITE_VERSION; }
     catch (e) { return false; }
