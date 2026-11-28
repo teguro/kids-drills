@@ -19,7 +19,7 @@
    version.json をキャッシュなしで確認し、版が違えば URL を変えて読み直す。
    公開のたびに SITE_VERSION と version.json を同じ値に上げること（GATE.md 参照）。 */
 (function () {
-  var SITE_VERSION = "20261128-10";
+  var SITE_VERSION = "20261128-11";
   function alreadyTried() {
     try { return new URLSearchParams(location.search).get("_v") === SITE_VERSION; }
     catch (e) { return false; }
@@ -66,6 +66,8 @@
   .pz-piece { aspect-ratio: 1; border: none; border-radius: 8px; cursor: pointer; padding: 0; background-repeat: no-repeat; touch-action: manipulation; }
   .pz-piece.sel { box-shadow: 0 0 0 4px #f39c12; }
   .pz-sample { display: block; width: 110px; aspect-ratio: 1; object-fit: cover; border-radius: 10px; margin: 0 auto 10px; }
+  .pz-grid.done { box-shadow: 0 0 0 6px #e53935, 0 0 26px rgba(229,57,53,.55); border-radius: 10px; }
+  .pz-sample.done { box-shadow: 0 0 0 5px #e53935, 0 0 18px rgba(229,57,53,.55); }
   /* えさキャッチ */
   .catch-area { position: relative; height: 380px; border-radius: 18px; background: linear-gradient(180deg, #bfe8ff 0%, #e8f9ff 70%, #d9f2c2 100%); overflow: hidden; touch-action: none; }
   .catch-bird { position: absolute; bottom: 8px; width: 68px; height: 68px; border-radius: 50%; object-fit: cover; border: 3px solid #fff; box-shadow: 0 3px 8px rgba(0,0,0,.25); transform: translateX(-50%); pointer-events: none; }
@@ -413,6 +415,8 @@
       paintPuzzle();
       if (pzSolved()) {
         pz.done = true;
+        document.getElementById("puzzle-grid").classList.add("done");
+        document.getElementById("puzzle-sample").classList.add("done");
         document.getElementById("puzzle-status").textContent =
           "🎉 かんせい！ " + pz.bird.name + "（" + pz.bird.size + "） " + pz.moves + "回で できたよ！";
         plDone("puzzle");
@@ -426,6 +430,8 @@
       pz.order = shuffle([0, 1, 2, 3, 4, 5, 6, 7, 8]);
       if (pzSolved()) { var t = pz.order[0]; pz.order[0] = pz.order[1]; pz.order[1] = t; }
       pz.sel = -1; pz.moves = 0; pz.done = false;
+      document.getElementById("puzzle-grid").classList.remove("done");
+      document.getElementById("puzzle-sample").classList.remove("done");
       document.getElementById("puzzle-status").textContent = "タップで 2まい えらんで 入れかえてね";
       paintPuzzle();
     }
