@@ -17,7 +17,7 @@
 <script>
 /* ===== バージョンチェック ===== */
 (function () {
-  var SITE_VERSION = "20261128-7";
+  var SITE_VERSION = "20261128-8";
   function alreadyTried() {
     try { return new URLSearchParams(location.search).get("_v") === SITE_VERSION; }
     catch (e) { return false; }
@@ -80,6 +80,7 @@
     <div class="ep-date" id="ep-date"></div>
     <div class="ep-desc" id="ep-desc"></div>
     <audio id="player" controls preload="none" playsinline></audio>
+    <button class="next-btn" id="skip-btn" type="button" style="background:#ffe9c9;border-color:#f0c98a;">⏩ 40秒 すすむ（さいしょの CMを とばす）</button>
     <button class="shuffle-btn" id="shuffle-btn" type="button">🎲 ランダムで きく</button>
     <button class="next-btn hidden" id="next-btn" type="button" style="display:none;">⏭ つぎの ランダムへ</button>
     <p class="msg" id="play-msg"></p>
@@ -168,6 +169,11 @@ $('shuffle-btn').addEventListener('click', function () {
 });
 $('next-btn').addEventListener('click', function () {
   playEpisode(pickRandom(), true);
+});
+$('skip-btn').addEventListener('click', function () {
+  var p = $('player');
+  if (!p.src) return;
+  try { p.currentTime = Math.min((p.currentTime || 0) + 40, (p.duration || 1e9) - 1); } catch (e) {}
 });
 $('player').addEventListener('ended', function () {
   if (shuffleOn) playEpisode(pickRandom(), true);
