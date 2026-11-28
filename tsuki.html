@@ -20,7 +20,7 @@
    version.json をキャッシュなしで確認し、版が違えば URL を変えて読み直す。
    公開のたびに SITE_VERSION と version.json を同じ値に上げること（GATE.md 参照）。 */
 (function () {
-  var SITE_VERSION = "20261128-14";
+  var SITE_VERSION = "20261128-15";
   function alreadyTried() {
     try { return new URLSearchParams(location.search).get("_v") === SITE_VERSION; }
     catch (e) { return false; }
@@ -70,6 +70,17 @@
   .day .d-lab { font-size: 12.5px; color: #888; margin-top: 4px; line-height: 1.25; }
   .day.today .d-lab { color: #c22e2e; font-weight: bold; }
   .mini-sky { background: #232c5c; border-radius: 10px; padding: 4px 0 2px; }
+  .orbit-box { background: linear-gradient(180deg, #141c3f, #2a3670); border-radius: 24px; padding: 18px 10px 14px; margin-top: 16px; text-align: center; box-shadow: 0 4px 0 rgba(0,0,0,.18); }
+  .orbit-box .ob-title { color: #ffe98a; font-size: 20px; font-weight: bold; margin: 0 0 6px; }
+  .orbit-box .ob-note { color: #cfd8ff; font-size: 13px; margin: 8px 0 0; line-height: 1.6; }
+  .planet-box { background: #fff; border-radius: 18px; box-shadow: 0 2px 6px rgba(0,0,0,.08); padding: 16px 14px 10px; margin-top: 16px; }
+  .planet-box .pb-title { text-align: center; font-size: 17px; font-weight: bold; color: #555; margin-bottom: 6px; }
+  .planet-row { border-top: 1px solid #f0ead8; padding: 10px 2px; }
+  .planet-row:first-of-type { border-top: none; }
+  .planet-row .pr-name { font-size: 19px; font-weight: bold; }
+  .planet-row .pr-desc { font-size: 15px; color: #555; line-height: 1.65; margin-top: 2px; }
+  .retro { display: inline-block; background: #f3e8ff; color: #7b3fb3; font-size: 12.5px; font-weight: bold; border-radius: 999px; padding: 2px 10px; margin-left: 8px; vertical-align: 2px; }
+  .planet-box .pb-note { font-size: 12px; color: #999; margin-top: 6px; line-height: 1.6; }
   a.back { display: block; margin: 30px auto 0; max-width: 320px; text-align: center; padding: 16px; border-radius: 16px; background: #555; color: #fff; font-size: 20px; font-weight: bold; text-decoration: none; box-shadow: 0 4px 0 rgba(0,0,0,.15); }
   .hidden { display: none !important; }
 </style>
@@ -116,6 +127,37 @@
   <div class="week-box">
     <div class="week-title">これからの つき</div>
     <div class="week-row" id="week-row"></div>
+  </div>
+
+  <div class="orbit-box">
+    <p class="ob-title">☀️ たいよう・ちきゅう・つきの 位置</p>
+    <div id="orbit-svg"></div>
+    <p class="ob-note">太陽の まわりを まわる 地球と、その まわりを まわる 月を、<br>上から 見た 図だよ（きょりは ちぢめて かいてあるよ）。</p>
+  </div>
+
+  <div class="planet-box">
+    <div class="pb-title">🪐 わくせいは どこ？</div>
+    <div class="planet-row">
+      <span class="pr-name">☿ すいせい（水星）</span><span id="mercury-retro"></span>
+      <div class="pr-desc" id="mercury-desc">よみこみ中…</div>
+    </div>
+    <div class="planet-row">
+      <span class="pr-name">♀ きんせい（金星）</span><span id="venus-retro"></span>
+      <div class="pr-desc" id="venus-desc">よみこみ中…</div>
+    </div>
+    <div class="planet-row">
+      <span class="pr-name">♂ かせい（火星）</span><span id="mars-retro"></span>
+      <div class="pr-desc" id="mars-desc">よみこみ中…</div>
+    </div>
+    <div class="planet-row">
+      <span class="pr-name">♃ もくせい（木星）</span><span id="jupiter-retro"></span>
+      <div class="pr-desc" id="jupiter-desc">よみこみ中…</div>
+    </div>
+    <div class="planet-row">
+      <span class="pr-name">♄ どせい（土星）</span><span id="saturn-retro"></span>
+      <div class="pr-desc" id="saturn-desc">よみこみ中…</div>
+    </div>
+    <p class="pb-note">※「逆行」は、地球から 見ると 逆向きに うごくように 見える こと。おたのしみの お話だよ。</p>
   </div>
 
 </div>
@@ -213,6 +255,133 @@ function agoLabel(days) {
       '<div class="d-lab">' + (i === 0 ? 'きょう' : (d.getMonth() + 1) + '/' + d.getDate()) + '<br>' + a.toFixed(0) + 'にち</div></div>';
   }
   row.innerHTML = html;
+})();
+</script>
+<script>
+'use strict';
+/* ===== 太陽・地球・月と水星・金星の位置（JPL近似軌道要素＋月の近似式、その場で計算） ===== */
+(function () {
+  var DEG = Math.PI / 180;
+  function norm360(x) { x = x % 360; return x < 0 ? x + 360 : x; }
+
+  /* 惑星の日心黄経と距離（AU）。elements: [a, aRate, e, eRate, I, IRate, L, LRate, ϖ, ϖRate, Ω, ΩRate] */
+  var ELEMENTS = {
+    mercury: [0.38709927, 0.00000037, 0.20563593, 0.00001906, 7.00497902, -0.00594749, 252.25032350, 149472.67411175, 77.45779628, 0.16047689, 48.33076593, -0.12534081],
+    venus:   [0.72333566, 0.00000390, 0.00677672, -0.00004107, 3.39467605, -0.00078890, 181.97909950, 58517.81538729, 131.60246718, 0.00268329, 76.67984255, -0.27769418],
+    earth:   [1.00000261, 0.00000562, 0.01671123, -0.00004392, -0.00001531, -0.01294668, 100.46457166, 35999.37244981, 102.93768193, 0.32327364, 0.0, 0.0],
+    mars:    [1.52371034, 0.00001847, 0.09339410, 0.00007882, 1.84969142, -0.00813131, -4.55343205, 19140.30268499, -23.94362959, 0.44441088, 49.55953891, -0.29257343],
+    jupiter: [5.20288700, -0.00011607, 0.04838624, -0.00013253, 1.30439695, -0.00183714, 34.39644051, 3034.74612775, 14.72847983, 0.21252668, 100.47390909, 0.20469106],
+    saturn:  [9.53667594, -0.00125060, 0.05386179, -0.00050991, 2.48599187, 0.00193609, 49.95424423, 1222.49362201, 92.59887831, -0.41897216, 113.66242448, -0.28867794]
+  };
+  function helio(el, T) {
+    var a = el[0] + el[1] * T, e = el[2] + el[3] * T;
+    var L = norm360(el[6] + el[7] * T), w = el[8] + el[9] * T;
+    var M = norm360(L - w) * DEG;
+    var E = M;
+    for (var i = 0; i < 12; i++) E = E - (E - e * Math.sin(E) - M) / (1 - e * Math.cos(E));
+    var nu = 2 * Math.atan2(Math.sqrt(1 + e) * Math.sin(E / 2), Math.sqrt(1 - e) * Math.cos(E / 2));
+    return { lon: norm360(nu / DEG + w), r: a * (1 - e * Math.cos(E)) };
+  }
+  function moonLon(d) {
+    var Lm = norm360(218.316 + 13.176396 * d);
+    var Mm = norm360(134.963 + 13.064993 * d) * DEG;
+    var Ms = norm360(357.529 + 0.98560028 * d) * DEG;
+    var D = norm360(297.850 + 12.190749 * d) * DEG;
+    var F = norm360(93.272 + 13.229350 * d) * DEG;
+    return norm360(Lm + 6.289 * Math.sin(Mm) + 1.274 * Math.sin(2 * D - Mm) +
+      0.658 * Math.sin(2 * D) + 0.214 * Math.sin(2 * Mm) - 0.186 * Math.sin(Ms) - 0.114 * Math.sin(2 * F));
+  }
+  function positions(date) {
+    var JD = date.getTime() / 86400000 + 2440587.5;
+    var T = (JD - 2451545.0) / 36525.0, d = JD - 2451545.0;
+    var me = helio(ELEMENTS.mercury, T), ve = helio(ELEMENTS.venus, T), ea = helio(ELEMENTS.earth, T);
+    var ma = helio(ELEMENTS.mars, T), ju = helio(ELEMENTS.jupiter, T), sa = helio(ELEMENTS.saturn, T);
+    var ex = ea.r * Math.cos(ea.lon * DEG), ey = ea.r * Math.sin(ea.lon * DEG);
+    function geo(p) {
+      var x = p.r * Math.cos(p.lon * DEG) - ex, y = p.r * Math.sin(p.lon * DEG) - ey;
+      return norm360(Math.atan2(y, x) / DEG);
+    }
+    var sun = norm360(ea.lon + 180);
+    return { mercury: me, venus: ve, earth: ea, mars: ma, jupiter: ju, saturn: sa, sun: sun, moon: moonLon(d),
+             mercuryGeo: geo(me), venusGeo: geo(ve), marsGeo: geo(ma), jupiterGeo: geo(ju), saturnGeo: geo(sa) };
+  }
+  function elong(pos, geo) {
+    var e = (geo - pos.sun + 180) % 360; if (e < 0) e += 360; return e - 180;
+  }
+  function isRetro(now, later, key) {
+    var diff = (later[key] - now[key] + 180) % 360; if (diff < 0) diff += 360;
+    return (diff - 180) < 0;
+  }
+  function sightText(e) {
+    var a = Math.abs(e);
+    if (a < 8) return '太陽に 近すぎて、見えない 位置だよ。';
+    if (e > 0) return 'ゆうがた、西の 空に 見える 位置だよ。';
+    return 'あさ、東の 空に 見える 位置だよ。';
+  }
+
+  var now = new Date();
+  var pos = positions(now);
+  var posLater = positions(new Date(now.getTime() + 2 * 86400000));
+
+  /* ---- 上から見た図（SVG） ---- */
+  var C = 220, R = { mercury: 46, venus: 78, earth: 114, mars: 148, jupiter: 184, saturn: 214 };
+  function pt(r, lonDeg) {
+    var t = lonDeg * DEG;
+    return [C + r * Math.cos(t), C - r * Math.sin(t)];
+  }
+  var s = '<svg width="440" height="440" viewBox="0 0 440 440" style="max-width:96%;height:auto;">';
+  [R.mercury, R.venus, R.earth, R.mars, R.jupiter, R.saturn].forEach(function (r) {
+    s += '<circle cx="' + C + '" cy="' + C + '" r="' + r + '" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="1"/>';
+  });
+  s += '<circle cx="' + C + '" cy="' + C + '" r="14" fill="#ffb340"/>' +
+       '<text x="' + C + '" y="' + (C + 4) + '" font-size="10" fill="#7a4a00" text-anchor="middle" font-weight="bold">太陽</text>';
+  var ep = pt(R.earth, pos.earth.lon);
+  s += '<circle cx="' + ep[0].toFixed(1) + '" cy="' + ep[1].toFixed(1) + '" r="13" fill="none" stroke="rgba(255,255,255,.35)" stroke-dasharray="2 2"/>';
+  var mp = [ep[0] + 13 * Math.cos(pos.moon * DEG), ep[1] - 13 * Math.sin(pos.moon * DEG)];
+  function planetDot(p, r, color, label, size) {
+    var q = pt(r, p.lon);
+    return '<circle cx="' + q[0].toFixed(1) + '" cy="' + q[1].toFixed(1) + '" r="' + size + '" fill="' + color + '"/>' +
+      '<text x="' + q[0].toFixed(1) + '" y="' + (q[1] - size - 4).toFixed(1) + '" font-size="11" fill="#fff" text-anchor="middle">' + label + '</text>';
+  }
+  s += planetDot(pos.mercury, R.mercury, '#c9b8a3', 'すいせい', 5);
+  s += planetDot(pos.venus, R.venus, '#e8c96a', 'きんせい', 6);
+  s += planetDot(pos.mars, R.mars, '#e07a4a', 'かせい', 6);
+  s += planetDot(pos.jupiter, R.jupiter, '#d9b380', 'もくせい', 10);
+  var sq = pt(R.saturn, pos.saturn.lon);
+  s += '<ellipse cx="' + sq[0].toFixed(1) + '" cy="' + sq[1].toFixed(1) + '" rx="14" ry="4.5" fill="none" stroke="#d8c690" stroke-width="2"/>' +
+    '<circle cx="' + sq[0].toFixed(1) + '" cy="' + sq[1].toFixed(1) + '" r="7" fill="#e3d0a0"/>' +
+    '<text x="' + sq[0].toFixed(1) + '" y="' + (sq[1] - 12).toFixed(1) + '" font-size="11" fill="#fff" text-anchor="middle">どせい</text>';
+  s += '<circle cx="' + ep[0].toFixed(1) + '" cy="' + ep[1].toFixed(1) + '" r="7" fill="#4aa3e0"/>' +
+    '<text x="' + ep[0].toFixed(1) + '" y="' + (ep[1] - 18).toFixed(1) + '" font-size="11" fill="#fff" text-anchor="middle">ちきゅう</text>' +
+    '<circle cx="' + mp[0].toFixed(1) + '" cy="' + mp[1].toFixed(1) + '" r="3" fill="#f9e08a"/>' +
+    '<text x="' + mp[0].toFixed(1) + '" y="' + (mp[1] + 13).toFixed(1) + '" font-size="9" fill="#ffe98a" text-anchor="middle">つき</text>';
+  s += '</svg>';
+  document.getElementById('orbit-svg').innerHTML = s;
+
+  /* ---- 水星・金星の読み出し ---- */
+  function fill(descId, retroId, e, retro) {
+    document.getElementById(descId).textContent =
+      sightText(e) + '（太陽から 約' + Math.round(Math.abs(e)) + '° はなれている）';
+    document.getElementById(retroId).innerHTML = retro ? '<span class="retro">逆行中</span>' : '';
+  }
+  fill('mercury-desc', 'mercury-retro', elong(pos, pos.mercuryGeo), isRetro(pos, posLater, 'mercuryGeo'));
+  fill('venus-desc', 'venus-retro', elong(pos, pos.venusGeo), isRetro(pos, posLater, 'venusGeo'));
+
+  function outerSightText(e) {
+    var a = Math.abs(e);
+    if (a < 12) return '太陽に 近すぎて、見えない 位置だよ。';
+    if (a > 150) return '太陽の 反対側で、一晩中 見える 位置だよ。';
+    if (e > 0) return 'ゆうがたから 夜に かけて 見える 位置だよ。';
+    return '夜中から 明け方に かけて 見える 位置だよ。';
+  }
+  function fillOuter(descId, retroId, e, retro, years) {
+    document.getElementById(descId).textContent =
+      outerSightText(e) + '太陽の まわりを 約' + years + '年で 1まわり。';
+    document.getElementById(retroId).innerHTML = retro ? '<span class="retro">逆行中</span>' : '';
+  }
+  fillOuter('mars-desc', 'mars-retro', elong(pos, pos.marsGeo), isRetro(pos, posLater, 'marsGeo'), '1.9');
+  fillOuter('jupiter-desc', 'jupiter-retro', elong(pos, pos.jupiterGeo), isRetro(pos, posLater, 'jupiterGeo'), '12');
+  fillOuter('saturn-desc', 'saturn-retro', elong(pos, pos.saturnGeo), isRetro(pos, posLater, 'saturnGeo'), '29');
 })();
 </script>
 <a id="float-back" href="index.html" style="position:fixed;right:14px;bottom:14px;z-index:500;background:#ffffff;border:2px solid #8a8a8a;color:#333333;padding:10px 18px;border-radius:999px;font-size:16px;font-weight:bold;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,0.25);opacity:0.96;">← もどる</a>
