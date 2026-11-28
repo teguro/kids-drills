@@ -17,7 +17,7 @@
 <script>
 /* ===== バージョンチェック ===== */
 (function () {
-  var SITE_VERSION = "20261128-9";
+  var SITE_VERSION = "20261128-10";
   function alreadyTried() {
     try { return new URLSearchParams(location.search).get("_v") === SITE_VERSION; }
     catch (e) { return false; }
@@ -49,28 +49,11 @@
   .wrap { max-width: 640px; margin: 0 auto; padding: 20px 16px 90px; }
   h1 { font-size: 30px; text-align: center; margin: 6px 0 4px; }
   .sub { text-align: center; color: #777; font-size: 15px; margin: 0 0 16px; line-height: 1.6; }
-  .card { background: #fff; border-radius: 20px; padding: 18px 16px; margin-top: 16px; box-shadow: 0 3px 0 rgba(0,0,0,.08); }
-  .card h2 { font-size: 20px; margin: 0 0 8px; }
-  .card .intro { font-size: 14.5px; color: #777; line-height: 1.65; margin: 0 0 6px; }
-  .ep-title { font-size: 19px; font-weight: bold; line-height: 1.5; }
-  .ep-date { color: #999; font-size: 14px; margin-top: 2px; }
-  .ep-desc { font-size: 15px; color: #555; line-height: 1.7; margin-top: 8px; }
-  audio { width: 100%; margin-top: 14px; height: 48px; }
-  .shuffle-btn { display: block; width: 100%; font-family: inherit; font-size: 21px; font-weight: bold; color: #fff; background: linear-gradient(180deg, #f5a54c, #e2703a); border: none; border-radius: 16px; padding: 16px 14px; margin-top: 12px; cursor: pointer; box-shadow: 0 4px 0 rgba(0,0,0,.15); touch-action: manipulation; }
-  .shuffle-btn:active { transform: translateY(3px); box-shadow: none; }
-  .shuffle-btn.on { background: linear-gradient(180deg, #43a35f, #2e7d4f); }
-  .shuffle-btn.blue { background: linear-gradient(180deg, #4aa3e0, #2e7cb8); }
-  .shuffle-btn.blue.on { background: linear-gradient(180deg, #43a35f, #2e7d4f); }
-  .skip-btn, .next-btn { display: block; width: 100%; font-family: inherit; font-size: 18px; font-weight: bold; color: #333; background: #fdf1dc; border: 2px solid #e8dcc0; border-radius: 14px; padding: 13px 14px; margin-top: 10px; cursor: pointer; touch-action: manipulation; }
-  .skip-btn { background: #ffe9c9; border-color: #f0c98a; }
-  .search { width: 100%; font-family: inherit; font-size: 18px; padding: 13px 14px; border: 2px solid #e8dcc0; border-radius: 14px; background: #fffdf6; margin-top: 10px; }
-  .ep-btn { display: block; width: 100%; text-align: left; font-family: inherit; font-size: 16px; font-weight: bold; color: #333; background: #fdf6e3; border: 2px solid #e8dcc0; border-radius: 14px; padding: 12px 14px; margin-top: 9px; cursor: pointer; touch-action: manipulation; line-height: 1.5; }
-  .ep-btn .d { display: block; font-size: 13px; font-weight: normal; color: #999; margin-top: 2px; }
-  .ep-btn.on { background: #ffe3b3; border-color: #f0a04b; }
-  .ep-btn .new { display: inline-block; background: #e4572e; color: #fff; font-size: 12px; border-radius: 999px; padding: 2px 9px; margin-left: 8px; vertical-align: 2px; }
-  .msg { font-size: 15px; color: #c0392b; min-height: 1.2em; margin: 10px 0 0; }
-  .count { color: #999; font-size: 14px; margin-top: 10px; }
-  .fallback-btn { display: block; text-align: center; padding: 14px; border-radius: 14px; background: #2e7de4; color: #fff; font-size: 16px; font-weight: bold; text-decoration: none; margin-top: 10px; }
+  .show-btn { display: block; text-decoration: none; color: #333; background: #fff; border-radius: 20px; padding: 20px 18px; margin-top: 16px; box-shadow: 0 3px 0 rgba(0,0,0,.08); border: 3px solid #f0c98a; }
+  .show-btn.blue { border-color: #9cc8ec; }
+  .show-btn .t { font-size: 22px; font-weight: bold; line-height: 1.4; }
+  .show-btn .d { display: block; font-size: 14.5px; color: #777; line-height: 1.65; margin-top: 6px; }
+  .show-btn:active { transform: translateY(2px); box-shadow: none; }
 </style>
 </head>
 <body>
@@ -78,226 +61,16 @@
   <h1>🎧 ポッドキャスト</h1>
   <p class="sub">ききたい 番組を えらんでね。<br>おもしろい 番組は ここに ふやしていくよ。</p>
 
-  <div class="card">
-    <h2>▶️ きく</h2>
-    <div class="ep-title" id="ep-title">下の 番組から えらんでね</div>
-    <div class="ep-date" id="ep-date"></div>
-    <div class="ep-desc" id="ep-desc"></div>
-    <audio id="player" controls preload="none" playsinline></audio>
-    <button class="skip-btn" id="skip-btn" type="button">⏩ 40秒 すすむ（さいしょの CMを とばす）</button>
-    <button class="next-btn" id="next-btn" type="button" style="display:none;">⏭ つぎの ランダムへ</button>
-    <p class="msg" id="play-msg"></p>
-  </div>
+  <a class="show-btn" href="kotori-asa.html">
+    <span class="t">🐦 朝の小鳥（文化放送）</span>
+    <span class="d">にっぽん中・世界中の とりの こえ（1回 5分くらい）。まいしゅう 日よう日に あたらしい 回が ふえるよ。</span>
+  </a>
 
-  <div class="card">
-    <h2>🐦 朝の小鳥（文化放送）</h2>
-    <p class="intro">にっぽん中・世界中の とりの こえ（1回 5分くらい）。まいしゅう 日よう日に あたらしい 回が ふえるよ。</p>
-    <button class="shuffle-btn" id="shuffle-kotori" type="button">🎲 朝の小鳥を ランダムで きく</button>
-    <input class="search" id="search" type="search" placeholder="🔍 とりの なまえ・ばしょ（例：ツグミ、北海道）">
-    <p class="count" id="kotori-count">よみこみ中…</p>
-    <div id="kotori-list"></div>
-    <a class="fallback-btn" href="https://podcastqr.joqr.co.jp/programs/kotori" target="_blank" rel="noopener">文化放送の ページで みる</a>
-  </div>
-
-  <div class="card">
-    <h2>🔭 とりぴけの野鳥観察＆撮影ラジオ</h2>
-    <p class="intro">野鳥の 観察と 撮影の お話。身近な 鳥の 見つけ方や 季節の 鳥の 話が 多いよ（1回 10分くらい）。</p>
-    <button class="shuffle-btn blue" id="shuffle-toripike" type="button">🎲 とりぴけを ランダムで きく</button>
-    <p class="count" id="toripike-count">よみこみ中…</p>
-    <div id="toripike-list"></div>
-  </div>
+  <a class="show-btn blue" href="toripike.html">
+    <span class="t">🔭 とりぴけの野鳥観察＆撮影ラジオ</span>
+    <span class="d">野鳥の 観察と 撮影の お話。身近な 鳥の 見つけ方や 季節の 鳥の 話が 多いよ（1回 10分くらい）。</span>
+  </a>
 </div>
-
-<script>
-var KOTORI_FEED = 'https://feeds.megaphone.fm/NCB6602326930';
-var ENDPOINT = 'https://script.google.com/macros/s/AKfycbyurtmUMcRCv2MmyBu96IlMEbBIpReYApm1QwtaI52hEh1JWn_fK4BrMhHgDkhszmZIBg/exec';
-var BOARD_PIN = '2002';
-
-var shows = {
-  kotori:   { eps: [], shuffle: false, recent: [], listId: 'kotori-list',   btnId: 'shuffle-kotori' },
-  toripike: { eps: [], shuffle: false, recent: [], listId: 'toripike-list', btnId: 'shuffle-toripike' }
-};
-var current = { show: null, idx: -1 };
-
-function $(id) { return document.getElementById(id); }
-function esc(s) {
-  return String(s || '').replace(/[&<>"']/g, function (c) {
-    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-  });
-}
-function fmtDate(d) {
-  if (!d || isNaN(d.getTime())) return '';
-  return d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日';
-}
-function stripHtml(s, n) {
-  var t = String(s || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
-  return t.length > n ? t.slice(0, n) + '…' : t;
-}
-
-function clearBtnStates() {
-  ['kotori-list', 'toripike-list'].forEach(function (id) {
-    var btns = $(id).children;
-    for (var k = 0; k < btns.length; k++) btns[k].className = btns[k].className.replace(' on', '');
-  });
-}
-
-function playEpisode(showKey, idx, play) {
-  var show = shows[showKey];
-  var ep = show.eps[idx];
-  if (!ep) return;
-  current = { show: showKey, idx: idx };
-  show.recent.push(idx);
-  if (show.recent.length > 30) show.recent.shift();
-  clearBtnStates();
-  var btn = $(show.listId).querySelector('[data-idx="' + idx + '"]');
-  if (btn) btn.className += ' on';
-  $('ep-title').textContent = ep.title;
-  $('ep-date').textContent = ep.dateText || '';
-  $('ep-desc').textContent = ep.desc || '';
-  $('play-msg').textContent = '';
-  var player = $('player');
-  player.src = ep.url;
-  if (play) {
-    player.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    var p = player.play();
-    if (p && p.catch) p.catch(function () {});
-  }
-}
-
-function pickRandom(showKey) {
-  var show = shows[showKey];
-  if (!show.eps.length) return -1;
-  var pool = [];
-  for (var i = 0; i < show.eps.length; i++) {
-    if (show.recent.indexOf(i) < 0) pool.push(i);
-  }
-  if (!pool.length) pool = show.eps.map(function (_, i) { return i; });
-  return pool[Math.floor(Math.random() * pool.length)];
-}
-
-function setShuffle(showKey, on) {
-  Object.keys(shows).forEach(function (k) {
-    shows[k].shuffle = (k === showKey) ? on : false;
-    var b = $(shows[k].btnId);
-    b.className = b.className.replace(' on', '') + (shows[k].shuffle ? ' on' : '');
-  });
-  $('next-btn').style.display = on ? 'block' : 'none';
-}
-
-function bindShuffle(showKey, label) {
-  $(shows[showKey].btnId).addEventListener('click', function () {
-    if (shows[showKey].shuffle) { setShuffle(showKey, false); return; }
-    if (!shows[showKey].eps.length) return;
-    setShuffle(showKey, true);
-    playEpisode(showKey, pickRandom(showKey), true);
-  });
-}
-bindShuffle('kotori');
-bindShuffle('toripike');
-
-$('next-btn').addEventListener('click', function () {
-  if (current.show && shows[current.show].shuffle) {
-    playEpisode(current.show, pickRandom(current.show), true);
-  }
-});
-$('skip-btn').addEventListener('click', function () {
-  var p = $('player');
-  if (!p.src) return;
-  try { p.currentTime = Math.min((p.currentTime || 0) + 40, (p.duration || 1e9) - 1); } catch (e) {}
-});
-$('player').addEventListener('ended', function () {
-  if (current.show && shows[current.show].shuffle) {
-    playEpisode(current.show, pickRandom(current.show), true);
-  }
-});
-$('player').addEventListener('error', function () {
-  if (current.show) {
-    $('play-msg').textContent = 'うまく 再生できなかった…ネットが つながっているか たしかめてね';
-  }
-}, true);
-
-/* ---------- 朝の小鳥（RSSを直接取得） ---------- */
-function renderKotori(filter) {
-  var list = $('kotori-list');
-  list.innerHTML = '';
-  var eps = shows.kotori.eps;
-  var shown = 0;
-  eps.forEach(function (ep, i) {
-    if (filter && ep.title.indexOf(filter) < 0 && (ep.desc || '').indexOf(filter) < 0) return;
-    shown++;
-    var b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'ep-btn' + (current.show === 'kotori' && current.idx === i ? ' on' : '');
-    b.setAttribute('data-idx', i);
-    b.innerHTML = esc(ep.title) + (i === 0 ? '<span class="new">さいしん</span>' : '') +
-      '<span class="d">' + esc(ep.dateText) + '</span>';
-    b.addEventListener('click', function () { setShuffle('kotori', false); playEpisode('kotori', i, true); });
-    list.appendChild(b);
-  });
-  $('kotori-count').textContent = 'ぜんぶで ' + eps.length + '回' + (filter ? '（' + shown + '回 みつかった）' : '');
-  if (!shown && eps.length) {
-    list.innerHTML = '<p style="color:#999;font-size:15px;">みつからなかった… ちがう ことばで さがしてみてね</p>';
-  }
-}
-$('search').addEventListener('input', function () { renderKotori($('search').value.trim()); });
-
-fetch(KOTORI_FEED)
-  .then(function (r) { return r.text(); })
-  .then(function (xmlText) {
-    var doc = new DOMParser().parseFromString(xmlText, 'text/xml');
-    var items = doc.querySelectorAll('item');
-    var eps = [];
-    items.forEach(function (it) {
-      var enc = it.querySelector('enclosure');
-      if (!enc || !enc.getAttribute('url')) return;
-      var d = new Date((it.querySelector('pubDate') || {}).textContent || '');
-      eps.push({
-        title: (it.querySelector('title') || {}).textContent || '朝の小鳥',
-        dateText: fmtDate(d),
-        url: enc.getAttribute('url'),
-        desc: stripHtml((it.querySelector('description') || {}).textContent || '', 160)
-      });
-    });
-    shows.kotori.eps = eps;
-    if (!eps.length) throw new Error('no episodes');
-    renderKotori('');
-  })
-  .catch(function () {
-    $('kotori-count').textContent = 'よみこめなかった…ネットが つながらないかも';
-  });
-
-/* ---------- とりぴけ（ボード経由で取得） ---------- */
-function renderToripike() {
-  var list = $('toripike-list');
-  list.innerHTML = '';
-  var eps = shows.toripike.eps;
-  eps.forEach(function (ep, i) {
-    var b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'ep-btn' + (current.show === 'toripike' && current.idx === i ? ' on' : '');
-    b.setAttribute('data-idx', i);
-    b.innerHTML = esc(ep.title) + (i === 0 ? '<span class="new">さいしん</span>' : '') +
-      '<span class="d">' + esc(ep.dateText) + '</span>';
-    b.addEventListener('click', function () { setShuffle('toripike', false); playEpisode('toripike', i, true); });
-    list.appendChild(b);
-  });
-  $('toripike-count').textContent = 'ぜんぶで ' + eps.length + '回';
-}
-
-fetch(ENDPOINT + '?action=yasashii&pin=' + encodeURIComponent(BOARD_PIN))
-  .then(function (r) { return r.json(); })
-  .then(function (j) {
-    var eps = ((j && j.toripike) || []).map(function (ep) {
-      return { title: ep.title || 'とりぴけ', dateText: ep.onair || '', url: ep.stream || '', desc: '' };
-    }).filter(function (ep) { return ep.url; });
-    shows.toripike.eps = eps;
-    if (eps.length) renderToripike();
-    else $('toripike-count').textContent = 'いまは よみこめなかった…あとで また ためしてね';
-  })
-  .catch(function () {
-    $('toripike-count').textContent = 'いまは よみこめなかった…あとで また ためしてね';
-  });
-</script>
 <a id="float-back" href="index.html" style="position:fixed;right:14px;bottom:14px;z-index:500;background:#ffffff;border:2px solid #8a8a8a;color:#333333;padding:10px 18px;border-radius:999px;font-size:16px;font-weight:bold;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,0.25);opacity:0.96;">← もどる</a>
 </body>
 </html>

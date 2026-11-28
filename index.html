@@ -80,7 +80,7 @@
    version.json をキャッシュなしで確認し、版が違えば URL を変えて読み直す。
    公開のたびに SITE_VERSION と version.json を同じ値に上げること（GATE.md 参照）。 */
 (function () {
-  var SITE_VERSION = "20261128-9";
+  var SITE_VERSION = "20261128-10";
   function alreadyTried() {
     try { return new URLSearchParams(location.search).get("_v") === SITE_VERSION; }
     catch (e) { return false; }
@@ -231,7 +231,7 @@
    その日のうちだけ有効（翌日は再入力）。
    ============================================================ */
 var LAND_PIN = '2002';
-var LAND_PAGES = ['kanji.html', 'kokugo.html', 'sansuu.html', 'shakai.html', 'rika.html', 'eigo.html', 'kiroku.html', 'bird.html', 'message.html', 'help.html', 'drills.html', 'tsuki.html', 'kansatsu.html', 'news.html', 'kotori.html'];
+var LAND_PAGES = ['kanji.html', 'kokugo.html', 'sansuu.html', 'shakai.html', 'rika.html', 'eigo.html', 'kiroku.html', 'bird.html', 'message.html', 'help.html', 'drills.html', 'tsuki.html', 'kansatsu.html', 'news.html', 'kotori.html', 'kotori-asa.html', 'toripike.html'];
 
 var $ = function (id) { return document.getElementById(id); };
 
