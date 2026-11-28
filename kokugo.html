@@ -21,7 +21,7 @@
    version.json をキャッシュなしで確認し、版が違えば URL を変えて読み直す。
    公開のたびに SITE_VERSION と version.json を同じ値に上げること（GATE.md 参照）。 */
 (function () {
-  var SITE_VERSION = "20261128-12";
+  var SITE_VERSION = "20261128-13";
   function alreadyTried() {
     try { return new URLSearchParams(location.search).get("_v") === SITE_VERSION; }
     catch (e) { return false; }
@@ -1357,6 +1357,15 @@ document.querySelectorAll(".player-btn").forEach(function(b){
   });
 });
 refreshPlayerUI();
+/* チケット対象判定：自分の学年以上のレベルだけ（ふくしゅうは対象）。時間は1回10分まで */
+var PLAYER_GRADE = { soichiro: 4, tsuzumi: 1 };
+function gradeOfLevel(l){ return (l === "g1" || l === "g1c") ? 1 : 4; }
+function ticketOk(){
+  if (state.mode === "review") return true;
+  var mine = PLAYER_GRADE[currentPlayer] || 0;
+  if (!mine) return false;
+  return gradeOfLevel(state.level) >= mine;
+}
 function saveRecord(rankName, elapsedMs){
   if (!currentPlayer) return;
   try {
@@ -1368,6 +1377,8 @@ function saveRecord(rankName, elapsedMs){
     rec.questions += state.log.length;
     rec.correct += state.score;
     rec.seconds = (rec.seconds || 0) + Math.round((elapsedMs || 0) / 1000);
+    if (rec.tplays == null) { rec.tplays = rec.plays - 1; rec.tseconds = (rec.seconds || 0) - Math.round((elapsedMs || 0) / 1000); }
+    if (ticketOk()) { rec.tplays += 1; rec.tseconds += Math.min(600, Math.round((elapsedMs || 0) / 1000)); }
     var curIdx = RANK_ORDER.indexOf(rec.bestRank);
     var newIdx = RANK_ORDER.indexOf(rankName);
     if (newIdx > curIdx) rec.bestRank = rankName;

@@ -20,7 +20,7 @@
    version.json をキャッシュなしで確認し、版が違えば URL を変えて読み直す。
    公開のたびに SITE_VERSION と version.json を同じ値に上げること（GATE.md 参照）。 */
 (function () {
-  var SITE_VERSION = "20261128-12";
+  var SITE_VERSION = "20261128-13";
   function alreadyTried() {
     try { return new URLSearchParams(location.search).get("_v") === SITE_VERSION; }
     catch (e) { return false; }
@@ -295,17 +295,22 @@
     var rec = {};
     try { rec = JSON.parse(localStorage.getItem("kidsdrills_records_v1") || "{}"); } catch (e) {}
     var mine = rec[currentPlayer] || {};
-    var plays = 0, seconds = 0;
+    var plays = 0, seconds = 0, tplays = 0, tseconds = 0;
     ["kanji", "kokugo", "sansuu", "shakai", "rika", "eigo"].forEach(function (k) {
       var r = mine[k];
-      if (r) { plays += (r.plays || 0); seconds += (r.seconds || 0); }
+      if (r) {
+        plays += (r.plays || 0); seconds += (r.seconds || 0);
+        // チケット対象分（tplays/tseconds が無い古い記録は plays/seconds で代用）
+        tplays += (r.tplays != null ? r.tplays : (r.plays || 0));
+        tseconds += (r.tseconds != null ? r.tseconds : (r.seconds || 0));
+      }
     });
-    return { plays: plays, seconds: seconds };
+    return { plays: plays, seconds: seconds, tplays: tplays, tseconds: tseconds };
   }
   function earned() {
     var t = totals();
     var g = myGacha();
-    return Math.floor(t.plays / 5) + Math.floor(t.seconds / 1800) + (g[currentPlayer].obsBonus || 0);
+    return Math.floor(t.tplays / 5) + Math.floor(t.tseconds / 1800) + (g[currentPlayer].obsBonus || 0);
   }
   function render() {
     document.getElementById("player-soichiro").className = "player-btn" + (currentPlayer === "soichiro" ? " sel-soichiro" : "");
@@ -317,8 +322,8 @@
     var t = totals();
     var obsB = g[currentPlayer].obsBonus || 0;
     document.getElementById("ticket-detail").textContent =
-      "ドリル " + t.plays + "かい ／ じかん " + Math.floor(t.seconds / 60) + "ふん がんばったよ。"
-      + "（5かいで 1まい、30ふんで 1まい たまるよ）"
+      "ドリル " + t.tplays + "かい ／ じかん " + Math.floor(t.tseconds / 60) + "ふん がんばったよ。"
+      + "（5かいで 1まい、30ふんで 1まい たまるよ。チケットは じぶんの 学年の レベルで あそんだ ときだけ たまるよ）"
       + (obsB ? " ＋ かんさつ記録のボーナス " + obsB + "まい" : "");
     document.getElementById("gacha-btn").disabled = left <= 0;
     var grid = document.getElementById("grid");

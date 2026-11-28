@@ -21,7 +21,7 @@
    version.json をキャッシュなしで確認し、版が違えば URL を変えて読み直す。
    公開のたびに SITE_VERSION と version.json を同じ値に上げること（GATE.md 参照）。 */
 (function () {
-  var SITE_VERSION = "20261128-12";
+  var SITE_VERSION = "20261128-13";
   function alreadyTried() {
     try { return new URLSearchParams(location.search).get("_v") === SITE_VERSION; }
     catch (e) { return false; }
@@ -1939,6 +1939,15 @@ function renderPlayerNote(){
     note.textContent = PLAYER_NAMES[currentPlayer] + " の きろくは まだ ないよ。20もん やると きろくされるよ。";
   }
 }
+/* チケット対象判定：自分の学年以上のレベルだけ（ふくしゅうは対象）。時間は1回10分まで */
+var PLAYER_GRADE = { soichiro: 4, tsuzumi: 1 };
+function gradeOfLevel(l){ return Number(l) || 0; }
+function ticketOk(){
+  if (state.mode === "review") return true;
+  var mine = PLAYER_GRADE[currentPlayer] || 0;
+  if (!mine) return false;
+  return gradeOfLevel(state.level) >= mine;
+}
 function saveRecord(rank, elapsedMs){
   if (!currentPlayer) return;
   var records = loadRecords();
@@ -1949,11 +1958,16 @@ function saveRecord(rank, elapsedMs){
   var today = d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
   var bestRank = prev.bestRank;
   if (!bestRank || RANK_ORDER.indexOf(rank.name) > RANK_ORDER.indexOf(bestRank)) bestRank = rank.name;
+  var tplays = (prev.tplays != null ? prev.tplays : (prev.plays || 0));
+  var tseconds = (prev.tseconds != null ? prev.tseconds : (prev.seconds || 0));
+  if (ticketOk()) { tplays += 1; tseconds += Math.min(600, Math.round((elapsedMs || 0) / 1000)); }
   records[currentPlayer].kanji = {
     plays: (prev.plays || 0) + 1,
     questions: (prev.questions || 0) + state.log.length,
     correct: (prev.correct || 0) + state.score,
     seconds: (prev.seconds || 0) + Math.round((elapsedMs || 0) / 1000),
+    tplays: tplays,
+    tseconds: tseconds,
     bestRank: bestRank,
     lastPlayed: today
   };

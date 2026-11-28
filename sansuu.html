@@ -21,7 +21,7 @@
    version.json をキャッシュなしで確認し、版が違えば URL を変えて読み直す。
    公開のたびに SITE_VERSION と version.json を同じ値に上げること（GATE.md 参照）。 */
 (function () {
-  var SITE_VERSION = "20261128-12";
+  var SITE_VERSION = "20261128-13";
   function alreadyTried() {
     try { return new URLSearchParams(location.search).get("_v") === SITE_VERSION; }
     catch (e) { return false; }
@@ -1330,6 +1330,15 @@ function setPlayer(p, save){
   renderReviewBtn();
 }
 /* 20もん おわったら、えらんだ プレイヤーの きろくに 加算する */
+/* チケット対象判定：自分の学年以上のレベルだけ（ふくしゅうは対象）。時間は1回10分まで */
+var PLAYER_GRADE = { soichiro: 4, tsuzumi: 1 };
+function gradeOfLevel(l){ return parseInt(String(l).charAt(0), 10) || 0; }
+function ticketOk(){
+  if (state.mode === "review") return true;
+  var mine = PLAYER_GRADE[currentPlayer] || 0;
+  if (!mine) return false;
+  return gradeOfLevel(state.level) >= mine;
+}
 function saveSessionRecord(elapsedMs){
   if (!currentPlayer || state.recordSaved) return;
   state.recordSaved = true;
@@ -1341,6 +1350,8 @@ function saveSessionRecord(elapsedMs){
   subj.questions = (subj.questions || 0) + state.questions.length;
   subj.correct = (subj.correct || 0) + state.score;
   subj.seconds = (subj.seconds || 0) + Math.round((elapsedMs || 0) / 1000);
+  if (subj.tplays == null) { subj.tplays = subj.plays - 1; subj.tseconds = (subj.seconds || 0) - Math.round((elapsedMs || 0) / 1000); }
+  if (ticketOk()) { subj.tplays += 1; subj.tseconds += Math.min(600, Math.round((elapsedMs || 0) / 1000)); }
   var rank = rankOf(state.score);
   var curIdx = BIRD_ORDER.indexOf(rank.name);
   var prevIdx = subj.bestRank ? BIRD_ORDER.indexOf(subj.bestRank) : -1;
