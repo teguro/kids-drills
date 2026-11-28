@@ -48,6 +48,7 @@
   a.menu-btn.m-moon { background: linear-gradient(180deg, #3b4a8c, #232c5c); }                /* つき（夜空） */
   a.menu-btn.m-kansatsu { background: linear-gradient(180deg, #43a35f, #2e7d4f); }            /* かんさつ記録（野の緑） */
   a.menu-btn.m-news { background: linear-gradient(180deg, #f2604c, #d63a26); }                /* やさしいニュース（ラジオの赤） */
+  a.menu-btn.m-kotori { background: linear-gradient(180deg, #ffb75e, #f07d4c); }              /* 朝の小鳥（朝焼け） */
   a.menu-btn.m-play { background: linear-gradient(180deg, #a55eea, #8e44ad); }                /* あそびコーナー（紫） */
   a.menu-btn.m-help { background: linear-gradient(180deg, #e05252, #c22e2e); border: 3px solid #f5d67b; }          /* アカショウビン＋金枠 */
   .theme-box { margin-top: 22px; background: rgba(255,255,255,.75); border-radius: 18px; padding: 14px 14px 16px; }
@@ -79,7 +80,7 @@
    version.json をキャッシュなしで確認し、版が違えば URL を変えて読み直す。
    公開のたびに SITE_VERSION と version.json を同じ値に上げること（GATE.md 参照）。 */
 (function () {
-  var SITE_VERSION = "20261128-6";
+  var SITE_VERSION = "20261128-7";
   function alreadyTried() {
     try { return new URLSearchParams(location.search).get("_v") === SITE_VERSION; }
     catch (e) { return false; }
@@ -202,6 +203,7 @@
     <a class="menu-btn m-moon" href="tsuki.html">🌙 つき<span class="small">きょうの げつれい・つぎの まんげつ</span></a>
     <a class="menu-btn m-kansatsu" href="kansatsu.html">🔭 かんさつ記録<span class="small">いきものの きろく（家族みんな）</span></a>
     <a class="menu-btn m-news" href="news.html">📻 ラジオ<span class="small">やさしいニュース・ラジオ体操を きく</span></a>
+    <a class="menu-btn m-kotori" href="kotori.html">🐦 朝の小鳥<span class="small">とりの こえ（文化放送・ランダム再生）</span></a>
     <a class="menu-btn m-help" href="help.html">🆘 こまったとき<span class="small">ママ・お父さんに でんわする</span></a>
 
     <div class="theme-box">
@@ -229,7 +231,7 @@
    その日のうちだけ有効（翌日は再入力）。
    ============================================================ */
 var LAND_PIN = '2002';
-var LAND_PAGES = ['kanji.html', 'kokugo.html', 'sansuu.html', 'shakai.html', 'rika.html', 'eigo.html', 'kiroku.html', 'bird.html', 'message.html', 'help.html', 'drills.html', 'tsuki.html', 'kansatsu.html', 'news.html'];
+var LAND_PAGES = ['kanji.html', 'kokugo.html', 'sansuu.html', 'shakai.html', 'rika.html', 'eigo.html', 'kiroku.html', 'bird.html', 'message.html', 'help.html', 'drills.html', 'tsuki.html', 'kansatsu.html', 'news.html', 'kotori.html'];
 
 var $ = function (id) { return document.getElementById(id); };
 
