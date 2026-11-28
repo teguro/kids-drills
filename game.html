@@ -19,7 +19,7 @@
    version.json をキャッシュなしで確認し、版が違えば URL を変えて読み直す。
    公開のたびに SITE_VERSION と version.json を同じ値に上げること（GATE.md 参照）。 */
 (function () {
-  var SITE_VERSION = "20261128-15";
+  var SITE_VERSION = "20261128-16";
   function alreadyTried() {
     try { return new URLSearchParams(location.search).get("_v") === SITE_VERSION; }
     catch (e) { return false; }
@@ -75,6 +75,31 @@
   /* ことりポップ */
   .hole .photo { width: 80%; height: 80%; border-radius: 50%; object-fit: cover; visibility: hidden; transform: translateY(8px); transition: transform .12s; pointer-events: none; }
   .hole.up .photo { visibility: visible; transform: translateY(-4px); }
+  /* リズムタップ（太鼓スタイル） */
+  .r-songs { display: flex; gap: 8px; margin-bottom: 12px; }
+  .r-chip { flex: 1; border: 3px solid #ddd; background: #fff; border-radius: 999px; font-family: inherit; font-size: 16px; font-weight: bold; padding: 11px 2px; cursor: pointer; touch-action: manipulation; }
+  .r-chip.sel { border-color: #e91e63; background: #fde7f1; }
+  .r-stage { position: relative; height: 240px; border-radius: 18px; background: linear-gradient(180deg, #ff9d5c 0%, #ffb877 55%, #ffd9a0 100%); overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; }
+  .r-band { position: absolute; left: 0; right: 0; top: 78px; height: 84px; background: rgba(60,30,10,.78); }
+  .r-target { position: absolute; top: 78px; width: 84px; height: 84px; border-radius: 50%; border: 5px solid #fff; background: rgba(255,255,255,.16); display: flex; align-items: center; justify-content: center; font-size: 38px; box-sizing: border-box; }
+  .r-target.pulse { animation: r-pulse .18s ease-out; }
+  @keyframes r-pulse { 0% { transform: scale(1); } 40% { transform: scale(1.13); } 100% { transform: scale(1); } }
+  .r-note { position: absolute; top: 90px; width: 60px; height: 60px; margin-left: -30px; border-radius: 50%; box-shadow: 0 3px 7px rgba(0,0,0,.35), inset 0 0 0 5px rgba(255,255,255,.85); pointer-events: none; will-change: transform; }
+  .r-note.don { background: #ef3f36; }
+  .r-note.katsu { background: #2f9be8; }
+  .r-note.big { width: 80px; height: 80px; margin-left: -40px; top: 80px; }
+  .r-note.missed { opacity: .25; filter: grayscale(1); }
+  .r-combo { position: absolute; top: 10px; right: 14px; font-size: 24px; font-weight: bold; color: #fff; text-shadow: 0 2px 5px rgba(0,0,0,.4); }
+  .r-judge { position: absolute; left: 0; right: 0; top: 16px; text-align: center; font-size: 32px; font-weight: bold; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,.45); opacity: 0; pointer-events: none; }
+  .r-judge.show { animation: r-judge-pop .45s ease-out; }
+  @keyframes r-judge-pop { 0% { opacity: 0; transform: scale(.6); } 25% { opacity: 1; transform: scale(1.15); } 60% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1); } }
+  .r-drumzone { margin-top: 12px; background: #fff3e0; border-radius: 18px; padding: 14px 8px 10px; text-align: center; touch-action: none; user-select: none; -webkit-user-select: none; box-shadow: 0 2px 6px rgba(0,0,0,.08); }
+  .r-drum { width: 168px; height: 168px; margin: 0 auto; border-radius: 50%; background: radial-gradient(circle, #fdf3d8 0 52%, #e33f33 53% 100%); box-shadow: 0 5px 0 rgba(0,0,0,.18), inset 0 0 0 4px rgba(0,0,0,.12); display: flex; align-items: center; justify-content: center; font-size: 21px; font-weight: bold; color: #a33; cursor: pointer; }
+  .r-drum.hit { transform: scale(.94); }
+  .r-drumzone .r-hint { font-size: 14px; color: #a1887f; margin-top: 8px; }
+  .r-drumzone .r-hint b.don { color: #ef3f36; } .r-drumzone .r-hint b.katsu { color: #2f9be8; }
+  .r-result { background: #fff; border-radius: 18px; box-shadow: 0 2px 6px rgba(0,0,0,.08); padding: 16px; margin-top: 14px; text-align: center; font-size: 18px; line-height: 1.8; }
+  .r-result .r-rank { font-size: 40px; font-weight: bold; color: #e91e63; }
   a.back { display: block; margin: 26px auto 0; max-width: 320px; text-align: center; padding: 15px; border-radius: 16px; background: #555; color: #fff; font-size: 19px; font-weight: bold; text-decoration: none; box-shadow: 0 4px 0 rgba(0,0,0,.15); }
   .hidden { display: none !important; }
 </style>
@@ -140,6 +165,25 @@
     <div class="holes" id="pop-holes"></div>
   </div>
 
+  <!-- リズムタップ -->
+  <div id="rhythm-game" class="hidden">
+    <h1>🥁 リズムタップ</h1>
+    <div class="status" id="rhythm-status">きょくを えらんで スタート！ ノーツが わっかに 重なったら たたこう</div>
+    <div class="r-songs" id="rhythm-songs"></div>
+    <button class="big-btn" id="rhythm-start" type="button">スタート！</button>
+    <div class="r-stage" id="rhythm-stage">
+      <div class="r-band"></div>
+      <div class="r-target" id="rhythm-target">🥁</div>
+      <div class="r-combo" id="rhythm-combo"></div>
+      <div class="r-judge" id="rhythm-judge"></div>
+    </div>
+    <div class="r-drumzone" id="rhythm-drumzone">
+      <div class="r-drum" id="rhythm-drum">ドン！</div>
+      <div class="r-hint"><b class="don">あかい ノーツ＝たいこの まんなか（ドン）</b>　<b class="katsu">あおい ノーツ＝たいこの ふち・そとがわ（カツ）</b></div>
+    </div>
+    <div class="r-result hidden" id="rhythm-result"></div>
+  </div>
+
 </div>
 
 <script>
@@ -176,7 +220,7 @@
   var gameKey = "touch";
   try {
     var g = new URLSearchParams(location.search).get("g");
-    if (g === "memory" || g === "puzzle" || g === "catch" || g === "pop") gameKey = g;
+    if (g === "memory" || g === "puzzle" || g === "catch" || g === "pop" || g === "rhythm") gameKey = g;
   } catch (e) {}
 
   function shuffle(arr) {
@@ -605,6 +649,295 @@
       }, 250);
     });
   }
+</script>
+<script>
+/* ===== リズムタップ（太鼓スタイル：ドン／カツ） ===== */
+if (gameKey === "rhythm") {
+  document.getElementById("rhythm-game").classList.remove("hidden");
+  document.title = "リズムタップ | あそびコーナー";
+
+  /* きょくデータ： [midi, はく数, タイプ] タイプ 0=ドン 1=カツ 2=大きいドン */
+  var SONGS = {
+    kira: { name: "⭐ きらきら星", bpm: 100, travel: 2.9, repeat: 1, notes: [
+      [60,1,0],[60,1,0],[67,1,1],[67,1,1],[69,1,0],[69,1,0],[67,2,1],
+      [65,1,0],[65,1,0],[64,1,1],[64,1,1],[62,1,0],[62,1,0],[60,2,0],
+      [67,1,1],[67,1,1],[65,1,0],[65,1,0],[64,1,1],[64,1,1],[62,2,0],
+      [67,1,1],[67,1,1],[65,1,0],[65,1,0],[64,1,1],[64,1,1],[62,2,0],
+      [60,1,0],[60,1,0],[67,1,1],[67,1,1],[69,1,0],[69,1,0],[67,2,1],
+      [65,1,0],[65,1,0],[64,1,1],[64,1,1],[62,1,0],[62,1,0],[60,2,2]
+    ]},
+    mary: { name: "🐑 メリーさんのひつじ", bpm: 112, travel: 2.6, repeat: 2, notes: [
+      [64,1,0],[62,1,1],[60,1,0],[62,1,1],[64,1,0],[64,1,0],[64,2,0],
+      [62,1,1],[62,1,1],[62,2,0],[64,1,0],[67,1,1],[67,2,1],
+      [64,1,0],[62,1,1],[60,1,0],[62,1,1],[64,1,0],[64,1,0],[64,1,0],[64,1,0],
+      [62,1,1],[62,1,1],[64,1,0],[62,1,1],[60,4,2]
+    ]},
+    march: { name: "🎺 わくわくマーチ", bpm: 126, travel: 2.4, repeat: 2, notes: [
+      [60,1,0],[64,1,0],[67,1,1],[64,1,0],[69,1,0],[67,1,1],[64,1,0],[60,1,0],
+      [62,1,1],[64,1,0],[67,1,1],[69,1,0],[67,1,1],[64,1,0],[62,1,1],[60,2,0],
+      [60,1,0],[64,1,0],[67,1,1],[64,1,0],[69,1,0],[67,1,1],[69,1,0],[67,1,1],
+      [64,1,0],[62,1,1],[64,1,0],[67,1,1],[64,1,0],[62,1,1],[60,2,2]
+    ]}
+  };
+  var LANE_TARGET_X = 72;
+  var stage = document.getElementById("rhythm-stage");
+  var targetEl = document.getElementById("rhythm-target");
+  var comboEl = document.getElementById("rhythm-combo");
+  var judgeEl = document.getElementById("rhythm-judge");
+  var statusEl = document.getElementById("rhythm-status");
+  var resultEl = document.getElementById("rhythm-result");
+  var drumEl = document.getElementById("rhythm-drum");
+  targetEl.style.left = (LANE_TARGET_X - 42) + "px";
+
+  var selSong = "kira";
+  var songsEl = document.getElementById("rhythm-songs");
+  Object.keys(SONGS).forEach(function (k) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "r-chip" + (k === selSong ? " sel" : "");
+    b.textContent = SONGS[k].name;
+    b.addEventListener("click", function () {
+      if (R.playing) return;
+      selSong = k;
+      songsEl.querySelectorAll(".r-chip").forEach(function (c) { c.classList.remove("sel"); });
+      b.classList.add("sel");
+    });
+    songsEl.appendChild(b);
+  });
+
+  var R = { playing: false, ctx: null, notes: [], startAt: 0, score: 0, combo: 0, maxCombo: 0,
+            nPerfect: 0, nGood: 0, nMiss: 0, raf: 0, schedTimer: 0, watchTimer: 0,
+            melPtr: 0, bassPtr: 0, events: [], bassEvents: [], lastBeat: -1, song: null, totalBeats: 0 };
+
+  function freq(midi) { return 440 * Math.pow(2, (midi - 69) / 12); }
+  function playTone(midi, t, dur, type, gain) {
+    var o = R.ctx.createOscillator(), g = R.ctx.createGain();
+    o.type = type; o.frequency.value = freq(midi);
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(gain, t + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(R.ctx.destination);
+    o.start(t); o.stop(t + dur + 0.05);
+  }
+  function drumSound(kind, t) {
+    if (!R.ctx) return;
+    t = t || R.ctx.currentTime;
+    if (kind === 0) { /* ドン */
+      var o = R.ctx.createOscillator(), g = R.ctx.createGain();
+      o.type = "sine";
+      o.frequency.setValueAtTime(175, t);
+      o.frequency.exponentialRampToValueAtTime(58, t + 0.10);
+      g.gain.setValueAtTime(0.65, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.20);
+      o.connect(g); g.connect(R.ctx.destination);
+      o.start(t); o.stop(t + 0.22);
+    } else { /* カツ */
+      var o2 = R.ctx.createOscillator(), g2 = R.ctx.createGain();
+      o2.type = "square"; o2.frequency.value = 1050;
+      g2.gain.setValueAtTime(0.20, t);
+      g2.gain.exponentialRampToValueAtTime(0.001, t + 0.055);
+      o2.connect(g2); g2.connect(R.ctx.destination);
+      o2.start(t); o2.stop(t + 0.07);
+    }
+  }
+
+  function buildChart(song) {
+    var spb = 60 / song.bpm;
+    var notes = [], events = [], bass = [];
+    var beat = 0, total = 0;
+    for (var r = 0; r < song.repeat; r++) {
+      beat = total;
+      song.notes.forEach(function (n) {
+        notes.push({ t: beat * spb, midi: n[0], type: n[2], el: null, state: 0 });
+        events.push({ t: beat * spb, midi: n[0], dur: Math.min(n[1] * spb * 0.92, 1.1) });
+        beat += n[1];
+      });
+      total = beat;
+    }
+    for (var b = 0; b < total; b++) {
+      if (b % 4 === 0) bass.push({ t: b * spb, midi: 36 });
+      if (b % 4 === 2) bass.push({ t: b * spb, midi: 43 });
+    }
+    return { notes: notes, events: events, bass: bass, totalSec: total * spb, spb: spb };
+  }
+
+  function scheduler() {
+    if (!R.playing) return;
+    var ahead = R.ctx.currentTime + 0.16;
+    while (R.melPtr < R.events.length && R.startAt + R.events[R.melPtr].t < ahead) {
+      var ev = R.events[R.melPtr];
+      playTone(ev.midi, R.startAt + ev.t, ev.dur, "triangle", 0.20);
+      R.melPtr++;
+    }
+    while (R.bassPtr < R.bassEvents.length && R.startAt + R.bassEvents[R.bassPtr].t < ahead) {
+      var bv = R.bassEvents[R.bassPtr];
+      playTone(bv.midi, R.startAt + bv.t, 0.24, "sine", 0.10);
+      R.bassPtr++;
+    }
+  }
+
+  function paintStatus() {
+    statusEl.textContent = "スコア " + R.score + "　🎵 " + R.song.name;
+    comboEl.textContent = R.combo >= 2 ? R.combo + " コンボ" : "";
+  }
+  function showJudge(text, color) {
+    judgeEl.textContent = text;
+    judgeEl.style.color = color;
+    judgeEl.classList.remove("show");
+    void judgeEl.offsetWidth;
+    judgeEl.classList.add("show");
+  }
+
+  function render() {
+    if (!R.playing) return;
+    var now = R.ctx.currentTime - R.startAt;
+    var W = stage.clientWidth;
+    var spawnX = W + 50;
+    var beatIdx = Math.floor(now / R.spb);
+    if (now >= 0 && beatIdx !== R.lastBeat) {
+      R.lastBeat = beatIdx;
+      targetEl.classList.remove("pulse");
+      void targetEl.offsetWidth;
+      targetEl.classList.add("pulse");
+    }
+    for (var i = 0; i < R.notes.length; i++) {
+      var n = R.notes[i];
+      if (n.state !== 0) continue;
+      var dt = n.t - now;
+      if (dt > R.song.travel) continue;
+      if (!n.el) {
+        n.el = document.createElement("div");
+        n.el.className = "r-note " + (n.type === 1 ? "katsu" : "don") + (n.type === 2 ? " big" : "");
+        stage.appendChild(n.el);
+      }
+      var x = LANE_TARGET_X + (dt / R.song.travel) * (spawnX - LANE_TARGET_X);
+      n.el.style.transform = "translateX(" + x.toFixed(1) + "px)";
+      if (dt < -0.26) {
+        n.state = 3;
+        R.nMiss++; R.combo = 0;
+        n.el.classList.add("missed");
+        (function (el) { setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 120); })(n.el);
+        showJudge("おしい！", "#ffd9d9");
+        paintStatus();
+      }
+    }
+    if (now > R.totalSec + 1.2) { finishSong(); return; }
+    R.raf = requestAnimationFrame(render);
+  }
+
+  function tap(kind) {
+    if (!R.playing || !R.ctx) return;
+    drumSound(kind);
+    drumEl.classList.add("hit");
+    setTimeout(function () { drumEl.classList.remove("hit"); }, 90);
+    var now = R.ctx.currentTime - R.startAt;
+    var best = null, bestAbs = 1e9;
+    for (var i = 0; i < R.notes.length; i++) {
+      var n = R.notes[i];
+      if (n.state !== 0) continue;
+      var match = (kind === 0) ? (n.type === 0 || n.type === 2) : (n.type === 1);
+      if (!match) continue;
+      var adt = Math.abs(n.t - now);
+      if (adt < bestAbs) { bestAbs = adt; best = n; }
+    }
+    if (!best || bestAbs > 0.26) return;
+    best.state = 1;
+    if (best.el && best.el.parentNode) best.el.parentNode.removeChild(best.el);
+    R.combo++;
+    if (R.combo > R.maxCombo) R.maxCombo = R.combo;
+    if (bestAbs <= 0.11) {
+      R.nPerfect++;
+      R.score += (best.type === 2 ? 200 : 100);
+      showJudge("ぴったり！", "#ffe98a");
+    } else {
+      R.nGood++;
+      R.score += (best.type === 2 ? 100 : 50);
+      showJudge("いいよ！", "#c8f7c5");
+    }
+    paintStatus();
+  }
+
+  function cleanupAudio() {
+    if (R.schedTimer) { clearInterval(R.schedTimer); R.schedTimer = 0; }
+    if (R.watchTimer) { clearInterval(R.watchTimer); R.watchTimer = 0; }
+    if (R.raf) { cancelAnimationFrame(R.raf); R.raf = 0; }
+    if (R.ctx) { try { R.ctx.close(); } catch (e) {} R.ctx = null; }
+    R.notes.forEach(function (n) { if (n.el && n.el.parentNode) n.el.parentNode.removeChild(n.el); });
+  }
+  function stopSong(msg) {
+    if (!R.playing) return;
+    R.playing = false;
+    cleanupAudio();
+    if (msg) statusEl.textContent = msg;
+    document.getElementById("rhythm-start").textContent = "スタート！";
+  }
+  function finishSong() {
+    R.playing = false;
+    var totalNotes = R.notes.length;
+    cleanupAudio();
+    document.getElementById("rhythm-start").textContent = "もういちど";
+    var acc = totalNotes ? (R.nPerfect + R.nGood * 0.5) / totalNotes : 0;
+    var rank, msg;
+    if (acc >= 0.9) { rank = "S"; msg = "ハイレベル！ リズム感 バツグン！"; }
+    else if (acc >= 0.7) { rank = "A"; msg = "すごい！ その調子！"; }
+    else if (acc >= 0.45) { rank = "B"; msg = "なかなか いい リズム！"; }
+    else { rank = "C"; msg = "もう一回 やってみよう！"; }
+    statusEl.textContent = "おわり！ スコア " + R.score;
+    comboEl.textContent = "";
+    resultEl.innerHTML = "<div class='r-rank'>" + rank + "</div>" + msg + "<br>" +
+      "スコア <b>" + R.score + "</b>　さいだいコンボ <b>" + R.maxCombo + "</b><br>" +
+      "ぴったり " + R.nPerfect + "　いいよ " + R.nGood + "　おしい " + R.nMiss;
+    resultEl.classList.remove("hidden");
+    plBest("rhythm", R.score);
+    plDone("rhythm");
+  }
+
+  document.getElementById("rhythm-start").addEventListener("click", function () {
+    if (R.playing) { stopSong("とめたよ。もう一回 やる？"); return; }
+    var song = SONGS[selSong];
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) { statusEl.textContent = "この たんまつでは 音が 出ないみたい"; return; }
+    R.ctx = new AC();
+    if (R.ctx.state === "suspended") R.ctx.resume();
+    var built = buildChart(song);
+    R.song = song;
+    R.notes = built.notes; R.events = built.events; R.bassEvents = built.bass;
+    R.totalSec = built.totalSec; R.spb = built.spb;
+    R.melPtr = 0; R.bassPtr = 0; R.lastBeat = -1;
+    R.score = 0; R.combo = 0; R.maxCombo = 0; R.nPerfect = 0; R.nGood = 0; R.nMiss = 0;
+    R.startAt = R.ctx.currentTime + 1.1;
+    R.playing = true;
+    resultEl.classList.add("hidden");
+    document.getElementById("rhythm-start").textContent = "やめる";
+    paintStatus();
+    R.schedTimer = setInterval(scheduler, 25);
+    R.watchTimer = setInterval(function () {
+      var e = playEndsAt();
+      if (!e || e <= Date.now()) stopSong("タイマーが おわったよ");
+    }, 500);
+    R.raf = requestAnimationFrame(render);
+  });
+
+  function zoneTap(e) {
+    if (!R.playing) return;
+    e.preventDefault();
+    var rect = drumEl.getBoundingClientRect();
+    var cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+    var dx = e.clientX - cx, dy = e.clientY - cy;
+    var dist = Math.sqrt(dx * dx + dy * dy);
+    tap(dist <= rect.width * 0.30 ? 0 : 1);
+  }
+  document.getElementById("rhythm-drumzone").addEventListener("pointerdown", zoneTap);
+  stage.addEventListener("pointerdown", function (e) { if (R.playing) { e.preventDefault(); tap(1); } });
+  document.addEventListener("keydown", function (e) {
+    if (!R.playing) return;
+    if (e.key === "f" || e.key === "F" || e.key === "j" || e.key === "J") tap(0);
+    if (e.key === "d" || e.key === "D" || e.key === "k" || e.key === "K") tap(1);
+  });
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden) stopSong("とまったよ。もう一回 やる？");
+  });
+}
 </script>
 <a id="float-back" href="play.html" style="position:fixed;right:14px;bottom:14px;z-index:500;background:#ffffff;border:2px solid #8a8a8a;color:#333333;padding:10px 18px;border-radius:999px;font-size:16px;font-weight:bold;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,0.25);opacity:0.96;">← もどる</a>
 </body>
