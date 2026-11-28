@@ -20,7 +20,7 @@
    version.json をキャッシュなしで確認し、版が違えば URL を変えて読み直す。
    公開のたびに SITE_VERSION と version.json を同じ値に上げること（GATE.md 参照）。 */
 (function () {
-  var SITE_VERSION = "20261128-11";
+  var SITE_VERSION = "20261128-12";
   function alreadyTried() {
     try { return new URLSearchParams(location.search).get("_v") === SITE_VERSION; }
     catch (e) { return false; }
@@ -79,6 +79,11 @@
   .card .c-photo { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 10px; display: block; }
   .reveal .r-photo { width: min(300px, 100%); aspect-ratio: 4 / 3; object-fit: cover; border-radius: 14px; margin-top: 8px; }
   .card .c-size { font-size: 11px; color: #999; }
+  .card .c-stars { font-size: 14px; letter-spacing: 2px; margin-top: 4px; line-height: 1; }
+  .card .c-stars.r1 { color: #b08968; }
+  .card .c-stars.r2 { color: #7d9dbd; }
+  .card .c-stars.r3 { color: #f0b90b; }
+  .col-rarity { font-size: 15px; font-weight: bold; color: #666; margin: -4px 0 12px; }
   .card.locked { opacity: .65; }
   .card.locked .c-photo { filter: grayscale(1) contrast(2.4) brightness(1.08); }
   .card img { -webkit-touch-callout: none; -webkit-user-drag: none; user-select: none; -webkit-user-select: none; }
@@ -118,6 +123,7 @@
   <div class="reveal hidden" id="reveal"></div>
 
   <h2>とり コレクション（<span id="col-count">0</span> / <span id="col-total">123</span>）</h2>
+  <div class="col-rarity" id="col-rarity"></div>
   <div class="grid" id="grid"></div>
   <div class="complete hidden" id="complete">🎉 コンプリート！ <span id="comp-total">123</span>しゅるい 全部 あつまったよ！</div>
 
@@ -272,7 +278,18 @@
     if (typeof g[currentPlayer].spent !== "number") g[currentPlayer].spent = 0;
     if (typeof g[currentPlayer].obsBonus !== "number") g[currentPlayer].obsBonus = 0;
     if (!g[currentPlayer].birds || typeof g[currentPlayer].birds !== "object") g[currentPlayer].birds = {};
+    if (!Array.isArray(g[currentPlayer].order)) g[currentPlayer].order = [];
+    // 見つけた順（order）を補完する。古いデータには順番がないので、
+    // 順番が分からない分は図鑑（BIRDS）の順で仮置きする。
+    var ord = g[currentPlayer].order;
+    BIRDS.forEach(function (b) {
+      if (g[currentPlayer].birds[b.name] > 0 && ord.indexOf(b.name) === -1) ord.push(b.name);
+    });
+    g[currentPlayer].order = ord.filter(function (n) { return g[currentPlayer].birds[n] > 0; });
     return g;
+  }
+  function starsOf(rarity) {
+    return rarity === 3 ? "★★★" : (rarity === 2 ? "★★" : "★");
   }
   function totals() {
     var rec = {};
@@ -307,18 +324,34 @@
     var grid = document.getElementById("grid");
     grid.innerHTML = "";
     var owned = 0;
+    var ordIdx = {};
+    g[currentPlayer].order.forEach(function (n, i) { ordIdx[n] = i; });
+    // 見つけた鳥は「見つけた順」、まだの鳥は そのあとに図鑑順で並べる
+    var ownedList = BIRDS.filter(function (b) { return (g[currentPlayer].birds[b.name] || 0) > 0; });
+    ownedList.sort(function (a, b) { return (ordIdx[a.name] || 0) - (ordIdx[b.name] || 0); });
+    var lockedList = BIRDS.filter(function (b) { return !(g[currentPlayer].birds[b.name] > 0); });
+    var perRarity = { 1: [0, 0], 2: [0, 0], 3: [0, 0] };
     BIRDS.forEach(function (b) {
+      perRarity[b.rarity][1]++;
+      if ((g[currentPlayer].birds[b.name] || 0) > 0) perRarity[b.rarity][0]++;
+    });
+    ownedList.concat(lockedList).forEach(function (b) {
       var cnt = g[currentPlayer].birds[b.name] || 0;
       if (cnt > 0) owned++;
       var div = document.createElement("div");
       div.className = "card" + (cnt > 0 ? "" : " locked");
       div.innerHTML = (cnt > 1 ? '<span class="cnt">×' + cnt + '</span>' : "")
         + birdPhoto(b, "c-photo")
+        + (cnt > 0 ? '<div class="c-stars r' + b.rarity + '">' + starsOf(b.rarity) + '</div>' : "")
         + '<div class="c-name">' + (cnt > 0 ? b.name : "？？？") + '</div>'
         + '<div class="c-size">' + (cnt > 0 ? (b.size || b.cat || "") : "まだ みつけてない") + '</div>'
         + (cnt > 0 ? "" : '<span class="shield"></span>');
       grid.appendChild(div);
     });
+    document.getElementById("col-rarity").textContent =
+      "★ ノーマル " + perRarity[1][0] + "/" + perRarity[1][1]
+      + "　★★ レア " + perRarity[2][0] + "/" + perRarity[2][1]
+      + "　★★★ スーパーレア " + perRarity[3][0] + "/" + perRarity[3][1];
     document.getElementById("col-count").textContent = owned;
     document.getElementById("col-total").textContent = BIRDS.length;
     document.getElementById("comp-total").textContent = BIRDS.length;
@@ -350,6 +383,7 @@
       var b = draw();
       var isNew = !g[currentPlayer].birds[b.name];
       g[currentPlayer].birds[b.name] = (g[currentPlayer].birds[b.name] || 0) + 1;
+      if (isNew && g[currentPlayer].order.indexOf(b.name) === -1) g[currentPlayer].order.push(b.name);
       g[currentPlayer].spent += 1;
       try { localStorage.setItem(GACHA_KEY, JSON.stringify(g)); } catch (e) {}
       var stars = b.rarity === 3 ? "★★★ スーパーレア！" : (b.rarity === 2 ? "★★ レア" : "★ ノーマル");
