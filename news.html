@@ -18,7 +18,7 @@
 <script>
 /* ===== バージョンチェック：新しい版が出ていたら自動で最新を取り直す ===== */
 (function () {
-  var SITE_VERSION = "20261128-13";
+  var SITE_VERSION = "20261128-14";
   function alreadyTried() {
     try { return new URLSearchParams(location.search).get("_v") === SITE_VERSION; }
     catch (e) { return false; }
@@ -43,7 +43,7 @@
 
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>やさしいニュース | ただいま</title>
+<title>ラジオ | ただいま</title>
 <style>
   * { box-sizing: border-box; }
   body { margin: 0; font-family: "Hiragino Maru Gothic ProN", "Hiragino Sans", sans-serif; background: #fff8e7; color: #333; }
@@ -56,10 +56,16 @@
   .ep-onair { font-size: 14px; color: #888; margin-top: 2px; }
   audio { width: 100%; margin-top: 14px; height: 48px; }
   .play-note { font-size: 14px; color: #888; text-align: center; margin-top: 8px; }
+  .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .menu-btn { font-family: inherit; font-size: 16.5px; font-weight: bold; color: #333; background: #fdf6e3; border: 2px solid #e8dcc0; border-radius: 14px; padding: 13px 10px; cursor: pointer; touch-action: manipulation; line-height: 1.35; }
+  .menu-btn.on { background: #2e7de4; border-color: #2e7de4; color: #fff; }
+  .prog-note { font-size: 15px; color: #777; margin: 0 0 4px; line-height: 1.6; }
   .ep-btn { display: block; width: 100%; text-align: left; font-family: inherit; font-size: 17px; font-weight: bold; color: #333; background: #fdf6e3; border: 2px solid #e8dcc0; border-radius: 14px; padding: 13px 14px; margin-top: 10px; cursor: pointer; touch-action: manipulation; }
   .ep-btn.on { background: #e4572e; border-color: #e4572e; color: #fff; }
   .ep-btn .new { display: inline-block; background: #e4572e; color: #fff; font-size: 12px; border-radius: 999px; padding: 2px 9px; margin-left: 8px; vertical-align: 2px; }
   .ep-btn.on .new { background: #fff; color: #e4572e; }
+  .ep-btn .sub-line { display: block; font-size: 13px; color: #999; font-weight: normal; margin-top: 2px; }
+  .ep-btn.on .sub-line { color: #ffd9cc; }
   .summary-text { font-size: 16.5px; line-height: 1.85; white-space: pre-line; }
   .summary-date { font-size: 13.5px; color: #888; margin-top: 8px; }
   .fallback-btn { display: block; text-align: center; padding: 15px; border-radius: 14px; background: #2e7de4; color: #fff; font-size: 18px; font-weight: bold; text-decoration: none; box-shadow: 0 4px 0 rgba(0,0,0,.15); }
@@ -79,7 +85,7 @@
 <body>
 <div class="wrap">
   <h1>📻 ラジオ</h1>
-  <p class="sub">NHKの ラジオを きく ページ。<br>やさしいことばニュース・ラジオ体操・子ども科学電話相談だよ。</p>
+  <p class="sub">NHKの ラジオを きく ページ。<br>すきな 番組を えらんでね。</p>
 
   <!-- ============ 本体 ============ -->
   <section id="view-main">
@@ -88,34 +94,26 @@
       <div class="ep-title" id="ep-title">よみこみ中…</div>
       <div class="ep-onair" id="ep-onair"></div>
       <audio id="player" controls preload="none" playsinline></audio>
-      <p class="play-note">▶ ボタンを おすと はじまるよ（5分くらい）</p>
-      <div id="ep-list"></div>
+      <p class="play-note">▶ ボタンを おすと はじまるよ</p>
       <p class="msg err" id="play-msg"></p>
     </div>
 
     <div class="card">
-      <h2>🤸 ラジオ体操</h2>
-      <p style="font-size:15px;color:#777;margin:0 0 4px;line-height:1.6;">あさ 6時30分の 回が おすすめ（歌 → 第1 → 第2、10分くらい）。<br>おすと 上の プレーヤーで ながれるよ。</p>
-      <div id="taiso-list"></div>
+      <h2>📋 番組メニュー</h2>
+      <div class="menu-grid" id="program-menu"></div>
     </div>
 
     <div class="card">
-      <h2>📞 子ども科学電話相談</h2>
-      <p style="font-size:15px;color:#777;margin:0 0 4px;line-height:1.6;">まいしゅう 日よう日 あさ10時から。子どもたちの しつもんに 先生が 答えるよ。<br>10時台と 11時台（それぞれ 55分くらい）。きけるのは 1週間だけ！</p>
-      <div id="kodomo-list"></div>
+      <h2 id="prog-name">やさしいことばニュース</h2>
+      <p class="prog-note" id="prog-note"></p>
+      <div id="prog-list"></div>
+      <a class="fallback-btn hidden" id="prog-fallback" href="#" target="_blank" rel="noopener">らじる★らじるの ページで きく</a>
     </div>
 
     <div class="card hidden" id="summary-card">
       <h2>📰 きょうのニュース（まとめ）</h2>
       <div class="summary-text" id="summary-text"></div>
       <div class="summary-date" id="summary-date"></div>
-    </div>
-
-    <div class="card">
-      <h2>うまく きけないときは</h2>
-      <a class="fallback-btn" href="https://www.nhk.or.jp/radio/ondemand/detail.html?p=34PY344RPJ_01" target="_blank" rel="noopener">らじる★らじるの ページで きく</a>
-      <a class="fallback-btn" style="margin-top:10px;background:#2e7d4f;" href="https://www.nhk.or.jp/radio/ondemand/detail.html?p=N9N4P87RLP_01" target="_blank" rel="noopener">ラジオ体操の ページで きく</a>
-      <a class="fallback-btn" style="margin-top:10px;background:#7a4fa3;" href="https://www.nhk.or.jp/radio/ondemand/detail.html?p=P3X5LNZ17X_00" target="_blank" rel="noopener">子ども科学電話相談の ページで きく</a>
     </div>
   </section>
 
@@ -125,14 +123,30 @@
 'use strict';
 var ENDPOINT = 'https://script.google.com/macros/s/AKfycbyurtmUMcRCv2MmyBu96IlMEbBIpReYApm1QwtaI52hEh1JWn_fK4BrMhHgDkhszmZIBg/exec';
 
-var episodes = [];
-var taiso = [];
-var kodomo = [];
+/* 番組メニュー：key はサーバー（action=yasashii）の返却キーと一致させる */
+var PROGRAMS = [
+  { key: 'episodes',  name: '📰 やさしいことばニュース', short: 'やさしいことばニュース', note: '月よう日〜金よう日の ニュースを、やさしい ことばで つたえるよ。', fallback: 'https://www.nhk.or.jp/radio/ondemand/detail.html?p=34PY344RPJ_01', label: 'date' },
+  { key: 'taiso',     name: '🤸 ラジオ体操', short: 'ラジオ体操', note: 'あさの 体操。さいしんの 回が 1つだけ あるよ（歌 → 第1 → 第2、10分くらい）。', fallback: 'https://www.nhk.or.jp/radio/ondemand/detail.html?p=N9N4P87RLP_01', label: 'date' },
+  { key: 'kodomo',    name: '📞 子ども科学電話相談', short: '子ども科学電話相談', note: 'まいしゅう 日よう日 あさ10時から。子どもたちの しつもんに 先生が 答えるよ。きけるのは 1週間だけ！', fallback: 'https://www.nhk.or.jp/radio/ondemand/detail.html?p=P3X5LNZ17X_00', label: 'kodomo' },
+  { key: 'minna',     name: '🎵 みんなのうた', short: 'みんなのうた', note: 'NHKの うたの 番組。あたらしい うたが きけるよ。', fallback: 'https://www.nhk.or.jp/radio/ondemand/detail.html?p=GPVXV8GJ9V_01', label: 'title' },
+  { key: 'yamacafe',  name: '⛰️ 石丸謙二郎の山カフェ', short: '石丸謙二郎の山カフェ', note: '石丸謙二郎さんの 山の おはなし。土よう日 あさ8時から。', fallback: 'https://www.nhk.or.jp/radio/ondemand/detail.html?p=R84PG2X5PW_01', label: 'title' },
+  { key: 'shinuchi',  name: '🎤 真打ち競演', short: '真打ち競演', note: '落語の 番組。土よう日 ひるすぎから。', fallback: 'https://www.nhk.or.jp/radio/ondemand/detail.html?p=LXL3PYLGP9_01', label: 'title' },
+  { key: 'chikyu',    name: '🌏 ちきゅうラジオ', short: 'ちきゅうラジオ', note: '世界の ことを 知る 番組。土よう日・日よう日の ゆうがた。', fallback: 'https://www.nhk.or.jp/radio/ondemand/detail.html?p=LR62K9QV6M_05', label: 'title' },
+  { key: 'kuradashi', name: '📚 蔵出し名人会', short: '蔵出し名人会', note: 'むかしの 名人の 落語が きけるよ。月に 数回、土よう日の 夜。', fallback: 'https://www.nhk.or.jp/radio/ondemand/detail.html?p=VWW7NP6Y6J_01', label: 'title' }
+];
+
+var DATA = {};
+var SUMMARY = null;
+var currentKey = 'episodes';
 
 function $(id) { return document.getElementById(id); }
 function esc(s) {
   return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
     .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+function progOf(key) {
+  for (var i = 0; i < PROGRAMS.length; i++) if (PROGRAMS[i].key === key) return PROGRAMS[i];
+  return PROGRAMS[0];
 }
 
 /* ---------- 放送データ読み込み ---------- */
@@ -149,114 +163,115 @@ function loadYasashii() {
     .then(function (r) { return r.json(); })
     .then(function (j) {
       if (!j || !j.ok) throw new Error('bad response');
-      episodes = j.episodes || [];
-      taiso = j.taiso || [];
-      kodomo = j.kodomo || [];
-      renderEpisodes();
-      renderTaiso();
-      renderKodomo();
-      renderSummary(j.summary);
+      DATA = j;
+      SUMMARY = j.summary || null;
+      renderMenu();
+      selectProgram('episodes', true);
     })
     .catch(function () {
       $('ep-title').textContent = 'よみこめなかった…';
       $('play-msg').textContent = 'ネットが つながらないかも。あとで また ためしてね';
+      renderMenu();
     });
 }
 loadYasashii();
 
-/* ---------- プレーヤー（ニュースと体操で共有） ---------- */
-function clearBtnStates() {
-  ['ep-list', 'taiso-list', 'kodomo-list'].forEach(function (id) {
-    var btns = $(id).children;
-    for (var k = 0; k < btns.length; k++) {
-      btns[k].className = btns[k].className.replace(' on', '');
-    }
+/* ---------- 番組メニュー ---------- */
+function renderMenu() {
+  var menu = $('program-menu');
+  menu.innerHTML = '';
+  PROGRAMS.forEach(function (p) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'menu-btn' + (p.key === currentKey ? ' on' : '');
+    b.textContent = p.name;
+    b.addEventListener('click', function () { selectProgram(p.key, false); });
+    menu.appendChild(b);
   });
 }
 
+function selectProgram(key, first) {
+  currentKey = key;
+  renderMenu();
+  var p = progOf(key);
+  $('prog-name').textContent = p.name;
+  $('prog-note').textContent = p.note;
+  var fb = $('prog-fallback');
+  fb.href = p.fallback;
+  fb.classList.remove('hidden');
+  renderList(p);
+  if (key === 'episodes') renderSummary();
+  else $('summary-card').classList.add('hidden');
+  if (first) {
+    var list = (DATA[key] || []);
+    if (list.length) playEpisode(list[0], $('prog-list').children[0], false);
+  }
+}
+
+function renderList(p) {
+  var list = $('prog-list');
+  list.innerHTML = '';
+  var eps = DATA[p.key] || [];
+  if (!eps.length) {
+    list.innerHTML = '<p style="font-size:15px;color:#999;">いまは きける 回が ないみたい。あとで また 見てね</p>';
+    if (p.key === 'episodes') {
+      $('ep-title').textContent = 'いまは きける ニュースが ないみたい';
+      $('ep-onair').textContent = '月よう日〜金よう日の よるに あたらしくなるよ';
+    }
+    return;
+  }
+  eps.forEach(function (ep, i) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'ep-btn';
+    if (p.label === 'date') {
+      var badge = '';
+      if (p.key === 'taiso' && (ep.onair || '').indexOf('午前6:30') >= 0) badge = '<span class="new">あさ</span>';
+      if (p.key === 'episodes' && i === 0) badge = '<span class="new">さいしん</span>';
+      b.innerHTML = esc(ep.onair || ep.title) + badge;
+    } else if (p.label === 'kodomo') {
+      var theme = (ep.title || '').replace(/^子ども科学電話相談\s*/, '');
+      b.innerHTML = esc(theme || ep.title) +
+        '<span class="sub-line">' + esc(ep.onair || '') + '</span>';
+    } else {
+      b.innerHTML = esc(ep.title || '') +
+        '<span class="sub-line">' + esc(ep.onair || '') + '</span>' +
+        (i === 0 ? '<span class="new">さいしん</span>' : '');
+    }
+    b.addEventListener('click', function () { playEpisode(ep, b, true); });
+    list.appendChild(b);
+  });
+}
+
+/* ---------- プレーヤー（全番組で共有） ---------- */
 function playEpisode(ep, btn, play) {
   if (!ep) return;
-  clearBtnStates();
+  var btns = $('prog-list').children;
+  for (var k = 0; k < btns.length; k++) {
+    btns[k].className = btns[k].className.replace(' on', '');
+  }
   if (btn) btn.className += ' on';
-  $('ep-title').textContent = ep.title || 'やさしいことばニュース';
+  $('ep-title').textContent = ep.title || progOf(currentKey).short;
   $('ep-onair').textContent = ep.onair || '';
   $('play-msg').textContent = '';
   var player = $('player');
   player.src = ep.stream;
   if (play) {
     player.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    var p = player.play();
-    if (p && p.catch) p.catch(function () {});
+    var pr = player.play();
+    if (pr && pr.catch) pr.catch(function () {});
   }
-}
-
-function renderEpisodes() {
-  var list = $('ep-list');
-  list.innerHTML = '';
-  if (!episodes.length) {
-    $('ep-title').textContent = 'いまは きける ニュースが ないみたい';
-    $('ep-onair').textContent = '月よう日〜金よう日の よるに あたらしくなるよ';
-    return;
-  }
-  episodes.forEach(function (ep, i) {
-    var b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'ep-btn';
-    b.innerHTML = esc(ep.onair || ep.title) + (i === 0 ? '<span class="new">さいしん</span>' : '');
-    b.addEventListener('click', function () { playEpisode(ep, b, true); });
-    list.appendChild(b);
-  });
-  playEpisode(episodes[0], list.children[0], false);
-}
-
-function renderTaiso() {
-  var list = $('taiso-list');
-  list.innerHTML = '';
-  if (!taiso.length) {
-    list.innerHTML = '<p style="font-size:15px;color:#999;">いまは 体操が よみこめなかった…</p>';
-    return;
-  }
-  taiso.forEach(function (ep) {
-    var b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'ep-btn';
-    var morning = (ep.onair || '').indexOf('午前6:30') >= 0;
-    b.innerHTML = esc(ep.onair || ep.title) + (morning ? '<span class="new">あさ</span>' : '');
-    b.addEventListener('click', function () { playEpisode(ep, b, true); });
-    list.appendChild(b);
-  });
-}
-
-function renderKodomo() {
-  var list = $('kodomo-list');
-  list.innerHTML = '';
-  if (!kodomo.length) {
-    list.innerHTML = '<p style="font-size:15px;color:#999;">いまは きける 回が ないみたい（日よう日の あとに あたらしくなるよ）</p>';
-    return;
-  }
-  kodomo.forEach(function (ep) {
-    var b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'ep-btn';
-    var theme = (ep.title || '').replace(/^子ども科学電話相談\s*/, '');
-    b.innerHTML = esc(theme || ep.title) +
-      '<span style="display:block;font-size:13px;color:#999;font-weight:normal;">' + esc(ep.onair || '') + '</span>';
-    b.addEventListener('click', function () { playEpisode(ep, b, true); });
-    list.appendChild(b);
-  });
 }
 
 $('player').addEventListener('error', function () {
-  if (episodes.length || taiso.length || kodomo.length) {
-    $('play-msg').textContent = 'うまく 再生できなかった…下の「らじる★らじるの ページで きく」から きいてみてね';
-  }
+  $('play-msg').textContent = 'うまく 再生できなかった…番組の 下にある「らじる★らじるの ページで きく」から きいてみてね';
 }, true);
 
-/* ---------- 要約 ---------- */
-function renderSummary(summary) {
-  if (!summary || !summary.text) return;
-  $('summary-text').textContent = summary.text;
-  $('summary-date').textContent = summary.date ? summary.date + ' のニュース' : '';
+/* ---------- 要約（やさしいことばニュースのときだけ） ---------- */
+function renderSummary() {
+  if (!SUMMARY || !SUMMARY.text) { $('summary-card').classList.add('hidden'); return; }
+  $('summary-text').textContent = SUMMARY.text;
+  $('summary-date').textContent = SUMMARY.date ? SUMMARY.date + ' のニュース' : '';
   $('summary-card').classList.remove('hidden');
 }
 </script>
